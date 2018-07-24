@@ -1,0 +1,26 @@
+Package: SLEMI
+Title: Statistical Learning based Estimation of Mutual Information (SLEMI)
+Version: 0.9.180722
+Authors@R: person("Tomasz", "Jetka", email = "t.jetka@sysbiosig.org", role = c("aut", "cre"))
+Description: The implementation of the algorithm for estimation of mutual information and channel capacity from experimental data by classification procedures (logistic regression)
+Depends: R (>= 3.2.3)
+License: LGPL (>=2)
+Encoding: UTF-8
+LazyData: true
+Imports: e1071,
+    ggplot2,
+    ggthemes,
+    gridExtra,
+    nnet,
+    Hmisc,
+    reshape2,
+    stringr,
+    glmnet,
+    doParallel,
+    caret,
+    plyr,
+    corrplot
+RoxygenNote: 6.0.1
+Suggests: knitr,
+    rmarkdown
+VignetteBuilder: knitr
