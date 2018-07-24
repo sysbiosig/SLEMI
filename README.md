@@ -50,7 +50,9 @@ in the R console.
 In order to install the package use following commands in R's console
 
 > `# install_packages("devtools") # run if not installed`
+
 > `library(devtools)`
+
 > `install_github("sysbiosig/SLEMI")`
 
 
