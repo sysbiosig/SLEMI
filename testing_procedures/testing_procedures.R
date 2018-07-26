@@ -46,7 +46,7 @@ require("ggplot2")   # install.packages("ggplot2")
 require("gridExtra") # install.packages("gridExtra")
 
 # FOR USER: install tested package SLEMI
-#install_github("sysbiosig/SLEMI")
+install_github("sysbiosig/SLEMI")
 
 
 #### Script configuration ####
@@ -395,76 +395,64 @@ print(summary(tempoutput))
 # params      3     -none-          numeric
 # data        2     data.frame      list   
 # logGraphs   9     -none-          list   
-#### Channel with a multi-dimensional output ####
 
-### 24. Load synthetic dataset. 
-# We created a synthetic data set, where output is three dimensional
-# and there are three different inputs.
-# It accompanies our package in variable data example2
-tempdata <- data_example2
+### Additional exploration ####
 
-# inspect data
-head(tempdata)
-#   signal          X1          X2          X3
-# 1      0  0.15580917  0.18045768  0.02999694
-# 2      0 -0.16423212  0.04744891 -0.42674054
-# 3      0  0.13896586 -0.06779270 -0.05983137
-# 4      0 -0.16338335  0.04204709  0.40134308
-# 5      0  0.07555051  0.09766543 -0.14256936
-# 6      0  0.16996827 -0.21497172 -0.09494647
+# Our methodology to estimate channel capacity faciliates also the investigation of 
+#
+# * mutual information between input and output (i.e. with an arbitrary distribtuion of input instead 
+# of optmising it as in channel capacity)
+# * probabilities of discrmination between input values based on output measurements
+#
+# Those two aspects can be investigated using functions `mi_logreg_main()` and `prob_discr_pairwise()`, 
+# which assume very similar arguments as function `capacity_logreg_main()`.
 
-# 25. Channel capacity of synthetic data
-# preapration of channel capacity computation
-signal_name <- "signal"
-response_name <- c("X1","X2","X3")
-i_type <- "testing_multivariate" 
-path_output_main <- paste('output/',
-                          i_type,
-                          '/',
-                          sep = "")
-dir.create(path_output_main,
-           recursive = TRUE)
+### 24. Estimate mutual information between X and Y, assuming distribution of input as 
+### in experimental data (proportional to the number of observations in each class). 
+### Required parameters and syntax is analogous as in the previous codes
 
-# computation of channel capacity
-tempoutput  <- capacity_logreg_main(
-  dataRaw = tempdata, 
-  signal = signal_name,
-  response = response_name, 
-  output_path = path_output_main
-)
+signal_name="signal"
+response_name="output"
+i_type="testing_mi_simpleGauss" 
+path_output_main=paste('output/',i_type,'/',sep="")
+dir.create(path_output_main,recursive = TRUE)
+tempoutput_mi  <- mi_logreg_main(dataRaw=tempdata, 
+                                 signal=signal_name, response=response_name, 
+                                 output_path=path_output_main)
 
-### 26 Print output of the estimation in the console
-# channel capacity in bits
-print(paste("Channel Capacity (bit):",
-            tempoutput$cc,
-            sep = " ")) 
-# [1] "Channel Capacity (bit): 1.58496240473138"
+### 25. Compare it with channel capacity estimate
+print(paste("Mutual Information: ",round(tempoutput_mi$mi,digits=2)," bits","     ",
+            "Channel Capacity: ",round(tempoutput$cc,digits=2)," bits",sep=""))
+# [1] "Mutual Information: 1.48 bits     Channel Capacity: 1.58 bits"
 
-# optimal probabilities
-print(paste("Optimal input probabilities:",
-            paste( 
-              tempoutput$p_opt,
-              collapse = ", "),
-            sep = " ")) 
-# [1] "Optimal input probabilities: 0.333333327033102, 0.333333320455409,
-# 0.333333352511489"
+### and probabilities of the optimal input distribution
+df=data.frame(rbind(round(tempoutput_mi$pinput,digits=2),round(tempoutput$p_opt,digits=2)))
+colnames(df)=paste("X = ",c(0,0.01,0.1,1,10,100),sep=" ")
+df[["Input distribution"]]=c("uniform (mutual information)","optimal (channel capacity)")
+df=df[,c(7,1:6)]
+df
+#             Input distribution X =  0 X =  0.01 X =  0.1 X =  1 X =  10 X =  100
+# 1 uniform (mutual information)   0.17      0.17     0.17   0.17    0.17     0.17
+# 2   optimal (channel capacity)   0.20      0.02     0.13   0.31    0.14     0.21
 
-# accuracy of classification
-print(paste("Accuracy of classification:",
-            tempoutput$regression$overall[1],
-            sep = " ")) 
-# [1] "Accuracy of classification: 1"
+### 26. Explore the probabilities of correct discrimination between pairs of input values
+i_type="testing_probs_simpleGauss" 
+path_output_main=paste('output/',i_type,'/',sep="")
+dir.create(path_output_main,recursive = TRUE)
+tempoutput_probs  <- prob_discr_pairwise(dataRaw=tempdata, 
+                                         signal=signal_name, response=response_name, 
+                                         output_path=path_output_main)
 
-# time of computations
-print(paste("Time of computations (sec.):",
-            tempoutput$time[3],
-            sep = " ")) 
-# [1] "Time of computations (sec.): 1.25699999999983"
+### what generates a graph in the output directory, where each pie chart represents a probability 
+### of correct discriminating between a pair of corresponding input values as computed by fitting 
+### a logistic regression model
+### Those probabilities are also stored in `prob_matr` element of a returned list:
 
-### 27. Visualistion of analysis
-# See the visualisation of results in  MainPlot.pdf 
-# in output directory or in object
-
-if(display_plots){
-  grid.arrange(tempoutput$logGraphs[[9]])
-}
+tempoutput_probs$prob_matr
+#           0   0.01    0.1      1     10    100
+# 0    1.0000 0.5180 0.6595 0.9940 1.0000 1.0000
+# 0.01 0.5180 1.0000 0.6395 0.9930 1.0000 1.0000
+# 0.1  0.6595 0.6395 1.0000 0.9785 1.0000 1.0000
+# 1    0.9940 0.9930 0.9785 1.0000 0.9810 0.9915
+# 10   1.0000 1.0000 1.0000 0.9810 1.0000 0.6505
+# 100  1.0000 1.0000 1.0000 0.9915 0.6505 1.0000
