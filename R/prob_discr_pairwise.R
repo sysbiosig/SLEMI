@@ -152,7 +152,7 @@ prob_discr_pairwise<-function(dataRaw,
   prob_matrix=prob_matrix+t(prob_matrix)
   
   for (is in 1:(nstim) ){
-      prob_matrix[is,is]=1
+      prob_matrix[is,is]=NA
   }
   
   row.names(prob_matrix)<-chosen_stim
