@@ -152,7 +152,7 @@ prob_discr_pairwise<-function(dataRaw,
   prob_matrix=prob_matrix+t(prob_matrix)
   
   for (is in 1:(nstim) ){
-      prob_matrix[is,is]=NA
+      prob_matrix[is,is]=1
   }
   
   row.names(prob_matrix)<-chosen_stim
@@ -167,6 +167,10 @@ prob_discr_pairwise<-function(dataRaw,
   pdf(paste0(output_path,"/plot_probs_discr.pdf"),height=6,width=6)
     corrplot::corrplot(prob_matrix,type = "upper", method = "pie",cl.lim = c(0.5, 1),col=col2(40), diag=FALSE)
   dev.off()
+  
+  for (is in 1:(nstim) ){
+      prob_matrix[is,is]=1
+  }
   
   output=list()
   
