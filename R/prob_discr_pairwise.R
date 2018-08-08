@@ -169,7 +169,7 @@ prob_discr_pairwise<-function(dataRaw,
   dev.off()
   
   for (is in 1:(nstim) ){
-      prob_matrix[is,is]=1
+      prob_matrix[is,is]=NA
   }
   
   output=list()
