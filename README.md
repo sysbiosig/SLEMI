@@ -109,7 +109,7 @@ Apart from required arguments, the function `capacity_logreg_main` has also othe
 * `lr_maxit` (`default = 1000`) - (argumnet of `nnet` package) a maximum number of iterations of optimisation step in logistic regression algorithm. Set to higher value if your data is more complex or of high dimension.
 * `MaxNWts` (`default = 5000`) - (argumnet of `nnet` package) a maximum number of paramters in logistic regression model. Set to higher value if you data has many dimensions or input has many states.
 
-### Testing procedures
+### Diagnostic procedures
 
 We implemented two diagnostic procedures to control the performance of channel capacity estimation and to measure uncertainity due to finite sample size and model over-fitting. These include:
 
