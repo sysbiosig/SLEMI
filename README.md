@@ -21,13 +21,13 @@ The main software requirement is the installation of the R environment (version:
   + doParallel (if parallel computation are needed)
   
 3. for visualisation
-   + ggplot2
+  + ggplot2
   + ggthemes
   + gridExtra
   + corrplot
   
 4. for data handling
-   + reshape2
+  + reshape2
   + stringr
   + plyr
  Each of the above packages can be installed by running 
