@@ -31,11 +31,11 @@ The main software requirement is the installation of the R environment (version:
   + stringr
   + plyr
  Each of the above packages can be installed by running 
-> `install_packages("name_of_a_package")`
+> `install.packages("name_of_a_package")`
  in the R console.
  ### Installation
  In order to install the package use following commands in R's console
- > `# install_packages("devtools") # run if not installed`
+ > `# install.packages("devtools") # run if not installed`
  > `library(devtools)`
  > `install_github("sysbiosig/SLEMI")`
  ## Basic usage
