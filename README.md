@@ -36,8 +36,11 @@ The main software requirement is the installation of the R environment (version:
  ### Installation
  In order to install the package use following commands in R's console
  > `# install.packages("devtools") # run if not installed`
+ 
  > `library(devtools)`
+ 
  > `install_github("sysbiosig/SLEMI")`
+ 
  ## Basic usage
  The package is based on a main wrapper function - `capacity_logreg_main()` for calculation of channel capacity, which calls specific methods implemented within this package. Similarly, functions `mi_logreg_main()` can be used to estimate mutual information, while `prob_discr_pairwise()` to compute probabilities of discrimination between two different input states.
  ### Preaparing data
