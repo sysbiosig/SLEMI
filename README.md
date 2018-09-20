@@ -1,5 +1,5 @@
 # Statistical Learning based Estimation of Mutual Information (SLEMI)
- The R package SLEMI is designed to estimate channel capacity between finite state input and multidimensional output from experimental data. For efficient computations, it uses iterative algorithm based on logistic regression.  The core function `capacity_logreg_main()` is the basic interface to all functionalities provided in the package. A comprehensive documentation is available on [github.io](https://github.io/) and in directory [`paper/Manual.pdf`](https://github.com/sysbiosig/SLEMI/blob/master/paper/Manual.pdf).
+ The R package SLEMI is designed to estimate channel capacity between finite state input and multidimensional output from experimental data. For efficient computations, it uses iterative algorithm based on logistic regression.  The core function `capacity_logreg_main()` is the basic interface to all functionalities provided in the package. A comprehensive documentation is available in directory [`paper/Manual.pdf`](https://github.com/sysbiosig/SLEMI/blob/master/paper/Manual.pdf).
  ## Setup
  ### Requirements - Hardware
   + A 32 or 64 bit processor (recommended: 64bit)
@@ -92,4 +92,4 @@ where:
  Please cite
 > Jetka et al., Information-theoretic analysis of multivariate signaling responses using SLEMI, 2018 (to be published)
  ## Licence
- SLEMI is released under the GNU licence and is freely available. A comprehensive documentation is available on [github.io](https://github.io/) and in directory [`paper/Manual.pdf`](https://github.com/sysbiosig/SLEMI/blob/master/paper/Manual.pdf).
+ SLEMI is released under the GNU licence and is freely available. A comprehensive documentation is available in directory [`paper/Manual.pdf`](https://github.com/sysbiosig/SLEMI/blob/master/paper/Manual.pdf).
