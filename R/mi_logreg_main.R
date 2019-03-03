@@ -65,7 +65,7 @@
 #' lr_maxit=1500, output_path="example2/",plot_height=8,plot_width=12) 
 #' 
 #' For further details see vignette
-mi_logreg_main<-function(dataRaw, signal="signal", response="response",side_variables=NULL,
+mi_logreg_main<-function(dataRaw, signal="input", response=NULL,side_variables=NULL,
                          pinput=NULL, 
                                           formula_string=NULL,
                                           glmnet_algorithm=FALSE,dataMatrix=NULL, 
@@ -84,6 +84,11 @@ mi_logreg_main<-function(dataRaw, signal="signal", response="response",side_vari
   print("Procedure starting")
   
   time_start=proc.time()
+  
+  #
+  if (is.null(response)){
+    response=paste0("output_",1:(ncol(dataRaw)-1) )  
+  }
   
   # checking assumptions
   if (is.null(output_path)) { 
