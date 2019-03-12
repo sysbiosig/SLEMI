@@ -17,7 +17,7 @@
 #' }
 #' 
 prob_discr_pairwise<-function(dataRaw,
-                              signal="signal",response="response",side_variables=NULL,
+                              signal="input",response=NULL,side_variables=NULL,
                               formula_string=NULL,
                               output_path=NULL, scale=TRUE,
                               model_out=TRUE,
@@ -26,6 +26,10 @@ prob_discr_pairwise<-function(dataRaw,
   
   
   print("Procedure starting")
+  
+  if (is.null(response)){
+    response=paste0("output_",1:(ncol(dataRaw)-1) )  
+  }
   
   time_start=proc.time()
   
@@ -164,10 +168,13 @@ prob_discr_pairwise<-function(dataRaw,
                              "#FDDBC7","#FFFFFF", "#D1E5F0", "#92C5DE",
                              "#4393C3", "#2166AC", "#053061"))
   
+if (!is.null(output_path)){                       
   pdf(paste0(output_path,"/plot_probs_discr.pdf"),height=6,width=6)
     corrplot::corrplot(prob_matrix,type = "upper", method = "pie",cl.lim = c(0.5, 1),col=col2(40), diag=FALSE)
   dev.off()
-  
+  }
+                       
+                       
   for (is in 1:(nstim) ){
       prob_matrix[is,is]=NA
   }
