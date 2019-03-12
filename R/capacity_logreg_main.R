@@ -68,7 +68,7 @@
 #' cc_maxit=75,lr_maxit=1500, output_path="example2/",plot_height=8,plot_width=12) 
 #' 
 #' For further details see vignette
-capacity_logreg_main<-function(dataRaw, signal="signal", response="response",side_variables=NULL,
+capacity_logreg_main<-function(dataRaw, signal="input", response=NULL,side_variables=NULL,
                                           formula_string=NULL,
                                           glmnet_algorithm=FALSE,dataMatrix=NULL, 
                                           glmnet_cores=1,glmnet_lambdanum=10,
@@ -84,6 +84,10 @@ capacity_logreg_main<-function(dataRaw, signal="signal", response="response",sid
   
   #Debugging:
   print("Procedure starting")
+  
+   if (is.null(response)){
+    response=paste0("output_",1:(ncol(dataRaw)-1) )  
+  }
   
   time_start=proc.time()
   
