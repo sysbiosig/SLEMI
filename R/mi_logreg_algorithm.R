@@ -56,7 +56,8 @@ mi_logreg_algorithm<-function(data,
     }
     
     if (is.null(pinput)){
-      pinput=p0
+      #pinput=p0
+      pinput=rep(1/length(p0),length(p0))
     }
     
     #Debugging:
