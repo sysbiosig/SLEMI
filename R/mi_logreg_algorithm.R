@@ -20,8 +20,7 @@
 #' \item output$model      - nnet object describing logistic regression model (if model_out=TRUE)
 #' }
 #' 
-mi_logreg_algorithm<-function(data,
-                                    signal="signal",response="response",side_variables=NULL,
+mi_logreg_algorithm<-function(data,signal="signal",response="response",side_variables=NULL,
                                     formula_string=NULL,
                                     model_out=TRUE,
                                     lr_maxit=1000,MaxNWts = 5000,
@@ -32,16 +31,18 @@ mi_logreg_algorithm<-function(data,
   if (!is.null(formula_string)){
     formula=as.formula(formula_string)
   } else {
-    formula=as.formula(formula_generator(signal,response, side_variables))
+    formula=as.formula(func_formula_generator(signal,response, side_variables))
   }
   
   if (is.null(data$train)|is.null(data$test)) {
     
+    cat("\n Main Algorithm starting...")
+
     # checking assumptions
-    aux_input_checks(data,signal,response,side_variables)
+    func_input_checks(data,signal,response,side_variables)
     
     #transform signal into factor
-    data=aux_signal_transform(data,signal)
+    data=func_signal_transform(data,signal)
     
     signal_levels<-levels(data[[signal]])
     cell_id=lapply(signal_levels,function(x){
@@ -60,9 +61,7 @@ mi_logreg_algorithm<-function(data,
       pinput=rep(1/length(p0),length(p0))
     }
     
-    #Debugging:
-    print("Logistic Regression algorihtm starting")
-    lr_model=nnet::multinom(formula,data=data,na.action=na.omit,maxit=lr_maxit, MaxNWts = MaxNWts)
+    lr_model=nnet::multinom(formula,data=data,na.action=na.omit,maxit=lr_maxit, MaxNWts = MaxNWts,trace=FALSE)
     
     prob_lr<-data.frame(fitted(lr_model))
     if (length(signal_levels)==2) {prob_lr=cbind(1-prob_lr,prob_lr)}
@@ -76,8 +75,6 @@ mi_logreg_algorithm<-function(data,
     output$regression<-caret::confusionMatrix(factor(pred,levels=signal_levels),obs)
     rm(obs,pred)
     
-    #Debugging:
-    print("Iterative algorihtm starting")
     
     prob_ratio=(p0[1]/p0)*(pinput/pinput[1])
     temp_val <- prob_lr*t(replicate(nrow(prob_lr),prob_ratio))
@@ -89,12 +86,10 @@ mi_logreg_algorithm<-function(data,
         mean(mc_values[is.finite(mc_values)])
       },simplify=TRUE)
 
-    MI_opt=sum(C_mc*pinput-x_log_y(pinput,pinput))
+    MI_opt=sum(C_mc*pinput-aux_x_log_y(pinput,pinput))
     
     tmp_iterative_output=list(pinput=pinput,MI_opt=MI_opt)
     
-    #Debugging:
-    print("Iterative algorihtm complete")
     
     if (model_out) {
       output$model = lr_model
@@ -104,6 +99,7 @@ mi_logreg_algorithm<-function(data,
     output$pinput  <- tmp_iterative_output$pinput
     output$cc     <- log2(exp(tmp_iterative_output$MI_opt))
     
+    cat("... Main algorihtm completed.")
     
   } else {
     
@@ -111,12 +107,12 @@ mi_logreg_algorithm<-function(data,
     data_test <-data$test
     
     # checking assumptions
-    aux_input_checks(data_train,signal,response,side_variables)
-    aux_input_checks(data_test,signal,response,side_variables)
+    func_input_checks(data_train,signal,response,side_variables)
+    func_input_checks(data_test,signal,response,side_variables)
     
     #transform signal into factor
-    data_train=aux_signal_transform(data_train,signal)
-    data_test=aux_signal_transform(data_test,signal)
+    data_train=func_signal_transform(data_train,signal)
+    data_test=func_signal_transform(data_test,signal)
     
     signal_levels<-levels(data_train[[signal]])
     
@@ -140,9 +136,8 @@ mi_logreg_algorithm<-function(data,
       pinput=rep(1/length(p0),length(p0))
     }
     
-    #Debugging:
-    print("Logistic Regression algorithm starting")
-    lr_model=nnet::multinom(formula,data=data_train,na.action=na.omit,maxit=lr_maxit, MaxNWts = MaxNWts)
+
+    lr_model=nnet::multinom(formula,data=data_train,na.action=na.omit,maxit=lr_maxit, MaxNWts = MaxNWts,trace=FALSE)
     
     prob_lr_train<-data.frame(fitted(lr_model))
     if (length(signal_levels)==2) {prob_lr_train=cbind(1-prob_lr_train,prob_lr_train)}
@@ -174,12 +169,9 @@ mi_logreg_algorithm<-function(data,
       mean(mc_values[is.finite(mc_values)])
     },simplify=TRUE)
     
-    MI_opt=sum(C_mc*pinput-x_log_y(pinput,pinput))
+    MI_opt=sum(C_mc*pinput-aux_x_log_y(pinput,pinput))
     
     tmp_iterative_output=list(pinput=pinput,MI_opt=MI_opt)
-    
-    #Debugging:
-    print("Iterative algorihtm complete")
     
     if (model_out) {
       output$model = lr_model
@@ -196,9 +188,6 @@ mi_logreg_algorithm<-function(data,
       #output$model_pv <- (1 - pnorm(abs(temp_z), 0, 1)) * 2
     }
   }
-  
-  #Debugging:
-  print("Main algorihtm complete")
   
   output
 }

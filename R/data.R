@@ -1,7 +1,7 @@
 #' Examplary data set I
 #'
 #' A dataset describing simple one dimensional intput - one dimensional output channel 
-#' with 500 observations per input. Each observation can be in addition of 3 types
+#' with 500 observations per input. In addition, each observation is assigned to one of three types
 #' that occurs with propensities (0.6,0.3,0.1), resepctively. 
 #' Conditional output distributions are Gaussian.
 #' 

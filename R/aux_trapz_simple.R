@@ -4,11 +4,10 @@
 #' @param x is a numeric vector
 #' @param y is a numeric vector of the same length as x
 #' @return A numeric value of integral approximated by trapezoids
-#' @export
 #' @examples 
 #' trapz_simple(x=1:10,y=exp(1:10))
 #' @keywords internal
-trapz_simple<-function(x,y){
+aux_trapz_simple<-function(x,y){
   nx=length(x)
   
   xmesh=x[(2:nx)]-x[(1:(nx-1))]

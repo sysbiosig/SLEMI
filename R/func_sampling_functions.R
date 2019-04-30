@@ -12,7 +12,6 @@
 #' shuffled values of columns given in side_variables argument. Function sampling_partition returns a list of two data.frame objects - 
 #' train and test that has the same structure as initial data argument with partition_trainfrac and 1-partition_trainfrac observations, resepctively.
 
-#' @export
 #' @examples 
 #' data=data_example1
 #' dataBootstrap = sampling_bootstrap(data=data,prob=0.8,"signal")

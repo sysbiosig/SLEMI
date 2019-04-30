@@ -1,4 +1,4 @@
-#' Probability of pairwise discrimination
+#' Calculates Probability of pairwise discrimination
 #' 
 #' INPUT:
 #' @param data must be a data.frame object
@@ -25,14 +25,15 @@ prob_discr_pairwise<-function(dataRaw,
   
   
   
-  print("Procedure starting")
+  print("Estimating pairwise probabilities of discrimination...")
   
   if (is.null(response)){
     response=paste0("output_",1:(ncol(dataRaw)-1) )  
   }
   
   time_start=proc.time()
-  
+  dataRaw=as.data.frame(dataRaw)
+
   # checking assumptions
   if (is.null(output_path)) { 
     warning('path is not defined. Graphs and RDS file will not be saved.')
@@ -43,14 +44,14 @@ prob_discr_pairwise<-function(dataRaw,
   if (!is.data.frame(dataRaw)) {
     stop('data is not in data.frame format')
   }
-  if ( length(colnames(dataRaw)==signal)==0 ) {
+  if ( sum(colnames(dataRaw)==signal)==0 ) {
     stop('There is no column described as signal in data')
   }
-  if ( length(colnames(dataRaw) %in% response)==length(response) ) {
+  if (!sum(colnames(dataRaw) %in% response)==length(response) ) {
     stop('There is no column described as response in data')
   }
   if (!is.null(side_variables)){
-    if ( length(colnames(dataRaw) %in% side_variables)==length(side_variables) ) {
+    if (!sum(colnames(dataRaw) %in% side_variables)==length(side_variables) ) {
       stop('There is no column described as side_variables in data')
     }
   }
@@ -64,14 +65,14 @@ prob_discr_pairwise<-function(dataRaw,
     print(table(data0[[signal]]))
   }
   
-  data0=aux_signal_transform(data0,signal)
+  data0=func_signal_transform(data0,signal)
   tempcolnames=colnames(data0)
   tempsignal=data.frame(data0[,(tempcolnames%in%c(signal,paste(signal,"_RAW",sep="") ) )])
   colnames(tempsignal)<-tempcolnames[(tempcolnames%in%c(signal,paste(signal,"_RAW",sep="") ) )]
   data0=data.frame(data0[,!(tempcolnames%in%c(signal,paste(signal,"_RAW",sep="") ) )])
   colnames(data0)<-tempcolnames[!(tempcolnames%in%c(signal,paste(signal,"_RAW",sep="") ) )]
   
-  print("Preprocessing started")
+  cat("\n  Preprocessing started...")
   
   #PreProcessing
   temp_idnumeric=sapply(data0,is.numeric)
@@ -87,20 +88,20 @@ prob_discr_pairwise<-function(dataRaw,
   rm(temp_idnumeric)
   
   #Debugging:
-  print("Preprocessing completed. Algorithm initialization")
+  cat(" completed")
   
   if (!is.null(formula_string)){
     formula=as.formula(formula_string)
   } else {
-    formula=as.formula(formula_generator(signal,response, side_variables))
+    formula=as.formula(func_formula_generator(signal,response, side_variables))
   }
   
   chosen_stim=unique(data[[signal]])
   nstim=length(chosen_stim)
   
-  aux_input_checks(data,signal,response,side_variables)
+  func_input_checks(data,signal,response,side_variables)
   
-  
+  cat("Fitting logistic regression models...")
   model_output=list()
   # 11 Estimate classificator
   for (is in 1:(nstim-1) ){
@@ -125,8 +126,7 @@ prob_discr_pairwise<-function(dataRaw,
       }
 
       #Debugging:
-      print("Logistic Regression algorihtm starting")
-      lr_model=nnet::multinom(formula,data=dataChosen,na.action=na.omit,maxit=lr_maxit, MaxNWts = MaxNWts)
+      lr_model=nnet::multinom(formula,data=dataChosen,na.action=na.omit,maxit=lr_maxit, MaxNWts = MaxNWts,trace=FALSE)
       model_output[[paste(chosen_stim[is],chosen_stim[js],sep="_")]]$model=lr_model
       
       prob_lr<-data.frame(fitted(lr_model))
@@ -142,7 +142,8 @@ prob_discr_pairwise<-function(dataRaw,
       
     }
   }
-  
+  cat("completed...")
+
   prob_matrix=matrix(0,nstim,nstim)
   for (is in 1:(nstim-1) ){
     for (js in (is+1):nstim){
@@ -163,17 +164,17 @@ prob_discr_pairwise<-function(dataRaw,
   colnames(prob_matrix)<-chosen_stim
   
   col2 <- grDevices::colorRampPalette(c("#67001F", "#B2182B", "#D6604D", "#F4A582",
-                             "#FDDBC7",
-                             "#67001F", "#B2182B", "#D6604D", "#F4A582",
+                             "#FDDBC7","#67001F", "#B2182B", "#D6604D", "#F4A582",
                              "#FDDBC7","#FFFFFF", "#D1E5F0", "#92C5DE",
                              "#4393C3", "#2166AC", "#053061"))
   
 if (!is.null(output_path)){                       
-  pdf(paste0(output_path,"/plot_probs_discr.pdf"),height=6,width=6)
+  pdf(paste0(output_path,"/plot_probs_discr.pdf"),height=0.75*length(chosen_stim),width=0.75*length(chosen_stim))
     corrplot::corrplot(prob_matrix,type = "upper", method = "pie",cl.lim = c(0.5, 1),col=col2(40), diag=FALSE)
   dev.off()
+   cat("graph created") 
   }
-                       
+                     
                        
   for (is in 1:(nstim) ){
       prob_matrix[is,is]=NA

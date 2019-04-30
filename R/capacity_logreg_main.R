@@ -22,11 +22,6 @@
 #' @param resamp_num is the number of resmapling tests to be performed (only if testing=TRUE)
 #' @param traintest_num is the number of traintest tests to be performed (only if testing=TRUE)
 #' @param partition_trainfrac is the fraction of data to be used as a training dataset (only if testing=TRUE)
-#' @param glmnet_algorithm is the logical indicating if the glmnet package should be used
-#' @param dataMatrix is a numeric matrix with columns treated as explanatory variables in 
-#' logistic regression algorithm (only if glmnet_algorithm=TRUE)
-#' @param glmnet_cores is the number of cores to use in parallel computing of glmnet package 
-#' @param glmnet_lambdanum is the lambda parameter of glmnet package
 #'
 #' @return a list with several elements:
 #' \itemize{
@@ -70,8 +65,6 @@
 #' For further details see vignette
 capacity_logreg_main<-function(dataRaw, signal="input", response=NULL,side_variables=NULL,
                                           formula_string=NULL,
-                                          glmnet_algorithm=FALSE,dataMatrix=NULL, 
-                                          glmnet_cores=1,glmnet_lambdanum=10,
                                           cc_maxit=100,lr_maxit=1000, MaxNWts = 5000, 
                                           output_path=NULL,
                                           testing=FALSE, model_out=TRUE,scale=TRUE,graphs=TRUE,
@@ -80,17 +73,18 @@ capacity_logreg_main<-function(dataRaw, signal="input", response=NULL,side_varia
                                           sidevar_num=10,
                                           traintest_num=10,partition_trainfrac=0.6,
                                           plot_width=6,plot_height=4,
-                                          dataout=TRUE){
+                                          data_out=FALSE){
   
   #Debugging:
-  print("Procedure starting")
+  cat("\n Estimating channel capacity ...")
   
    if (is.null(response)){
     response=paste0("output_",1:(ncol(dataRaw)-1) )  
   }
   
   time_start=proc.time()
-  
+  dataRaw=as.data.frame(dataRaw)
+
   # checking assumptions
   if (is.null(output_path)) { 
     warning('path is not defined. Graphs and RDS file will not be saved.')
@@ -98,14 +92,14 @@ capacity_logreg_main<-function(dataRaw, signal="input", response=NULL,side_varia
   if (!is.data.frame(dataRaw)) {
     stop('data is not in data.frame format')
   }
-  if ( length(colnames(dataRaw)==signal)==0 ) {
+  if ( sum(colnames(dataRaw)==signal)==0 ) {
     stop('There is no column described as signal in data')
   }
-  if ( length(colnames(dataRaw) %in% response)==length(response) ) {
+  if (!sum(colnames(dataRaw) %in% response)==length(response) ) {
     stop('There is no column described as response in data')
   }
   if (!is.null(side_variables)){
-    if ( length(colnames(dataRaw) %in% side_variables)==length(side_variables) ) {
+    if (!sum(colnames(dataRaw) %in% side_variables)==length(side_variables) ) {
     stop('There is no column described as side_variables in data')
     }
   }
@@ -113,20 +107,20 @@ capacity_logreg_main<-function(dataRaw, signal="input", response=NULL,side_varia
   
    data0=dataRaw[,c(signal,response,side_variables)]
    if ( any(apply(data0,1,function(x) any(is.na(x)) )) ) {
-     print("There are NA in observations - removing")
+     cat("\nThere are NA in observations - removing...")
      data0=data0[!apply(data0,1,function(x) any(is.na(x)) ),]
-     print("Numer of observations after cleaning:")
-     print(table(data0[[signal]]))
+     cat("Numer of observations after cleaning:")
+     cat(table(data0[[signal]]))
    }
   
-   data0=aux_signal_transform(data0,signal)
+   data0=func_signal_transform(data0,signal)
    tempcolnames=colnames(data0)
    tempsignal=data.frame(data0[,(tempcolnames%in%c(signal,paste(signal,"_RAW",sep="") ) )])
    colnames(tempsignal)<-tempcolnames[(tempcolnames%in%c(signal,paste(signal,"_RAW",sep="") ) )]
    data0=data.frame(data0[,!(tempcolnames%in%c(signal,paste(signal,"_RAW",sep="") ) )])
    colnames(data0)<-tempcolnames[!(tempcolnames%in%c(signal,paste(signal,"_RAW",sep="") ) )]
    
-  print("Preprocessing started")
+  cat("\n Preprocessing started")
   
   #PreProcessing
   temp_idnumeric=sapply(data0,is.numeric)
@@ -142,22 +136,14 @@ capacity_logreg_main<-function(dataRaw, signal="input", response=NULL,side_varia
   rm(temp_idnumeric)
 
   #Debugging:
-  print("Preprocessing completed. Algorithm initialization")
+  cat("... Preprocessing completed. Algorithm initialization")
   
-  if (!glmnet_algorithm) {
-    output<-capacity_logreg_algorithm(data=data,signal=signal,response=response,side_variables=side_variables,
+  output<-capacity_logreg_algorithm(data=data,signal=signal,response=response,side_variables=side_variables,
                                               formula_string=formula_string, model_out = model_out,
                                               cc_maxit=cc_maxit,lr_maxit=lr_maxit,MaxNWts =MaxNWts) 
-  } else { 
-    if (is.null(dataMatrix)) {stop('Data Matrix not supplied')}
-    output<-capacity_klogreg_algorithm(dataMatrix=dataMatrix, dataSignal = data[[signal]],
-                                                    model_out=TRUE, cc_maxit=cc_maxit,
-                                                    lambda_num=glmnet_lambdanum,
-                                                    cv_core_num=glmnet_cores) 
-    }
   
   #Debugging:
-  print(paste("Main algorihtm sent data:",length(output)))
+  #print(paste("Main algorihtm sent data:",length(output)))
   
   if (testing){
       output$testing<-capacity_logreg_testing(data,signal=signal,response=response,side_variables=side_variables,
@@ -166,11 +152,8 @@ capacity_logreg_main<-function(dataRaw, signal="input", response=NULL,side_varia
                                                       TestingSeed=TestingSeed,testing_cores=testing_cores,
                                                       boot_num=boot_num,boot_prob=boot_prob,
                                                       sidevar_num=sidevar_num,
-                                                      traintest_num=traintest_num,partition_trainfrac=partition_trainfrac,
-                                              glmnet_algorithm= glmnet_algorithm,dataMatrix=dataMatrix, 
-                                              glmnet_lambdanum=glmnet_lambdanum
-                                              )
-      
+                                                      traintest_num=traintest_num,partition_trainfrac=partition_trainfrac)
+
       output$testing_pv<-lapply(output$testing,function(x){
         tmp_boot_cc=sapply(x,function(xx) xx$cc)
         c(mean(tmp_boot_cc<output$cc),mean(tmp_boot_cc>output$cc))
@@ -179,31 +162,32 @@ capacity_logreg_main<-function(dataRaw, signal="input", response=NULL,side_varia
   
   
   #Debugging:
-  print(paste("Testing algorithm sent data:", length(output$testing)))
+  #print(paste("Testing algorithm sent data:", length(output$testing)))
   
-
   output$time   <- proc.time() - time_start
   output$params <- c(cc_maxit=cc_maxit,lr_maxit=lr_maxit,MaxNWts =MaxNWts)
   
-  if (dataout){
-  output$data   <- dataRaw
+  if (data_out){
+    output$data   <- dataRaw
   }
   
   if(!is.null(output_path)){dir.create(output_path,recursive=TRUE)}
   
   
   #Debugging:
-  print("RDS saved")
+  #print("RDS saved")
   
   if (graphs){
-    output$logGraphs=try(capacity_output_graphs(data=dataRaw,signal=signal,response=response,side_variables=side_variables,cc_output=output,
+    cat("Creating graphs ...")
+    output$logGraphs=try(output_graphs_main(data=dataRaw,signal=signal,response=response,side_variables=side_variables,cc_output=output,
                                 output_path=output_path,height=plot_height,width=plot_width),
         silent=FALSE)
     
     #Debugging:
-    print("Graphs finished")
+    cat("finished")
   }
   if(!is.null(output_path)){saveRDS(output,file=paste(output_path,'output.rds',sep=""))}
   
+  cat(paste0("\n Full Procedure finished. Results are in ",output_path))
   output
 }

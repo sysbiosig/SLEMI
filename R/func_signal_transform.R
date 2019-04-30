@@ -5,7 +5,6 @@
 #' @return A data.frame that is a copy of data provided with signal column transformed to factor class. 
 #' If signal has been numeric initially, additional column is created "signal_RAW" that is an exact
 #' copy of original column
-#' @export
 #' @examples 
 #' data=data_example1
 #' data1=aux_signal_transform(data,"signal")
@@ -14,7 +13,7 @@
 #' data$signal=as.numeric(data$signal)
 #' data3=aux_signal_transform(data,"signal")
 #' @keywords internal
-aux_signal_transform<-function(data,signal){
+func_signal_transform<-function(data,signal){
   signal_class=class(data[[signal]])
   
     if (signal_class=="numeric") {

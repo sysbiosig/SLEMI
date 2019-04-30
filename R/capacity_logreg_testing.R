@@ -16,11 +16,6 @@
 #' @param resamp_num is the number of resmapling tests to be performed (only if testing=TRUE)
 #' @param traintest_num is the number of traintest tests to be performed (only if testing=TRUE)
 #' @param partition_trainfrac is the fraction of data to be used as a training dataset (only if testing=TRUE)
-#' @param glmnet_algorithm is the logical indicating if the glmnet package should be used
-#' @param dataMatrix is a numeric matrix with columns treated as explanatory variables in 
-#' logistic regression algorithm (only if glmnet_algorithm=TRUE)
-#' @param glmnet_cores is the number of cores to use in parallel computing of glmnet package 
-#' @param glmnet_lambdanum is the lambda parameter of glmnet package
 #'
 #' @return a list with four elements:
 #' \itemize{
@@ -31,13 +26,12 @@
 #' }
 #' Each of above is a list, where an element is an output of a single repetition of the channel capacity algorithm
 #' @export
+#'
 #' @examples 
 #' 
 capacity_logreg_testing<-function(data,signal="signal",response="response",side_variables=NULL,
                                           cc_maxit=100,lr_maxit=1000,MaxNWts = 5000,
                                           formula_string=NULL,
-                                          glmnet_algorithm=FALSE,dataMatrix=NULL, 
-                                          glmnet_lambdanum=10,
                                           model_out=FALSE,
                                           TestingSeed=1234,testing_cores=4,
                                           boot_num=10,boot_prob=0.8,
@@ -53,107 +47,79 @@ capacity_logreg_testing<-function(data,signal="signal",response="response",side_
   }
   
   set.seed(TestingSeed)
-  print("Testing started")
+  cat("\n Testing started..")
   
   `%dopar%`<-foreach::`%dopar%`
   
   #Bootstrap
+  cat("\n Bootstrap starting..")
   cl=parallel::makeCluster(testing_cores)
   doParallel::registerDoParallel(cl)
   output_test1<-foreach::foreach(j=1:boot_num,
-                                 .export=c("sampling_bootstrap","capacity_logreg_algorithm","capacity_klogreg_algorithm","x_log_y"),
-                                 .packages=c("nnet","caret","glmnet")) %dopar% {
-    
-    if (glmnet_algorithm){
-      data_bt_samp   <- sampling_bootstrap(cbind(data,data_signal),boot_prob,data_signal)
-      bt_samp_output <- capacity_klogreg_algorithm(dataMatrix=data_bt_samp[,-ncol(data_bt_samp)],
-                                                   dataSignal=as.factor(data_bt_samp[,ncol(data_bt_samp)]),
-                                                   model_out=model_out,cc_maxit=cc_maxit,lambda_num=glmnet_lambdanum,
-                                                   cv_core_num=NULL)
-    } else {
+                                 .export=c("sampling_bootstrap","capacity_logreg_algorithm","aux_x_log_y"),
+                                 .packages=c("nnet","caret")) %dopar% {
+
       data_bt_samp   <- sampling_bootstrap(data,boot_prob,data_signal)
       bt_samp_output <- capacity_logreg_algorithm(data=data_bt_samp,signal=signal,response=response,side_variables=side_variables,
-                                                          formula_string=formula_string,model_out=model_out,cc_maxit=cc_maxit,lr_maxit=lr_maxit,MaxNWts =MaxNWts )
-    }
+                                                          formula_string=formula_string,model_out=model_out,cc_maxit=cc_maxit,
+                                                          lr_maxit=lr_maxit,MaxNWts =MaxNWts )
     bt_samp_output
   }
   parallel::stopCluster(cl)
-  print("Bootstrap completed")
+  cat("... completed")
   
   if (!is.null(side_variables)){
   # Resampling
+   cat("\n Reshuffling starting..")
   cl=parallel::makeCluster(testing_cores)
   doParallel::registerDoParallel(cl)
   output_test2=foreach::foreach(j=1:sidevar_num,
-                                .export=c("sampling_shuffle","capacity_logreg_algorithm","capacity_klogreg_algorithm","x_log_y"),
-                                .packages=c("nnet","caret","glmnet")) %dopar% {
-    if (glmnet_algorithm){
-      data_resamp_samp   <- sampling_shuffle(cbind(data,data_signal),side_variables)
-      bt_samp_output <- capacity_klogreg_algorithm(dataMatrix=data_resamp_samp[,-(ncol(data_resamp_samp)-length(side_variables))],
-                                                              dataSignal= as.factor(data_resamp_samp[,(ncol(data_resamp_samp)-length(side_variables))]),
-                                                   model_out=model_out,cc_maxit=cc_maxit,lambda_num=glmnet_lambdanum,
-                                                   cv_core_num=NULL)
-    } else {
+                                .export=c("sampling_shuffle","capacity_logreg_algorithm","aux_x_log_y"),
+                                .packages=c("nnet","caret")) %dopar% {
+
       data_resamp_samp   <- sampling_shuffle(data,side_variables)
       bt_samp_output <- capacity_logreg_algorithm(data=data_resamp_samp,signal=signal,response=response,side_variables=side_variables,
                                                   formula_string=formula_string,model_out=model_out,cc_maxit=cc_maxit,lr_maxit=lr_maxit,MaxNWts =MaxNWts )
-    }
     bt_samp_output
   }
   parallel::stopCluster(cl)
-  print("Resampling completed")
-  
+  print("... completed 1 ...")
   
   # Bootstrap&Resampling
   cl=parallel::makeCluster(testing_cores)
   doParallel::registerDoParallel(cl)
   output_test4=foreach::foreach(j=1:sidevar_num,
-                                .export=c("sampling_bootstrap","sampling_shuffle","capacity_logreg_algorithm","capacity_klogreg_algorithm","x_log_y"),
-                                .packages=c("nnet","caret","glmnet")) %dopar% {
-                                  if (glmnet_algorithm){
-                                    data_resamp_samp   <- sampling_shuffle(cbind(data,data_signal),side_variables)
-                                    data_bt_samp   <- sampling_bootstrap(cbind(data_resamp_samp,data_signal),boot_prob,data_signal)
-                                    bt_samp_output <- capacity_klogreg_algorithm(dataMatrix=data_bt_samp[,-(ncol(data_bt_samp)-length(side_variables))],
-                                                                                 dataSignal= as.factor(data_bt_samp[,(ncol(data_bt_samp)-length(side_variables))]),
-                                                                                 model_out=model_out,cc_maxit=cc_maxit,lambda_num=glmnet_lambdanum,
-                                                                                 cv_core_num=NULL)
-                                  } else {
+                                .export=c("sampling_bootstrap","sampling_shuffle","capacity_logreg_algorithm","aux_x_log_y"),
+                                .packages=c("nnet","caret")) %dopar% {
+
                                     data_resamp_samp   <- sampling_shuffle(data,side_variables)
                                     data_bt_samp   <- sampling_bootstrap(data_resamp_samp,boot_prob,data_signal)
                                     bt_samp_output <- capacity_logreg_algorithm(data=data_bt_samp,signal=signal,response=response,side_variables=side_variables,
                                                                                 formula_string=formula_string,model_out=model_out,cc_maxit=cc_maxit,lr_maxit=lr_maxit,MaxNWts =MaxNWts )
-                                  }
+
                                   bt_samp_output
                                 }
   parallel::stopCluster(cl)
-  print("Boot&Resampling completed")
+  print("completed 2")
   }
   
+
   # Train-Test
+   cat("\n Over-fitting starting..")
   cl=parallel::makeCluster(testing_cores)
   doParallel::registerDoParallel(cl)
   output_test3=foreach::foreach(j=1:traintest_num,
-                                .export=c("sampling_partition","capacity_logreg_algorithm","capacity_klogreg_algorithm","x_log_y"),
-                                .packages=c("nnet","caret","glmnet")) %dopar% {
+                                .export=c("sampling_partition","capacity_logreg_algorithm","aux_x_log_y"),
+                                .packages=c("nnet","caret")) %dopar% {
     
-    if (glmnet_algorithm){
-      datatraintestsamp   <- sampling_partition(cbind(data,data_signal),data_signal,partition_trainfrac)
-      temp_databasic=lapply(datatraintestsamp,function(x) x[,-(ncol(x))] )
-      temp_datasignal=lapply(datatraintestsamp, function(x) as.factor(x[,(ncol(x))]))
-      bt_samp_output <- capacity_klogreg_algorithm(dataMatrix=temp_databasic,
-                                                                dataSignal=temp_datasignal,
-                                                                model_out,cc_maxit,lambda_num,
-                                                                NULL)
-    } else {
       datatraintestsamp   <- sampling_partition(data,data_signal,partition_trainfrac)
       bt_samp_output<- capacity_logreg_algorithm(data=datatraintestsamp,signal=signal,response=response,side_variables=side_variables,
                                                  formula_string=formula_string,model_out=model_out,cc_maxit=cc_maxit,lr_maxit=lr_maxit,MaxNWts =MaxNWts )
-    }
     bt_samp_output
   }
   parallel::stopCluster(cl)
   
-  print("Train-Test completed")
+  print("... completed")
   
   output$bootstrap        <- output_test1
   if (!is.null(side_variables)){ output$resamplingMorph  <- output_test2}

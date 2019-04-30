@@ -1,13 +1,14 @@
-#' GGplot Themes
+#' Tuning GGplot Themes
 #' 
 #' This function changes the theme of plots created with the use of ggplot package
 #' @param base_size integer that sets the default size of font used in the plot
 #' @param base_family character that indicates what type of font should be used
 #' @param version integer that changes the characteristic of the plot, values 1,2 and 3 accepted.
-#' @export
 #' @examples
+#' ggplot(data=data.frame(x=1:10,y=rnorm(10)),aes(x=x,y=y))+geom_point()+theme_publ(version=1)
 #' ggplot(data=data.frame(x=1:10,y=rnorm(10)),aes(x=x,y=y))+geom_point()+theme_publ(version=2)
-theme_publ<-function (base_size = 12, base_family = "sans",version=1) { 
+#' ggplot(data=data.frame(x=1:10,y=rnorm(10)),aes(x=x,y=y))+geom_point()+theme_publ(version=3)
+aux_theme_publ<-function (base_size = 12, base_family = "sans",version=1) { 
   if (version==1) {
   ret<-(ggthemes::theme_foundation(base_size = base_size, base_family = base_family) + 
           ggplot2::theme(line = ggplot2::element_line(), 

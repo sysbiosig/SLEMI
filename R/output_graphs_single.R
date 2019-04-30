@@ -27,12 +27,12 @@ capacity_output_graph_io<-function(data,signal,response,path,height,width){
       ggplot2::facet_grid(.~variable)+
       ggplot2::scale_y_continuous(paste("Response ",sep="") )+ggplot2::scale_x_continuous(paste("Signal - ",signal,sep=""),limits=c(0,maxSignal*1.05) )+
       ggplot2::ggtitle("Input-Output Relation")+
-      theme_publ(version=2)
+      aux_theme_publ(version=2)
     
     plot_col<-ggplot2::ggplot(data=dataPlot,ggplot2::aes_string(x=signalNUM,y="value"),ggplot2::aes(colour=factor(variable)))+ggplot2::stat_summary(fun.y=mean,geom="line",size=1.35)+
       ggplot2::scale_y_continuous(paste("Response ",sep="") )+ggplot2::scale_x_continuous(paste("Signal - ",signal,sep=""),limits=c(0,maxSignal*1.05) )+
       ggplot2::ggtitle("Input-Output Relation")+
-      theme_publ(version=2)
+      aux_theme_publ(version=2)
   } else {
     dataPlot=reshape2::melt(data[,c(signal,response)],id.vars=c(signal))
     plot<-ggplot2::ggplot(data=dataPlot,ggplot2::aes_string(x=signal,y="value"))+
@@ -41,14 +41,14 @@ capacity_output_graph_io<-function(data,signal,response,path,height,width){
       ggplot2::scale_y_continuous(paste("Response ",sep="") )+
       ggplot2::scale_x_discrete(paste("Signal - ",signal,sep="") )+
       ggplot2::ggtitle("Input-Output Relation")+
-      theme_publ(version=2)
+      aux_theme_publ(version=2)
     
     plot_col<-ggplot2::ggplot(data=dataPlot,ggplot2::aes_string(x=signal,y="value"),ggplot2::aes(colour=factor(variable)))+
       ggplot2::stat_summary(fun.y=mean,geom="point",size=2.35)+
       ggplot2::scale_y_continuous(paste("Response ",sep="") )+
       ggplot2::scale_x_discrete(paste("Signal - ",signal,sep="") )+
       ggplot2::ggtitle("Input-Output Relation")+
-      theme_publ(version=2)
+      aux_theme_publ(version=2)
   }
   
   ggplot2::ggsave(plot,file=paste(path,'io_relation.pdf',sep=""),height=height,width=min(49.5,response_length*width))
@@ -81,7 +81,7 @@ capacity_output_graph_boxplots<-function(data,signal,response,path,height=4,widt
     #ggplot2::scale_x_discrete(name=paste("Input",signal,sep="") )+
     ggplot2::scale_x_discrete(name=paste("Input",sep="") )+
     ggplot2::ggtitle("Boxplots")+
-    theme_publ(version=2)
+    aux_theme_publ(version=2)
   
   ggplot2::ggsave(plot,file=paste(path,'boxplots.pdf',sep=""),height=height,width=width)
   
@@ -108,7 +108,7 @@ capacity_output_graph_violinMean<-function(data,signal,response,path,height=4,wi
       #ggplot2::scale_x_continuous(paste("Input",signal,sep=""),limits=c(0,maxSignal*1.05) )+
       ggplot2::scale_x_continuous(paste("Input",sep=""),limits=c(0,maxSignal*1.05) )+
       ggplot2::ggtitle("ViolinPlot")+
-      theme_publ(version=2)
+      aux_theme_publ(version=2)
   } else {
     dataPlot=reshape2::melt(data[,c(signal,response)],id.vars=c(signal))
     plot<-ggplot2::ggplot(data=dataPlot,ggplot2::aes_string(x=signal,y="value"))+ggplot2::geom_violin(ggplot2::aes_string(group=signal),scale="width")+
@@ -118,7 +118,7 @@ capacity_output_graph_violinMean<-function(data,signal,response,path,height=4,wi
       #ggplot2::scale_x_discrete(paste("Input",signal,sep="") )+
       ggplot2::scale_x_discrete(paste("Input",sep="") )+
       ggplot2::ggtitle("ViolinPlot")+
-      theme_publ(version=2)
+      aux_theme_publ(version=2)
   }
   
   ggplot2:: ggsave(plot,file=paste(path,'violin.pdf',sep=""),height=height,width=min(49.5,response_length*width))
@@ -167,7 +167,7 @@ capacity_output_graph_histograms<-function(data,signal,response,path,height=4,wi
 #   plot<-plotTemp + ggplot2::geom_text(data=tmp_data,ggplot2::aes(x=x,y=y,label=lab),vjust=1)+    
 #     ggplot2::scale_y_continuous(paste("Output",sep="") )+
 #     ggplot2::ggtitle("Histograms")+
-#     theme_publ(version=2)
+#     aux_theme_publ(version=2)
 #   ggplot2::ggsave(plot,file=paste(path,'histograms.pdf',sep=""),height=min(49.5,response_length*height),width=min(49.5,3*width) )
 #   plot  
 # }
@@ -188,7 +188,7 @@ capacity_output_graph_boxplotsSideVar<-function(data,signal,side_variables,path,
       ggplot2::scale_y_continuous("side variable")+
       ggplot2::scale_x_discrete(paste("Input",signal,sep="") )+
       ggplot2::ggtitle("Boxplots")+
-      theme_publ(version=2)
+      aux_theme_publ(version=2)
     
     ggplot2::ggsave(plot,file=paste(path,'boxplots_sideVar.pdf',sep=""),height=height,width=width)
   }
@@ -208,7 +208,7 @@ capacity_output_graph_capacity<-function(cc_output,path,height=4,width=6){
       ggplot2::geom_line(data=data.frame(x=seq(from=0.9*cc_output$cc,to=1.1*cc_output$cc,length=10),y=0),arrow = ggplot2::arrow())+
       ggplot2::scale_y_continuous("",limits=c(-0.05,0.1))+ggplot2::scale_x_continuous( "Capacity (bits)" )+
       ggplot2::ggtitle("Capacity")+
-      theme_publ(version=2)+
+      aux_theme_publ(version=2)+
       ggplot2::theme(axis.ticks.y=ggplot2::element_blank(),
             axis.text.y=ggplot2::element_blank(),
             axis.title.y=ggplot2::element_blank(),
@@ -233,7 +233,7 @@ capacity_output_graph_capacity<-function(cc_output,path,height=4,width=6){
       ggplot2::scale_y_continuous("",limits=c(-0.05,0.1))+
       ggplot2::scale_x_continuous( "Capacity (bits)",breaks=c(0.95*(cc_output$cc-boot_sd),1.05*(cc_output$cc+boot_sd)) )+
       ggplot2::ggtitle("Capacity")+
-      theme_publ(version=2)+
+      aux_theme_publ(version=2)+
       ggplot2::theme(axis.ticks.y=ggplot2::element_blank(),
             axis.text.y=ggplot2::element_blank(),
             axis.title.y=ggplot2::element_blank(),
@@ -244,13 +244,13 @@ capacity_output_graph_capacity<-function(cc_output,path,height=4,width=6){
       ggplot2::geom_histogram( )+
       ggplot2::geom_point(data=data.frame(x=cc_output$cc,y=0),ggplot2::aes(x=x,y=y),size=4,shape=15) +
       ggplot2::ggtitle("Bootstrap")+ggplot2::scale_x_continuous( "Capacity (bits)" )+
-      theme_publ(version=2)
+      aux_theme_publ(version=2)
     
     plot4<-ggplot2::ggplot( data=data.frame(x=sapply(cc_output$testing$traintest,function(x) x$cc)),ggplot2::aes(x=x,y=..density..) ) + 
       ggplot2::geom_histogram( )+
       ggplot2::geom_point(data=data.frame(x=cc_output$cc,y=0),ggplot2::aes(x=x,y=y),size=4,shape=15) +
       ggplot2::ggtitle("TrainTest")+ggplot2::scale_x_continuous( "Capacity (bits)" )+
-      theme_publ(version=2)
+      aux_theme_publ(version=2)
     
     plot5=grid::textGrob(paste("PV-left:",round(cc_output$testing_pv$bootstrap[1],digits=3),sep=" " ))
      plot6=grid::textGrob(paste("PV-right:",round(cc_output$testing_pv$bootstrap[2],digits=3),sep=" " )) 
@@ -280,7 +280,7 @@ capacity_output_graph_capacity<-function(cc_output,path,height=4,width=6){
       ggplot2::scale_y_continuous("",limits=c(-0.05,0.1))+
       ggplot2::scale_x_continuous( "Capacity (bits)",breaks=c(0.95*(cc_output$cc-boot_sd),1.05*(cc_output$cc+boot_sd)) )+
       ggplot2::ggtitle("Capacity")+
-      theme_publ(version=2)+
+      aux_theme_publ(version=2)+
       ggplot2::theme(axis.ticks.y=ggplot2::element_blank(),
                      axis.text.y=ggplot2::element_blank(),
                      axis.title.y=ggplot2::element_blank(),
@@ -291,25 +291,25 @@ capacity_output_graph_capacity<-function(cc_output,path,height=4,width=6){
       ggplot2::geom_histogram( )+
       ggplot2::geom_point(data=data.frame(x=cc_output$cc,y=0),ggplot2::aes(x=x,y=y),size=4,shape=15) +
       ggplot2::ggtitle("Bootstrap")+ggplot2::scale_x_continuous( "Capacity (bits)" )+
-      theme_publ(version=2)
+      aux_theme_publ(version=2)
     
     plot3<-ggplot2::ggplot( data=data.frame(x=sapply(cc_output$testing$resamplingMorph,function(x) x$cc)),ggplot2::aes(x=x,y=..density..) ) + 
       ggplot2::geom_histogram( )+
       ggplot2::geom_point(data=data.frame(x=cc_output$cc,y=0),ggplot2::aes(x=x,y=y),size=4,shape=15) +
       ggplot2::ggtitle("SideVar Resampling")+ggplot2::scale_x_continuous( "Capacity (bits)" )+
-      theme_publ(version=2)
+      aux_theme_publ(version=2)
     
     plot4<-ggplot2::ggplot( data=data.frame(x=sapply(cc_output$testing$traintest,function(x) x$cc)),ggplot2::aes(x=x,y=..density..) ) + 
       ggplot2::geom_histogram( )+
       ggplot2::geom_point(data=data.frame(x=cc_output$cc,y=0),ggplot2::aes(x=x,y=y),size=4,shape=15) +
       ggplot2::ggtitle("TrainTest")+ggplot2::scale_x_continuous( "Capacity (bits)" )+
-      theme_publ(version=2)
+      aux_theme_publ(version=2)
     
     plot3b<-ggplot2::ggplot( data=data.frame(x=sapply(cc_output$testing$bootResampMorph,function(x) x$cc)),ggplot2::aes(x=x,y=..density..) ) + 
       ggplot2::geom_histogram( )+
       ggplot2::geom_point(data=data.frame(x=cc_output$cc,y=0),ggplot2::aes(x=x,y=y),size=4,shape=15) +
       ggplot2::ggtitle("Boot SideVar Resampling")+ggplot2::scale_x_continuous( "Capacity (bits)" )+
-      theme_publ(version=2)
+      aux_theme_publ(version=2)
     
     plot5=grid::textGrob(paste("PV-left:",round(cc_output$testing_pv$bootstrap[1],digits=3),sep=" " ))
     plot6=grid::textGrob(paste("PV-right:",round(cc_output$testing_pv$bootstrap[2],digits=3),sep=" " )) 
@@ -340,7 +340,7 @@ capacity_output_graph_densities<-function(data,signal,response,path,height=4,wid
     ggplot2::facet_grid(variable~.)+
     ggplot2::scale_x_continuous(paste("Output",sep="") )+ ggplot2::scale_y_continuous("Density")+
     ggplot2::ggtitle("Density")+
-    theme_publ(version=2)+ggplot2::theme(legend.position = "right")
+    aux_theme_publ(version=2)+ggplot2::theme(legend.position = "right")
   
   ggplot2::ggsave(plot,file=paste(path,'kdensities.pdf',sep=""),height=height,width=width)
   

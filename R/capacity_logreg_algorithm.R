@@ -10,7 +10,7 @@
 #' @param lr_maxit is the number of iteration of iterative algorithm of logistic regression
 #' @param maxNWts is the maximum acceptable number of weights in logistic regression algorithm - the higher, the slower the computations
 #' @param model_out is the logical indicating if the calculated logisitc regression model should be included in output list
-#'
+#' @export
 #' @return a list with three elements:
 #' \itemize{
 #' \item output$regression - confusion matrix of logistic regression predictions
@@ -18,6 +18,14 @@
 #' \item output$p_opt      - optimal probability distribution
 #' \item output$model      - nnet object describing logistic regression model (if model_out=TRUE)
 #' }
+#' @examples 
+#' tempdata=data_example1
+#' dir.create("example1/",recursive=TRUE)
+#' outputCLR1=capacity_logreg_main(dataRaw=tempdata,
+#' signal="signal", response="output",
+#' formula_string = "signal~output",
+#' cc_maxit=75,lr_maxit=1500, output_path="example1/",plot_height=8,plot_width=12)
+#'
 capacity_logreg_algorithm<-function(data,
                                     signal="signal",response="response",side_variables=NULL,
                                     formula_string=NULL,
@@ -29,16 +37,18 @@ capacity_logreg_algorithm<-function(data,
   if (!is.null(formula_string)){
     formula=as.formula(formula_string)
   } else {
-    formula=as.formula(formula_generator(signal,response, side_variables))
+    formula=as.formula(func_formula_generator(signal,response, side_variables))
   }
   
   if (is.null(data$train)|is.null(data$test)) {
     
+    cat("\n Main Algorithm starting...")
+
     # checking assumptions
-    aux_input_checks(data,signal,response,side_variables)
+    func_input_checks(data,signal,response,side_variables)
     
     #transform signal into factor
-    data=aux_signal_transform(data,signal)
+    data=func_signal_transform(data,signal)
    
     signal_levels<-levels(data[[signal]])
     cell_id=lapply(signal_levels,function(x){
@@ -52,9 +62,8 @@ capacity_logreg_algorithm<-function(data,
       stop('There is no observations of some signals')
     }
     
-    #Debugging:
-    print("Logistic Regression algorihtm starting")
-    lr_model=nnet::multinom(formula,data=data,na.action=na.omit,maxit=lr_maxit, MaxNWts = MaxNWts)
+    
+    lr_model=nnet::multinom(formula,data=data,na.action=na.omit,maxit=lr_maxit, MaxNWts = MaxNWts,trace=FALSE)
     
     prob_lr<-data.frame(fitted(lr_model))
     if (length(signal_levels)==2) {prob_lr=cbind(1-prob_lr,prob_lr)}
@@ -69,12 +78,12 @@ capacity_logreg_algorithm<-function(data,
     rm(obs,pred)
     
     #Debugging:
-    print("Iterative algorihtm starting")
+    #print("Iterative algorihtm starting")
     
-    tmp_iterative_output=aux_iterative_logreg_update(prob_lr,p0,cell_id,signal_levels,cc_maxit)
+    tmp_iterative_output=func_iterative_logreg_update(prob_lr,p0,cell_id,signal_levels,cc_maxit)
     
     #Debugging:
-    print("Iterative algorihtm complete")
+    #print("Iterative algorihtm complete")
     
     if (model_out) {
       output$model = lr_model
@@ -84,18 +93,20 @@ capacity_logreg_algorithm<-function(data,
     output$p_opt  <- tmp_iterative_output$p_opt
     output$cc     <- log2(exp(tmp_iterative_output$MI_opt))
     
+      cat("... Main algorihtm completed.")
+
   } else {
     
     data_train<-data$train
     data_test <-data$test
     
     # checking assumptions
-    aux_input_checks(data_train,signal,response,side_variables)
-    aux_input_checks(data_test,signal,response,side_variables)
+    func_input_checks(data_train,signal,response,side_variables)
+    func_input_checks(data_test,signal,response,side_variables)
     
     #transform signal into factor
-    data_train=aux_signal_transform(data_train,signal)
-    data_test=aux_signal_transform(data_test,signal)
+    data_train=func_signal_transform(data_train,signal)
+    data_test=func_signal_transform(data_test,signal)
     
     signal_levels<-levels(data_train[[signal]])
     
@@ -114,9 +125,7 @@ capacity_logreg_algorithm<-function(data,
       stop('There is no observations of some signals')
     }
     
-    #Debugging:
-    print("Logistic Regression algorihtm starting")
-    lr_model=nnet::multinom(formula,data=data_train,na.action=na.omit,maxit=lr_maxit, MaxNWts = MaxNWts)
+    lr_model=nnet::multinom(formula,data=data_train,na.action=na.omit,maxit=lr_maxit, MaxNWts = MaxNWts,trace=FALSE)
     
     prob_lr_train<-data.frame(fitted(lr_model))
     if (length(signal_levels)==2) {prob_lr_train=cbind(1-prob_lr_train,prob_lr_train)}
@@ -142,7 +151,7 @@ capacity_logreg_algorithm<-function(data,
     output$regression$test<-caret::confusionMatrix(factor(pred_test,levels=signal_levels),obs_test)
     output$regression$train<-caret::confusionMatrix(factor(pred_train,levels=signal_levels),obs_train)
     
-    tmp_iterative_output=aux_iterative_logreg_update(prob_lr_test,p0,cell_id_test,signal_levels,cc_maxit)
+    tmp_iterative_output=func_iterative_logreg_update(prob_lr_test,p0,cell_id_test,signal_levels,cc_maxit)
   
     output$p_opt  <- tmp_iterative_output$p_opt
     output$cc     <- log2(exp(tmp_iterative_output$MI_opt))
@@ -154,9 +163,7 @@ capacity_logreg_algorithm<-function(data,
       #output$model_pv <- (1 - pnorm(abs(temp_z), 0, 1)) * 2
     }
   }
-  
-  #Debugging:
-  print("Main algorihtm complete")
+
   
   output
 }

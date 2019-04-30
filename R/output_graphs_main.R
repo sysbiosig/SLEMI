@@ -24,7 +24,7 @@
 #' @examples 
 #' 
 #' 
-capacity_output_graphs<-function(data,signal,response,side_variables,cc_output,
+output_graphs_main<-function(data,signal,response,side_variables,cc_output,
                         output_path,height=4,width=6){
   
   data=aux_signal_transform(data,signal)
@@ -74,7 +74,8 @@ capacity_output_graphs<-function(data,signal,response,side_variables,cc_output,
   }
   
   if(!is.null(output_path)){
-    try(ggplot2::ggsave(plot_main,file=paste(output_path,'MainPlot_full.pdf',sep=""),height=5*height,width=2*width,limitsize = FALSE),silent=FALSE)
+    try(ggplot2::ggsave(plot_main,file=paste(output_path,'MainPlot_full.pdf',sep=""),
+      height=5*height,width=2*width,limitsize = FALSE),silent=FALSE)
   }
 
   if (is.null(cc_output$testing)){
@@ -86,7 +87,8 @@ capacity_output_graphs<-function(data,signal,response,side_variables,cc_output,
                                                               c(3,3)
                                           )),silent=FALSE)
     if(!is.null(output_path)){
-      try(ggplot2::ggsave(plot_main_simp,file=paste(output_path,'MainPlot.pdf',sep=""),height=2*height,width=2*width,limitsize = FALSE),silent=FALSE)
+      try(ggplot2::ggsave(plot_main_simp,file=paste(output_path,'MainPlot.pdf',sep=""),
+        height=2*height,width=2*width,limitsize = FALSE),silent=FALSE)
     }
   } else {
     plot_main_simp=try(gridExtra::grid.arrange(plot_violin,plot_box,plot_capacity,
@@ -96,7 +98,8 @@ capacity_output_graphs<-function(data,signal,response,side_variables,cc_output,
                                                               c(3,3)
                                           )),silent=FALSE)
     if(!is.null(output_path)){
-      try(ggplot2::ggsave(plot_main_simp,file=paste(output_path,'MainPlot.pdf',sep=""),height=3*height,width=2*width,limitsize = FALSE),silent=FALSE)
+      try(ggplot2::ggsave(plot_main_simp,file=paste(output_path,'MainPlot.pdf',sep=""),
+        height=3*height,width=2*width,limitsize = FALSE),silent=FALSE)
     }
   }
   

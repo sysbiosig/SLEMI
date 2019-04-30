@@ -10,9 +10,8 @@
 #'   \item p_opt - a numeric vectors with estimated optimal input probabilities
 #'   \item MI_opt -  a numerical value of estimated channel capacity
 #' }
-#' @export
 #' @keywords internal
-aux_iterative_logreg_update<-function(prob_lr,p0,cell_id,signal_levels,cc_maxit){
+func_iterative_logreg_update<-function(prob_lr,p0,cell_id,signal_levels,cc_maxit){
   for (i in 1:cc_maxit){
     C_mc<-sapply(signal_levels,function(x) {
       mc_values=log(prob_lr[[x]][cell_id[[x]] ])
@@ -32,7 +31,7 @@ aux_iterative_logreg_update<-function(prob_lr,p0,cell_id,signal_levels,cc_maxit)
     colnames(prob_lr) <- signal_levels
     p0=p_opt
   }
-  MI_opt=sum(C_mc*p_opt-x_log_y(p_opt,p_opt))
+  MI_opt=sum(C_mc*p_opt-aux_x_log_y(p_opt,p_opt))
   
   out=list(p_opt=p_opt,MI_opt=MI_opt)
   out
