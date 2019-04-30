@@ -1,5 +1,7 @@
 #' Sampling procedures used for testing capacity algorithm
 #' 
+#' Internal, auxillary functions
+#'
 #' These function allow to re-sample, bootstrap and divide initial dataset
 #' @param data is a data.frame to be resampled
 #' @param dataDiv a character indicating column of data, with respect to which, data should be splitte before bootstrap

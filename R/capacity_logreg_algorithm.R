@@ -1,21 +1,32 @@
-#' Algorithm for channel capacity calculation
-#' 
-#' INPUT:
-#' @param data must be a data.frame object
-#' @param signal is a character object that indicates columns of data to be treated as channel's input
-#' @param response is a character vector that indicates columns of data to be treated as channel's output
-#' @param side_variables is an optional character vector that indicates side variables' columns of data, if NULL no side variables are included
-#' @param formula_string is a character object that includes a formula syntax to use in algorithm for capacity calculation
-#' @param cc_maxit is the number of iteration of iterative algorithm of finding maximum CC
-#' @param lr_maxit is the number of iteration of iterative algorithm of logistic regression
-#' @param maxNWts is the maximum acceptable number of weights in logistic regression algorithm - the higher, the slower the computations
+#' Main algorithm to calculate channel capacity by SLEMI approach
+#'
+#'
+#' Additional parameters: lr_maxit and maxNWts are the same as in definition of multinom function from nnet package. An alternative
+#' model formula (using formula_string arguments) should be provided if  data are not suitable for description by logistic regression
+#' (recommended only for advanced users). It is recommended to conduct estimation by calling capacity_logreg_main.R.
+#'
+#'
+#' @section References:
+#' Jetka T, Nienaltowski K, Winarski T, Blonski S, Komorowski M,  
+#' Information-theoretic analysis of multivariate single-cell signaling responses using SLEMI,
+#' \emph{PLOS Comp Bio}, 2019.
+#'
+#' @param data must be a data.frame object. Cannot contain NA values.
+#' @param signal is a character object with names of columns of dataRaw to be treated as channel's input.
+#' @param response is a character vector with names of columns of dataRaw  to be treated as channel's output
+#' @param side_variables (optional) is a character vector that indicates side variables' columns of data, if NULL no side variables are included
+#' @param formula_string (optional) is a character object that includes a formula syntax to use in logistic regression model. 
+#' If NULL, a standard additive model of response variables is assumed. Only for advanced users.
+#' @param cc_maxit is the number of iteration of iterative optimisation of the algorithm to esimate channel capacity. Default is 100.
+#' @param lr_maxit is a maximum number of iteration of fitting algorithm of logistic regression. Default is 1000.
+#' @param maxNWts is a maximum acceptable number of weights in logistic regression algorithm. Default is 5000.
 #' @param model_out is the logical indicating if the calculated logisitc regression model should be included in output list
 #' @export
 #' @return a list with three elements:
 #' \itemize{
-#' \item output$regression - confusion matrix of logistic regression predictions
 #' \item output$cc         - channel capacity in bits
 #' \item output$p_opt      - optimal probability distribution
+#' \item output$regression - confusion matrix of logistic regression predictions
 #' \item output$model      - nnet object describing logistic regression model (if model_out=TRUE)
 #' }
 #' @examples 
@@ -93,7 +104,7 @@ capacity_logreg_algorithm<-function(data,
     output$p_opt  <- tmp_iterative_output$p_opt
     output$cc     <- log2(exp(tmp_iterative_output$MI_opt))
     
-      cat("... Main algorihtm completed.")
+      cat("... Main algorithm completed.")
 
   } else {
     

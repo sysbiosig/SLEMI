@@ -1,5 +1,7 @@
-#' Auxiliary function. Initial verification of signal provided and its transformation into a factor type
+#'  Initial verification and transformation of input variable
 #' 
+#' Internal, auxillary functions
+#'
 #' @param data is a data.frame
 #' @param signal is a character that indicates columns of data that include the labels of input
 #' @return A data.frame that is a copy of data provided with signal column transformed to factor class. 
@@ -16,6 +18,7 @@
 func_signal_transform<-function(data,signal){
   signal_class=class(data[[signal]])
   
+  options(warn=-1)
     if (signal_class=="numeric") {
       data[[paste(signal,"_RAW",sep="")]]=data[[signal]]
       data[[signal]]=factor(data[[signal]],levels=sort(unique(data[[signal]])))
@@ -35,10 +38,11 @@ func_signal_transform<-function(data,signal){
       data[[signal]]=factor(as.numeric(data[[signal]]),levels=sort(unique(as.numeric(data[[signal]]) ))) 
     } 
   } else if (signal_class=="factor"){
-    print("")
+    cat("")
   } else {
     stop('signal is of unknown type')
   }
-    
+  options(warn=0)
+
   data
 }

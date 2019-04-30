@@ -2,99 +2,106 @@
 % Please edit documentation in R/mi_logreg_main.R
 \name{mi_logreg_main}
 \alias{mi_logreg_main}
-\title{Calculate mutual information}
+\title{Estimate mutual information between discrete input and continuouse output}
 \usage{
-mi_logreg_main(dataRaw, signal = "signal", response = "response",
+mi_logreg_main(dataRaw, signal = "input", response = NULL,
   side_variables = NULL, pinput = NULL, formula_string = NULL,
-  glmnet_algorithm = FALSE, dataMatrix = NULL, glmnet_cores = 1,
-  glmnet_lambdanum = 10, lr_maxit = 1000, MaxNWts = 5000,
-  output_path = NULL, testing = FALSE, model_out = TRUE, scale = TRUE,
-  graphs = TRUE, TestingSeed = 1234, testing_cores = 1, boot_num = 10,
+  lr_maxit = 1000, MaxNWts = 5000, output_path = NULL,
+  testing = FALSE, model_out = TRUE, scale = TRUE, graphs = TRUE,
+  TestingSeed = 1234, testing_cores = 1, boot_num = 10,
   boot_prob = 0.8, sidevar_num = 10, traintest_num = 10,
   partition_trainfrac = 0.6, plot_width = 6, plot_height = 4,
-  dataout = TRUE)
+  data_out = FALSE)
 }
 \arguments{
 \item{dataRaw}{must be a data.frame object}
 
-\item{signal}{is a character object that indicates columns of data to be treated as channel's input}
+\item{signal}{is a character object with names of columns of dataRaw to be treated as channel's input.}
 
-\item{response}{is a character vector that indicates columns of data to be treated as channel's output}
+\item{response}{is a character vector with names of columns of dataRaw  to be treated as channel's output}
 
-\item{side_variables}{is an optional character vector that indicates side variables' columns of data, if NULL no side variables are included}
+\item{side_variables}{(optional) is a character vector that indicates side variables' columns of data, if NULL no side variables are included}
 
-\item{pinput}{is a numeric vector with the probabilities of the input that will be used in estimation}
+\item{pinput}{is a numeric vector with piror probabilities of the input values. Uniform distribution is assumed as default (pinput=NULL).}
 
-\item{formula_string}{is a character object that includes a formula syntax to use in algorithm for capacity calculation}
+\item{formula_string}{(optional) is a character object that includes a formula syntax to use in logistic regression model. 
+If NULL, a standard additive model of response variables is assumed. Only for advanced users.}
 
-\item{glmnet_algorithm}{is the logical indicating if the glmnet package should be used}
-
-\item{dataMatrix}{is a numeric matrix with columns treated as explanatory variables in 
-logistic regression algorithm (only if glmnet_algorithm=TRUE)}
-
-\item{glmnet_cores}{is the number of cores to use in parallel computing of glmnet package}
-
-\item{glmnet_lambdanum}{is the lambda parameter of glmnet package}
-
-\item{lr_maxit}{is the number of iteration of iterative algorithm of logistic regression}
+\item{lr_maxit}{is a maximum number of iteration of fitting algorithm of logistic regression. Default is 1000.}
 
 \item{output_path}{is the directory in which output will be saved}
 
-\item{testing}{is the logical indicating if the testing procedures should be included}
+\item{testing}{is the logical indicating if the testing procedures should be executed}
 
 \item{model_out}{is the logical indicating if the calculated logisitc regression model should be included in output list}
 
-\item{scale}{is the logical indicating if the data preprocessing should be carried out}
+\item{scale}{is a logical indicating if the response variables should be scaled and centered before fitting logistic regression}
 
-\item{graphs}{is the logical indicating if output graphs should be created}
+\item{TestingSeed}{is the seed for random number generator used in testing procedures}
 
-\item{TestingSeed}{is the seed used in bootstrap procedures (only if testing=TRUE)}
+\item{testing_cores}{- number of cores to be used in parallel computing (via doParallel package)}
 
-\item{testing_cores}{- number of cores to use in parallel computing if implemented (only if testing=TRUE)}
+\item{boot_num}{is the number of bootstrap tests to be performed. Default is 10, but it is recommended to use at least 50 for reliable estimates.}
 
-\item{boot_num}{is the number of bootstrap tests to be performed (only if testing=TRUE)}
+\item{boot_prob}{is the proportion of initial size of data to be used in bootstrap}
 
-\item{boot_prob}{is the proportion of initial size of data to be used in bootstrap (only if testing=TRUE)}
+\item{sidevar_num}{is the number of re-shuffling tests of side variables to be performed. Default is 10, but it is recommended to use at least 50 for reliable estimates.}
 
-\item{traintest_num}{is the number of traintest tests to be performed (only if testing=TRUE)}
+\item{traintest_num}{is the number of overfitting tests to be performed. Default is 10, but it is recommended to use at least 50 for reliable estimates.}
 
-\item{partition_trainfrac}{is the fraction of data to be used as a training dataset (only if testing=TRUE)}
+\item{partition_trainfrac}{is the fraction of data to be used as a training dataset}
 
 \item{plot_height, }{plot_width - the basic dimnesions of plots}
 
-\item{maxNWts}{is the maximum acceptable number of weights in logistic regression algorithm - the higher, the slower the computations}
+\item{data_out}{is the logical indicating if the data should be included in output list}
 
-\item{resamp_num}{is the number of resmapling tests to be performed (only if testing=TRUE)}
+\item{maxNWts}{is a maximum acceptable number of weights in logistic regression algorithm. Default is 5000.}
 }
 \value{
 a list with several elements:
 \itemize{
 \item output$regression - confusion matrix of logistic regression predictions
-\item output$cc         - channel capacity in bits
+\item output$mi         - mutual information in bits
 \item output$model      - nnet object describing logistic regression model (if model_out=TRUE)
 \item output$params     - parameters used in algorithm
 \item output$time       - computation time of calculations
-\item output$testing    - a 4-element output list of testing procedures (bootstrap, resamplingMorph, traintest, bootResampMorph) (if testing=TRUE)
+\item output$testing    - a 2- or 4-element output list of testing procedures (if testing=TRUE)
 \item output$testing_pv - one-sided p-values of testing procedures (if testing=TRUE)
-\item output$data       - dataRaw object
-\item output$logGraphs  - ggplot and grid objects of output graphs (if graphs=TRUE)
+\item output$data       - raw data used in analysis
 }
 }
 \description{
-The main wrapping function for basic usage of SLEMI package for estimation of mutual information
+The main wrapping function for basic usage of SLEMI package for estimation of mutual information. Firstly, data is pre-processed
+(all arguments are checked, observation with NAs are removed, variables are scaled and centered (if scale=TRUE)). Then basic estimation is carried out
+and (if testing=TRUE) diagnostic tests are computed. If output directory path is given (output_path is not NULL), graphs visualising the data and the analysis
+are saved there, together with a compressed output object (as .rds file) with full estimation results.
 }
+\details{
+Additional parameters: lr_maxit and maxNWts are the same as in definition of multinom function from nnet package. An alternative
+model formula (using formula_string arguments) should be provided if  data are not suitable for description by logistic regression
+(recommended only for advanced users). Preliminary scaling of  data (argument scale) should be used similarly as in other 
+data-driven approaches, e.g. if response variables are comparable, scaling (scale=FALSE) can be omitted, while if they represent 
+different phenomenon (varying by units and/or magnitude) scaling is recommended.
+}
+\section{References}{
+
+Jetka T, Nienaltowski K, Winarski T, Blonski S, Komorowski M,  
+Information-theoretic analysis of multivariate single-cell signaling responses using SLEMI,
+\emph{PLOS Comp Bio}, 2019.
+}
+
 \examples{
 tempdata=data_example1
 dir.create("example1/",recursive=TRUE)
 outputCLR1=mi_logreg_main(dataRaw=tempdata,
-signal="signal", response="output",
+signal="signal", response="response",
 lr_maxit=1500, output_path="example1/",plot_height=8,plot_width=12)
 
 
 tempdata=data_example1
 dir.create("example1_testing/",recursive=TRUE)
 outputCLR1_testing=mi_logreg_main(dataRaw=tempdata,
-signal="signal", response="output",
+signal="signal", response="response",
 lr_maxit=1500, output_path="example1_testing/",plot_height=8,plot_width=12,
 testing=TRUE,graphs=TRUE,TestingSeed=11111, boot_num=50,boot_prob=0.8,testing_cores=2,
 sidevar_num=2,traintest_num=50,partition_trainfrac=0.6)

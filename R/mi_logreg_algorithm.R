@@ -1,30 +1,46 @@
-#' Algorithm for calculation of mutual information
-#' 
-#' INPUT:
-#' @param data must be a data.frame object
-#' @param signal is a character object that indicates columns of data to be treated as channel's input
-#' @param pinput is a numeric vector with the probabilities of the input that will be used in estimation
-#' @param response is a character vector that indicates columns of data to be treated as channel's output
-#' @param side_variables is an optional character vector that indicates side variables' columns of data, if NULL no side variables are included
-#' @param formula_string is a character object that includes a formula syntax to use in algorithm for capacity calculation
-#' @param cc_maxit is the number of iteration of iterative algorithm of finding maximum CC
-#' @param lr_maxit is the number of iteration of iterative algorithm of logistic regression
-#' @param maxNWts is the maximum acceptable number of weights in logistic regression algorithm - the higher, the slower the computations
+#' Main algorithm to calculate mutual information by SLEMI approach
+#'
+#'
+#' Additional parameters: lr_maxit and maxNWts are the same as in definition of multinom function from nnet package. An alternative
+#' model formula (using formula_string arguments) should be provided if  data are not suitable for description by logistic regression
+#' (recommended only for advanced users). It is recommended to conduct estimation by calling mi_logreg_main.R.
+#'
+#' @section References:
+#' Jetka T, Nienaltowski K, Winarski T, Blonski S, Komorowski M,  
+#' Information-theoretic analysis of multivariate single-cell signaling responses using SLEMI,
+#' \emph{PLOS Comp Bio}, 2019.
+#'
+#' @param data must be a data.frame object. Cannot contain NA values.
+#' @param signal is a character object with names of columns of dataRaw to be treated as channel's input.
+#' @param response is a character vector with names of columns of dataRaw  to be treated as channel's output
+#' @param side_variables (optional) is a character vector that indicates side variables' columns of data, if NULL no side variables are included
+#' @param pinput is a numeric vector with piror probabilities of the input values. Uniform distribution is assumed as default (pinput=NULL).
+#' @param formula_string (optional) is a character object that includes a formula syntax to use in logistic regression model. 
+#' If NULL, a standard additive model of response variables is assumed. Only for advanced users.
+#' @param lr_maxit is a maximum number of iteration of fitting algorithm of logistic regression. Default is 1000.
+#' @param maxNWts is a maximum acceptable number of weights in logistic regression algorithm. Default is 5000.
 #' @param model_out is the logical indicating if the calculated logisitc regression model should be included in output list
 #' @keywords internal
+#' @export
 #' @return a list with three elements:
 #' \itemize{
-#' \item output$regression - confusion matrix of logistic regression predictions
-#' \item output$cc         - channel capacity in bits
-#' \item output$p_opt      - optimal probability distribution
+#' \item output$mi         - mutual information in bits
+#' \item output$pinput     - prior probabilities used in estimation
+#' \item output$regression - confusion matrix of logistic regression model
 #' \item output$model      - nnet object describing logistic regression model (if model_out=TRUE)
 #' }
-#' 
+#' @examples 
+#' ## Estimate mutual information directly
+#' ## Not run:
+#' temp_data=data_example1
+#' output=mi_logreg_algorithm(data=data_example1,
+#'                    signal = "signal",
+#'                    response = "response")
+#'
 mi_logreg_algorithm<-function(data,signal="signal",response="response",side_variables=NULL,
-                                    formula_string=NULL,
-                                    model_out=TRUE,
+                                    pinput=NULL,formula_string=NULL,
                                     lr_maxit=1000,MaxNWts = 5000,
-                                    pinput=NULL){
+                                    model_out=TRUE){
   
   output<-list()
   
@@ -53,7 +69,7 @@ mi_logreg_algorithm<-function(data,signal="signal",response="response",side_vari
     class_num=sapply(cell_id,sum,simplify=TRUE)
     p0=sapply(cell_id,mean,simplify=TRUE)
     if (any(p0==0)) {
-      stop('There is no observations of some signals')
+      stop('There is no observations of some signals. Please provide a clean data.frame.')
     }
     
     if (is.null(pinput)){
@@ -97,7 +113,7 @@ mi_logreg_algorithm<-function(data,signal="signal",response="response",side_vari
       #output$model_pv <- (1 - pnorm(abs(temp_z), 0, 1)) * 2
     }
     output$pinput  <- tmp_iterative_output$pinput
-    output$cc     <- log2(exp(tmp_iterative_output$MI_opt))
+    output$mi     <- log2(exp(tmp_iterative_output$MI_opt))
     
     cat("... Main algorihtm completed.")
     
@@ -128,7 +144,7 @@ mi_logreg_algorithm<-function(data,signal="signal",response="response",side_vari
     class_num=sapply(cell_id_train,sum,simplify=TRUE)
     p0=sapply(cell_id_train,mean,simplify=TRUE)
     if (any(p0==0)) {
-      stop('There is no observations of some signals')
+      stop('There is no observations of some signals. Please provide a clean data.frame.')
     }
     
     if (is.null(pinput)){
@@ -179,7 +195,7 @@ mi_logreg_algorithm<-function(data,signal="signal",response="response",side_vari
       #output$model_pv <- (1 - pnorm(abs(temp_z), 0, 1)) * 2
     }
     output$pinput  <- tmp_iterative_output$pinput
-    output$cc     <- log2(exp(tmp_iterative_output$MI_opt))
+    output$mi     <- log2(exp(tmp_iterative_output$MI_opt))
     
     if (model_out){
       #output$data   <- data # for debugging

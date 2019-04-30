@@ -1,5 +1,7 @@
-#' Auxiliary function. Iterative updating of prior probabilities in logistic regression estimator
+#' Iterative updating of prior probabilities in logistic regression estimator
 #' 
+#' Internal, auxillary functions
+#'
 #' @param prob_lr is a matrix of class probabilties for each observation
 #' @param p0 is a numeric vector of prior probabilities used for logistic regression estimation
 #' @param cell_id a list of logical vectors indicating class labels of each observation

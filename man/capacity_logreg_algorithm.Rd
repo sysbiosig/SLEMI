@@ -2,40 +2,60 @@
 % Please edit documentation in R/capacity_logreg_algorithm.R
 \name{capacity_logreg_algorithm}
 \alias{capacity_logreg_algorithm}
-\title{Algorithm for channel capacity calculation}
+\title{Main algorithm to calculate channel capacity by SLEMI approach}
 \usage{
-capacity_logreg_algorithm(data, signal = "signal", response = "response",
-  side_variables = NULL, formula_string = NULL, model_out = TRUE,
-  cc_maxit = 100, lr_maxit = 1000, MaxNWts = 5000)
+capacity_logreg_algorithm(data, signal = "signal",
+  response = "response", side_variables = NULL,
+  formula_string = NULL, model_out = TRUE, cc_maxit = 100,
+  lr_maxit = 1000, MaxNWts = 5000)
 }
 \arguments{
-\item{data}{must be a data.frame object}
+\item{data}{must be a data.frame object. Cannot contain NA values.}
 
-\item{signal}{is a character object that indicates columns of data to be treated as channel's input}
+\item{signal}{is a character object with names of columns of dataRaw to be treated as channel's input.}
 
-\item{response}{is a character vector that indicates columns of data to be treated as channel's output}
+\item{response}{is a character vector with names of columns of dataRaw  to be treated as channel's output}
 
-\item{side_variables}{is an optional character vector that indicates side variables' columns of data, if NULL no side variables are included}
+\item{side_variables}{(optional) is a character vector that indicates side variables' columns of data, if NULL no side variables are included}
 
-\item{formula_string}{is a character object that includes a formula syntax to use in algorithm for capacity calculation}
+\item{formula_string}{(optional) is a character object that includes a formula syntax to use in logistic regression model. 
+If NULL, a standard additive model of response variables is assumed. Only for advanced users.}
 
 \item{model_out}{is the logical indicating if the calculated logisitc regression model should be included in output list}
 
-\item{cc_maxit}{is the number of iteration of iterative algorithm of finding maximum CC}
+\item{cc_maxit}{is the number of iteration of iterative optimisation of the algorithm to esimate channel capacity. Default is 100.}
 
-\item{lr_maxit}{is the number of iteration of iterative algorithm of logistic regression}
+\item{lr_maxit}{is a maximum number of iteration of fitting algorithm of logistic regression. Default is 1000.}
 
-\item{maxNWts}{is the maximum acceptable number of weights in logistic regression algorithm - the higher, the slower the computations}
+\item{maxNWts}{is a maximum acceptable number of weights in logistic regression algorithm. Default is 5000.}
 }
 \value{
 a list with three elements:
 \itemize{
-\item output$regression - confusion matrix of logistic regression predictions
 \item output$cc         - channel capacity in bits
 \item output$p_opt      - optimal probability distribution
+\item output$regression - confusion matrix of logistic regression predictions
 \item output$model      - nnet object describing logistic regression model (if model_out=TRUE)
 }
 }
 \description{
-INPUT:
+Additional parameters: lr_maxit and maxNWts are the same as in definition of multinom function from nnet package. An alternative
+model formula (using formula_string arguments) should be provided if  data are not suitable for description by logistic regression
+(recommended only for advanced users). It is recommended to conduct estimation by calling capacity_logreg_main.R.
+}
+\section{References}{
+
+Jetka T, Nienaltowski K, Winarski T, Blonski S, Komorowski M,  
+Information-theoretic analysis of multivariate single-cell signaling responses using SLEMI,
+\emph{PLOS Comp Bio}, 2019.
+}
+
+\examples{
+tempdata=data_example1
+dir.create("example1/",recursive=TRUE)
+outputCLR1=capacity_logreg_main(dataRaw=tempdata,
+signal="signal", response="output",
+formula_string = "signal~output",
+cc_maxit=75,lr_maxit=1500, output_path="example1/",plot_height=8,plot_width=12)
+
 }

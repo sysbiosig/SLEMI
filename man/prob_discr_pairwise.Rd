@@ -2,36 +2,92 @@
 % Please edit documentation in R/prob_discr_pairwise.R
 \name{prob_discr_pairwise}
 \alias{prob_discr_pairwise}
-\title{Probability of pairwise discrimination}
+\title{Calculates Probability of pairwise discrimination}
 \usage{
-prob_discr_pairwise(dataRaw, signal = "signal", response = "response",
+prob_discr_pairwise(dataRaw, signal = "input", response = NULL,
   side_variables = NULL, formula_string = NULL, output_path = NULL,
-  scale = TRUE, model_out = TRUE, lr_maxit = 1000, MaxNWts = 5000)
+  scale = TRUE, lr_maxit = 1000, MaxNWts = 5000,
+  diagnostics = TRUE)
 }
 \arguments{
-\item{signal}{is a character object that indicates columns of data to be treated as channel's input}
+\item{dataRaw}{must be a data.frame object}
 
-\item{response}{is a character vector that indicates columns of data to be treated as channel's output}
+\item{signal}{is a character object with names of columns of dataRaw to be treated as channel's input.}
 
-\item{side_variables}{is an optional character vector that indicates side variables' columns of data, if NULL no side variables are included}
+\item{response}{is a character vector with names of columns of dataRaw  to be treated as channel's output}
 
-\item{formula_string}{is a character object that includes a formula syntax to use in algorithm for capacity calculation}
+\item{side_variables}{(optional) is a character vector that indicates side variables' columns of data, if NULL no side variables are included}
 
-\item{model_out}{is the logical indicating if the calculated logisitc regression model should be included in output list}
+\item{formula_string}{(optional) is a character object that includes a formula syntax to use in logistic regression model. 
+If NULL, a standard additive model of response variables is assumed. Only for advanced users.}
 
-\item{lr_maxit}{is the number of iteration of iterative algorithm of logistic regression}
+\item{output_path}{is a directory where a pie chart with calculated probabilities will be saved. If NULL, the graph will not be created.}
 
-\item{data}{must be a data.frame object}
+\item{scale}{is a logical indicating if the response variables should be scaled and centered before fitting logistic regression}
 
-\item{maxNWts}{is the maximum acceptable number of weights in logistic regression algorithm - the higher, the slower the computations}
+\item{lr_maxit}{is a maximum number of iteration of fitting algorithm of logistic regression. Default is 1000.}
+
+\item{diagnostics}{is a logical indicating if details of logistic regression fitting should be included in output list}
+
+\item{maxNWts}{is a maximum acceptable number of weights in logistic regression algorithm. Default is 5000.}
 }
 \value{
 a list with three elements:
 \itemize{
-\item output$prob_matr - confusion matrix of logistic regression predictions
-\item output$model     - optimal probability distribution
+\item output$prob_matr - a \eqn{n\times n} matrix, where \eqn{n} is the number of inputs, with probabilities of correct 
+discirimination between pairs of input values. 
+\item output$diagnostics     - (if diagnostics=TRUE) a list correspondning to logistic regression model fitted for each 
+pair of input values. Each element consists of three sub-elements: 1) nnet_model - nnet object summarising logistic regression model; 
+2) prob_lr - probabilities of assignment obtained from logistic regression model; 
+3) confusion_matrix - confusion matrix of classificator.
 }
 }
 \description{
-INPUT:
+Estimates probabilities of correct discrimination (PCDs) between each pair of input/signal values using a logistic regression model.
+}
+\details{
+In order to estimate PCDs, for a given pair of input values \eqn{x_i} and \eqn{x_j}, we propose to fit a logistic regression model
+using response data corresponding to the two considered inputs, i.e. \eqn{y^l_u}, for \eqn{l\in\{i,j\}} and \eqn{u} ranging from 
+1 to \eqn{n_l}. 
+To ensure that both inputs have equal contribution to the calculated discriminability, equal probabilities should be assigned,
+\eqn{P(X) = (P(x_i),P(x_j))=(1/2,1/2)}. Once the regression model is fitted, probability of assigning a given cellular response, 
+\eqn{y},
+to the correct input value is estimated as
+\deqn{\max \{ \hat{P}_{lr}(x_i|Y=y;P(X)), \hat{P}_{lr}(x_j|Y=y;P(X))\}.}
+Note that \eqn{P(x_j|Y=y)=1-P(x_i|Y=y)} as well as \eqn{\hat{P}_{lr}(x_j|Y=y;P(X))=1-\hat{P}_{lr}(x_i|Y=y;P(X))}
+The average of the above probabilities over all observations \eqn{y^i_l} yields PCDs
+\deqn{\text{PCD}_{x_i,x_j}=\frac{1}{2}\frac{1}{n_i}\sum_{l=1}^{n_i}\max\{ \hat{P}_{lr}(x_i|Y=y_i^l;P(X)),\hat{P}_{lr}(x_i^l|Y=y;P(X))\} + }
+\deqn{ \frac{1}{2}  \frac{1}{n_j} \sum_{l=1}^{n_j} \max \{ \hat{P}_{lr}(x_i|Y=y_j^l;P(X)), \hat{P}_{lr}(x_j|Y=y_j^l;P(X))\}.}
+
+Additional parameters: lr_maxit and maxNWts are the same as in definition of multinom function from nnet package. An alternative
+model formula (using formula_string arguments) should be provided if  data are not suitable for description by logistic regression
+(recommended only for advanced users). Preliminary scaling of  data (argument scale) should be used similarly as in other 
+data-driven approaches, e.g. if response variables are comparable, scaling (scale=FALSE) can be omitted, while if they represent 
+different phenomenon (varying by units and/or magnitude) scaling is recommended.
+}
+\section{References}{
+
+Jetka T, Nienaltowski K, Winarski T, Blonski S, Komorowski M,  
+Information-theoretic analysis of multivariate single-cell signaling responses using SLEMI,
+\emph{PLOS Comp Bio}, 2019.
+}
+
+\examples{
+## Calculate probabilities of discrimination for toy dataset
+## Not run:
+temp_data=data_example1
+output=prob_discr_pairwise(dataRaw=data_example1,
+                   signal = "signal",
+                   response = "response",
+                   output_path = "discrimination_probabilities/toy_dataset/")
+
+## Calculate probabilities of discrimination for nfkb dataset
+## Not run:
+for (it in seq(from=12,to=30,by=3)){
+ output=prob_discr_pairwise(dataRaw=data_nfkb,
+                            signal = "signal",
+                           response = paste0("response_",it),
+                            output_path = paste0("discrimination_probabilities/nfkb/",it,"/"))
+}
+
 }

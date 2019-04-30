@@ -2,54 +2,45 @@
 % Please edit documentation in R/capacity_logreg_testing.R
 \name{capacity_logreg_testing}
 \alias{capacity_logreg_testing}
-\title{Testing procedures for calculating channel capacity}
+\title{Testing procedures for estimation of channel capacity}
 \usage{
 capacity_logreg_testing(data, signal = "signal", response = "response",
   side_variables = NULL, cc_maxit = 100, lr_maxit = 1000,
-  MaxNWts = 5000, formula_string = NULL, glmnet_algorithm = FALSE,
-  dataMatrix = NULL, glmnet_lambdanum = 10, model_out = FALSE,
-  TestingSeed = 1234, testing_cores = 4, boot_num = 10, boot_prob = 0.8,
+  MaxNWts = 5000, formula_string = NULL, TestingSeed = 1234,
+  testing_cores = 4, boot_num = 10, boot_prob = 0.8,
   sidevar_num = 10, traintest_num = 10, partition_trainfrac = 0.6)
 }
 \arguments{
-\item{data}{must be a data.frame object}
+\item{data}{must be a data.frame object. Cannot contain NA values.}
 
-\item{signal}{is a character object that indicates columns of data to be treated as channel's input}
+\item{signal}{is a character object with names of columns of dataRaw to be treated as channel's input.}
 
-\item{response}{is a character vector that indicates columns of data to be treated as channel's output}
+\item{response}{is a character vector with names of columns of dataRaw  to be treated as channel's output}
 
-\item{side_variables}{is an optional character vector that indicates side variables' columns of data, if NULL no side variables are included}
+\item{side_variables}{(optional) is a character vector that indicates side variables' columns of data, if NULL no side variables are included}
 
-\item{cc_maxit}{is the number of iteration of iterative algorithm of finding maximum CC}
+\item{cc_maxit}{is the number of iteration of iterative optimisation of the algorithm to esimate channel capacity. Default is 100.}
 
-\item{lr_maxit}{is the number of iteration of iterative algorithm of logistic regression}
+\item{lr_maxit}{is a maximum number of iteration of fitting algorithm of logistic regression. Default is 1000.}
 
-\item{formula_string}{is a character object that includes a formula syntax to use in algorithm for capacity calculation}
+\item{formula_string}{(optional) is a character object that includes a formula syntax to use in logistic regression model. 
+If NULL, a standard additive model of response variables is assumed. Only for advanced users.}
 
-\item{glmnet_algorithm}{is the logical indicating if the glmnet package should be used}
+\item{TestingSeed}{is the seed for random number generator used in testing procedures}
 
-\item{dataMatrix}{is a numeric matrix with columns treated as explanatory variables in 
-logistic regression algorithm (only if glmnet_algorithm=TRUE)}
+\item{testing_cores}{- number of cores to be used in parallel computing (via doParallel package)}
 
-\item{glmnet_lambdanum}{is the lambda parameter of glmnet package}
+\item{boot_num}{is the number of bootstrap tests to be performed. Default is 10, but it is recommended to use at least 50 for reliable estimates.}
 
-\item{TestingSeed}{is the seed used in bootstrap procedures (only if testing=TRUE)}
+\item{boot_prob}{is the proportion of initial size of data to be used in bootstrap. Default is 0.8.}
 
-\item{testing_cores}{- number of cores to use in parallel computing if implemented (only if testing=TRUE)}
+\item{sidevar_num}{is the number of re-shuffling tests of side variables to be performed. Default is 10, but it is recommended to use at least 50 for reliable estimates.}
 
-\item{boot_num}{is the number of bootstrap tests to be performed (only if testing=TRUE)}
+\item{traintest_num}{is the number of overfitting tests to be performed. Default is 10, but it is recommended to use at least 50 for reliable estimates.}
 
-\item{boot_prob}{is the proportion of initial size of data to be used in bootstrap (only if testing=TRUE)}
+\item{partition_trainfrac}{is the fraction of data to be used as a training dataset. Default is 0.6.}
 
-\item{traintest_num}{is the number of traintest tests to be performed (only if testing=TRUE)}
-
-\item{partition_trainfrac}{is the fraction of data to be used as a training dataset (only if testing=TRUE)}
-
-\item{maxNWts}{is the maximum acceptable number of weights in logistic regression algorithm - the higher, the slower the computations}
-
-\item{resamp_num}{is the number of resmapling tests to be performed (only if testing=TRUE)}
-
-\item{glmnet_cores}{is the number of cores to use in parallel computing of glmnet package}
+\item{maxNWts}{is a maximum acceptable number of weights in logistic regression algorithm. Default is 5000.}
 }
 \value{
 a list with four elements:
@@ -62,8 +53,24 @@ a list with four elements:
 Each of above is a list, where an element is an output of a single repetition of the channel capacity algorithm
 }
 \description{
-INPUT:
+Diagnostic procedures that allows to compute the uncertainity of estimation of channel capacity by SLEMI approach. Two main procedures are implemented:
+bootstrap, which execute estimation with using a fraction of data and overfitting test, which dividies data into two parts: training and testing. Each of them
+is repeated specified number of times to obtain a distribution of our estimators. It is recommended to conduct estimation by calling capacity_logreg_main.R.
 }
+\details{
+If side variables are added within the analysis (side_variables is not NULL), two additional procedures are carried out:
+reshuffling test and reshuffling with boostrap test, which are based on permutation of side variables values within the dataset.  
+Additional parameters: lr_maxit and maxNWts are the same as in definition of multinom function from nnet package. An alternative
+model formula (using formula_string arguments) should be provided if  data are not suitable for description by logistic regression
+(recommended only for advanced users).
+}
+\section{References}{
+
+Jetka T, Nienaltowski K, Winarski T, Blonski S, Komorowski M,  
+Information-theoretic analysis of multivariate single-cell signaling responses using SLEMI,
+\emph{PLOS Comp Bio}, 2019.
+}
+
 \examples{
 
 }

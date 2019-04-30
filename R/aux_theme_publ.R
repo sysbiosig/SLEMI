@@ -1,5 +1,7 @@
 #' Tuning GGplot Themes
-#' 
+#'
+#' Internal, auxillary functions
+#'
 #' This function changes the theme of plots created with the use of ggplot package
 #' @param base_size integer that sets the default size of font used in the plot
 #' @param base_family character that indicates what type of font should be used

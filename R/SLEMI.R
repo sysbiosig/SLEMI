@@ -2,10 +2,13 @@
 #'
 #' The package SLEMI is designed to estimate channel capacity between finite 
 #' state input and multidimensional continuouse output from experimental data. For efficient computations, 
-#' it uses an iterative algorithm based on logistic regression.
+#' it uses an iterative algorithm based on logistic regression. In addition, functions to estimate mutual information and
+#' calculate probabilities of correct discrimination between a pair of input values are implemented.
 #' 
-#' For theoretical background and basic applications see 
-#' Jetka et al., Information-theoretic analysis of multivariate single-cell signaling responses using SLEMI, PLOS Comp Bio, 2019.
+#' @section References:
+#' Jetka T, Nienaltowski K, Winarski T, Blonski S, Komorowski M,  
+#' Information-theoretic analysis of multivariate single-cell signaling responses using SLEMI,
+#' \emph{PLOS Comp Bio}, 2019.
 #' 
 #' @docType package
 #' @name SLEMI

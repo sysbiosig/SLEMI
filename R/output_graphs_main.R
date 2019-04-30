@@ -27,7 +27,7 @@
 output_graphs_main<-function(data,signal,response,side_variables,cc_output,
                         output_path,height=4,width=6){
   
-  data=aux_signal_transform(data,signal)
+  data=func_signal_transform(data,signal)
   
   plot_io=try(capacity_output_graph_io(data,signal,response,output_path,height=height,width=width),silent=TRUE)
   plot_box=try(capacity_output_graph_boxplots(data,signal,response,output_path,height=height,width=width),silent=FALSE)

@@ -2,69 +2,83 @@
 % Please edit documentation in R/mi_logreg_testing.R
 \name{mi_logreg_testing}
 \alias{mi_logreg_testing}
-\title{Testing procedures for calculating mutual information}
+\title{Testing procedures for estimation of mutual information}
 \usage{
 mi_logreg_testing(data, signal = "signal", response = "response",
-  side_variables = NULL, lr_maxit = 1000, MaxNWts = 5000,
-  formula_string = NULL, glmnet_algorithm = FALSE, dataMatrix = NULL,
-  glmnet_lambdanum = 10, model_out = FALSE, TestingSeed = 1234,
-  testing_cores = 4, boot_num = 10, boot_prob = 0.8, sidevar_num = 10,
-  traintest_num = 10, partition_trainfrac = 0.6, pinput = NULL)
+  side_variables = NULL, pinput = NULL, lr_maxit = 1000,
+  MaxNWts = 5000, formula_string = NULL, TestingSeed = 1234,
+  testing_cores = 4, boot_num = 10, boot_prob = 0.8,
+  sidevar_num = 10, traintest_num = 10, partition_trainfrac = 0.6)
 }
 \arguments{
-\item{data}{must be a data.frame object}
+\item{data}{must be a data.frame object. Cannot contain NA values.}
 
-\item{signal}{is a character object that indicates columns of data to be treated as channel's input}
+\item{signal}{is a character object with names of columns of dataRaw to be treated as channel's input.}
 
-\item{response}{is a character vector that indicates columns of data to be treated as channel's output}
+\item{response}{is a character vector with names of columns of dataRaw  to be treated as channel's output}
 
-\item{side_variables}{is an optional character vector that indicates side variables' columns of data, if NULL no side variables are included}
+\item{side_variables}{(optional) is a character vector that indicates side variables' columns of data, if NULL no side variables are included}
 
-\item{lr_maxit}{is the number of iteration of iterative algorithm of logistic regression}
+\item{pinput}{is a numeric vector with piror probabilities of the input values. Uniform distribution is assumed as default (pinput=NULL).}
 
-\item{formula_string}{is a character object that includes a formula syntax to use in algorithm for capacity calculation}
+\item{lr_maxit}{is a maximum number of iteration of fitting algorithm of logistic regression. Default is 1000.}
 
-\item{glmnet_algorithm}{is the logical indicating if the glmnet package should be used}
+\item{formula_string}{(optional) is a character object that includes a formula syntax to use in logistic regression model. 
+If NULL, a standard additive model of response variables is assumed. Only for advanced users.}
 
-\item{dataMatrix}{is a numeric matrix with columns treated as explanatory variables in 
-logistic regression algorithm (only if glmnet_algorithm=TRUE)}
+\item{TestingSeed}{is the seed for random number generator used in testing procedures}
 
-\item{glmnet_lambdanum}{is the lambda parameter of glmnet package}
+\item{testing_cores}{- number of cores to be used in parallel computing (via doParallel package)}
 
-\item{TestingSeed}{is the seed used in bootstrap procedures (only if testing=TRUE)}
+\item{boot_num}{is the number of bootstrap tests to be performed. Default is 10, but it is recommended to use at least 50 for reliable estimates.}
 
-\item{testing_cores}{- number of cores to use in parallel computing if implemented (only if testing=TRUE)}
+\item{boot_prob}{is the proportion of initial size of data to be used in bootstrap}
 
-\item{boot_num}{is the number of bootstrap tests to be performed (only if testing=TRUE)}
+\item{sidevar_num}{is the number of re-shuffling tests of side variables to be performed. Default is 10, but it is recommended to use at least 50 for reliable estimates.}
 
-\item{boot_prob}{is the proportion of initial size of data to be used in bootstrap (only if testing=TRUE)}
+\item{traintest_num}{is the number of overfitting tests to be performed. Default is 10, but it is recommended to use at least 50 for reliable estimates.}
 
-\item{traintest_num}{is the number of traintest tests to be performed (only if testing=TRUE)}
+\item{partition_trainfrac}{is the fraction of data to be used as a training dataset}
 
-\item{partition_trainfrac}{is the fraction of data to be used as a training dataset (only if testing=TRUE)}
-
-\item{pinput}{is a numeric vector with the probabilities of the input that will be used in estimation}
-
-\item{maxNWts}{is the maximum acceptable number of weights in logistic regression algorithm - the higher, the slower the computations}
-
-\item{resamp_num}{is the number of resmapling tests to be performed (only if testing=TRUE)}
-
-\item{glmnet_cores}{is the number of cores to use in parallel computing of glmnet package}
+\item{maxNWts}{is a maximum acceptable number of weights in logistic regression algorithm. Default is 5000.}
 }
 \value{
-a list with four elements:
+a list with elements:
 \itemize{
-\item output$bootstrap - confusion matrix of logistic regression predictions
-\item output$resamplingMorph          - channel capacity in bits
-\item output$traintest      - optimal probability distribution
-\item output$bootResampMorph      - nnet object describing logistic regression model (if model_out=TRUE)
+\item output$bootstrap - bootstrap test
+\item output$traintest - overfitting test
+\item output$reshuffling_sideVar - (if side_variables is not NULL) re-shuffling test
+\item output$bootstrap_Reshuffling_sideVar - (if side_variables is not NULL) re-shuffling test with a bootstrap
 }
-Each of above is a list, where an element is an output of a single repetition of the channel capacity algorithm
+Each of the above is a list, where an element is a standard output of a single mi_logreg_algorithm run.
 }
 \description{
-INPUT:
+Diagnostic procedures that allows to compute the uncertainity of estimation of mutual information by SLEMI approach. Two main procedures are implemented:
+bootstrap, which execute estimation with using a fraction of data and overfitting test, which dividies data into two parts: training and testing. Each of them
+is repeated specified number of times to obtain a distribution of our estimators. It is recommended to call this function from mi_logreg_main.R.
 }
+\details{
+If side variables are added within the analysis (side_variables is not NULL), two additional procedures are carried out:
+reshuffling test and reshuffling with boostrap test, which are based on permutation of side variables values within the dataset.  
+Additional parameters: lr_maxit and maxNWts are the same as in definition of multinom function from nnet package. An alternative
+model formula (using formula_string arguments) should be provided if  data are not suitable for description by logistic regression
+(recommended only for advanced users).
+}
+\section{References}{
+
+Jetka T, Nienaltowski K, Winarski T, Blonski S, Komorowski M,  
+Information-theoretic analysis of multivariate single-cell signaling responses using SLEMI,
+\emph{PLOS Comp Bio}, 2019.
+}
+
 \examples{
+## Compute uncertainity of mutual information estimator using 4 cores
+## Not run:
+temp_data=data_example1
+output=mi_logreg_testing(data=data_example1,
+                   signal = "signal",
+                   response = "response",
+                   testing_cores = 4)
 
 }
 \keyword{internal}

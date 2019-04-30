@@ -2,43 +2,60 @@
 % Please edit documentation in R/mi_logreg_algorithm.R
 \name{mi_logreg_algorithm}
 \alias{mi_logreg_algorithm}
-\title{Algorithm for calculation of mutual information}
+\title{Main algorithm to calculate mutual information by SLEMI approach}
 \usage{
 mi_logreg_algorithm(data, signal = "signal", response = "response",
-  side_variables = NULL, formula_string = NULL, model_out = TRUE,
-  lr_maxit = 1000, MaxNWts = 5000, pinput = NULL)
+  side_variables = NULL, pinput = NULL, formula_string = NULL,
+  lr_maxit = 1000, MaxNWts = 5000, model_out = TRUE)
 }
 \arguments{
-\item{data}{must be a data.frame object}
+\item{data}{must be a data.frame object. Cannot contain NA values.}
 
-\item{signal}{is a character object that indicates columns of data to be treated as channel's input}
+\item{signal}{is a character object with names of columns of dataRaw to be treated as channel's input.}
 
-\item{response}{is a character vector that indicates columns of data to be treated as channel's output}
+\item{response}{is a character vector with names of columns of dataRaw  to be treated as channel's output}
 
-\item{side_variables}{is an optional character vector that indicates side variables' columns of data, if NULL no side variables are included}
+\item{side_variables}{(optional) is a character vector that indicates side variables' columns of data, if NULL no side variables are included}
 
-\item{formula_string}{is a character object that includes a formula syntax to use in algorithm for capacity calculation}
+\item{pinput}{is a numeric vector with piror probabilities of the input values. Uniform distribution is assumed as default (pinput=NULL).}
+
+\item{formula_string}{(optional) is a character object that includes a formula syntax to use in logistic regression model. 
+If NULL, a standard additive model of response variables is assumed. Only for advanced users.}
+
+\item{lr_maxit}{is a maximum number of iteration of fitting algorithm of logistic regression. Default is 1000.}
 
 \item{model_out}{is the logical indicating if the calculated logisitc regression model should be included in output list}
 
-\item{lr_maxit}{is the number of iteration of iterative algorithm of logistic regression}
-
-\item{pinput}{is a numeric vector with the probabilities of the input that will be used in estimation}
-
-\item{cc_maxit}{is the number of iteration of iterative algorithm of finding maximum CC}
-
-\item{maxNWts}{is the maximum acceptable number of weights in logistic regression algorithm - the higher, the slower the computations}
+\item{maxNWts}{is a maximum acceptable number of weights in logistic regression algorithm. Default is 5000.}
 }
 \value{
 a list with three elements:
 \itemize{
-\item output$regression - confusion matrix of logistic regression predictions
-\item output$cc         - channel capacity in bits
-\item output$p_opt      - optimal probability distribution
+\item output$mi         - mutual information in bits
+\item output$pinput     - prior probabilities used in estimation
+\item output$regression - confusion matrix of logistic regression model
 \item output$model      - nnet object describing logistic regression model (if model_out=TRUE)
 }
 }
 \description{
-INPUT:
+Additional parameters: lr_maxit and maxNWts are the same as in definition of multinom function from nnet package. An alternative
+model formula (using formula_string arguments) should be provided if  data are not suitable for description by logistic regression
+(recommended only for advanced users). It is recommended to conduct estimation by calling mi_logreg_main.R.
+}
+\section{References}{
+
+Jetka T, Nienaltowski K, Winarski T, Blonski S, Komorowski M,  
+Information-theoretic analysis of multivariate single-cell signaling responses using SLEMI,
+\emph{PLOS Comp Bio}, 2019.
+}
+
+\examples{
+## Estimate mutual information directly
+## Not run:
+temp_data=data_example1
+output=mi_logreg_algorithm(data=data_example1,
+                   signal = "signal",
+                   response = "response")
+
 }
 \keyword{internal}

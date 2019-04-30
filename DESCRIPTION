@@ -8,6 +8,6 @@ License: LGPL (>=2)
 Encoding: UTF-8
 LazyData: true
 Imports: e1071, ggplot2, ggthemes, gridExtra, nnet, Hmisc, reshape2, stringr, glmnet, doParallel, caret, plyr, corrplot
-RoxygenNote: 6.0.1
+RoxygenNote: 6.1.1
 Suggests: knitr, rmarkdown
 VignetteBuilder: knitr

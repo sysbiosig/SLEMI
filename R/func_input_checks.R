@@ -1,4 +1,6 @@
-#' Auxiliary function. Initial verification of input
+#' Initial verification of input
+#' 
+#' Internal, auxillary functions
 #' 
 #' @param data is an input object that should be a data.frame
 #' @param signal is a character object that indicates input columns of data
@@ -16,20 +18,20 @@
 #' data=data_example1
 #' aux_input_checks(data=data,signal="input",response="response",side_variables="sideVar")
 func_input_checks<-function(data,signal,response,side_variables){
-  if (!is.data.frame(dataRaw)) {
+  if (!is.data.frame(data)) {
     stop('data is not in data.frame format')
   }
-  if ( sum(colnames(dataRaw)==signal)==0 ) {
+  if ( sum(colnames(data)==signal)==0 ) {
     stop('There is no column described as signal in data')
   }
-  if (!sum(colnames(dataRaw) %in% response)==length(response) ) {
+  if (!sum(colnames(data) %in% response)==length(response) ) {
     stop('There is no column described as response in data')
   }
   if ( !sum(colnames(data)%in%side_variables)==length(side_variables) ) {
     stop('There is no column described as side_variables in data')
   }
   if ( any(apply(data,1,function(x) any(is.na(x)) )) ) {
-    stop("There are NA in observations")
+    stop("There are NAs in data")
   }
   out="ok"
 }

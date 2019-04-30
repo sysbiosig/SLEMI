@@ -1,31 +1,80 @@
 #' Calculates Probability of pairwise discrimination
 #' 
-#' INPUT:
-#' @param data must be a data.frame object
-#' @param signal is a character object that indicates columns of data to be treated as channel's input
-#' @param response is a character vector that indicates columns of data to be treated as channel's output
-#' @param side_variables is an optional character vector that indicates side variables' columns of data, if NULL no side variables are included
-#' @param formula_string is a character object that includes a formula syntax to use in algorithm for capacity calculation
-#' @param lr_maxit is the number of iteration of iterative algorithm of logistic regression
-#' @param maxNWts is the maximum acceptable number of weights in logistic regression algorithm - the higher, the slower the computations
-#' @param model_out is the logical indicating if the calculated logisitc regression model should be included in output list
+#' Estimates probabilities of correct discrimination (PCDs) between each pair of input/signal values using a logistic regression model.
+#'
+#' 
+#' In order to estimate PCDs, for a given pair of input values \eqn{x_i} and \eqn{x_j}, we propose to fit a logistic regression model
+#' using response data corresponding to the two considered inputs, i.e. \eqn{y^l_u}, for \eqn{l\in\{i,j\}} and \eqn{u} ranging from 
+#' 1 to \eqn{n_l}. 
+#' To ensure that both inputs have equal contribution to the calculated discriminability, equal probabilities should be assigned,
+#' \eqn{P(X) = (P(x_i),P(x_j))=(1/2,1/2)}. Once the regression model is fitted, probability of assigning a given cellular response, 
+#' \eqn{y},
+#' to the correct input value is estimated as
+#' \deqn{\max \{ \hat{P}_{lr}(x_i|Y=y;P(X)), \hat{P}_{lr}(x_j|Y=y;P(X))\}.}
+#' Note that \eqn{P(x_j|Y=y)=1-P(x_i|Y=y)} as well as \eqn{\hat{P}_{lr}(x_j|Y=y;P(X))=1-\hat{P}_{lr}(x_i|Y=y;P(X))}
+#' The average of the above probabilities over all observations \eqn{y^i_l} yields PCDs
+#' \deqn{\text{PCD}_{x_i,x_j}=\frac{1}{2}\frac{1}{n_i}\sum_{l=1}^{n_i}\max\{ \hat{P}_{lr}(x_i|Y=y_i^l;P(X)),\hat{P}_{lr}(x_i^l|Y=y;P(X))\} + }
+#' \deqn{ \frac{1}{2}  \frac{1}{n_j} \sum_{l=1}^{n_j} \max \{ \hat{P}_{lr}(x_i|Y=y_j^l;P(X)), \hat{P}_{lr}(x_j|Y=y_j^l;P(X))\}.}
+#' 
+#' Additional parameters: lr_maxit and maxNWts are the same as in definition of multinom function from nnet package. An alternative
+#' model formula (using formula_string arguments) should be provided if  data are not suitable for description by logistic regression
+#' (recommended only for advanced users). Preliminary scaling of  data (argument scale) should be used similarly as in other 
+#' data-driven approaches, e.g. if response variables are comparable, scaling (scale=FALSE) can be omitted, while if they represent 
+#' different phenomenon (varying by units and/or magnitude) scaling is recommended.
+#'
+#' @section References:
+#' Jetka T, Nienaltowski K, Winarski T, Blonski S, Komorowski M,  
+#' Information-theoretic analysis of multivariate single-cell signaling responses using SLEMI,
+#' \emph{PLOS Comp Bio}, 2019.
+#'
+#' @param dataRaw must be a data.frame object
+#' @param signal is a character object with names of columns of dataRaw to be treated as channel's input.
+#' @param response is a character vector with names of columns of dataRaw  to be treated as channel's output
+#' @param side_variables (optional) is a character vector that indicates side variables' columns of data, if NULL no side variables are included
+#' @param formula_string (optional) is a character object that includes a formula syntax to use in logistic regression model. 
+#' If NULL, a standard additive model of response variables is assumed. Only for advanced users.
+#' @param output_path is a directory where a pie chart with calculated probabilities will be saved. If NULL, the graph will not be created.
+#' @param scale is a logical indicating if the response variables should be scaled and centered before fitting logistic regression
+#' @param lr_maxit is a maximum number of iteration of fitting algorithm of logistic regression. Default is 1000.
+#' @param maxNWts is a maximum acceptable number of weights in logistic regression algorithm. Default is 5000.
+#' @param diagnostics is a logical indicating if details of logistic regression fitting should be included in output list
 #' @export
 #' @return a list with three elements:
 #' \itemize{
-#' \item output$prob_matr - confusion matrix of logistic regression predictions
-#' \item output$model     - optimal probability distribution
+#' \item output$prob_matr - a \eqn{n\times n} matrix, where \eqn{n} is the number of inputs, with probabilities of correct 
+#' discirimination between pairs of input values. 
+#' \item output$diagnostics     - (if diagnostics=TRUE) a list correspondning to logistic regression model fitted for each 
+#' pair of input values. Each element consists of three sub-elements: 1) nnet_model - nnet object summarising logistic regression model; 
+#' 2) prob_lr - probabilities of assignment obtained from logistic regression model; 
+#' 3) confusion_matrix - confusion matrix of classificator.
 #' }
-#' 
+#' @examples 
+#' ## Calculate probabilities of discrimination for toy dataset
+#' ## Not run:
+#' temp_data=data_example1
+#' output=prob_discr_pairwise(dataRaw=data_example1,
+#'                    signal = "signal",
+#'                    response = "response",
+#'                    output_path = "discrimination_probabilities/toy_dataset/")
+#'
+#' ## Calculate probabilities of discrimination for nfkb dataset
+#' ## Not run:
+#' for (it in seq(from=12,to=30,by=3)){
+#'  output=prob_discr_pairwise(dataRaw=data_nfkb,
+#'                             signal = "signal",
+#'                            response = paste0("response_",it),
+#'                             output_path = paste0("discrimination_probabilities/nfkb/",it,"/"))
+#' }
+#'
 prob_discr_pairwise<-function(dataRaw,
                               signal="input",response=NULL,side_variables=NULL,
                               formula_string=NULL,
                               output_path=NULL, scale=TRUE,
-                              model_out=TRUE,
-                              lr_maxit=1000,MaxNWts = 5000){
+                              lr_maxit=1000,MaxNWts = 5000,diagnostics=TRUE){
   
   
   
-  print("Estimating pairwise probabilities of discrimination...")
+  cat("\nEstimating pairwise probabilities of discrimination...")
   
   if (is.null(response)){
     response=paste0("output_",1:(ncol(dataRaw)-1) )  
@@ -38,7 +87,9 @@ prob_discr_pairwise<-function(dataRaw,
   if (is.null(output_path)) { 
     warning('path is not defined. Graphs and RDS file will not be saved.')
   } else {
+    options(warn=-1)
     dir.create(output_path,recursive = TRUE)
+    options(warn=0)
   }
   
   if (!is.data.frame(dataRaw)) {
@@ -59,12 +110,15 @@ prob_discr_pairwise<-function(dataRaw,
   
   data0=dataRaw[,c(signal,response,side_variables)]
   if ( any(apply(data0,1,function(x) any(is.na(x)) )) ) {
-    print("There are NA in observations - removing")
+    cat("\n There are NA in observations - removing..")
     data0=data0[!apply(data0,1,function(x) any(is.na(x)) ),]
-    print("Numer of observations after cleaning:")
-    print(table(data0[[signal]]))
+    cat("\n Number of observations after cleaning:\n")
+    print(data.frame(input=names(table(data0[[signal]])), 
+      No.Of.Obsv=as.numeric(table(data0[[signal]]))))
   }
   
+
+
   data0=func_signal_transform(data0,signal)
   tempcolnames=colnames(data0)
   tempsignal=data.frame(data0[,(tempcolnames%in%c(signal,paste(signal,"_RAW",sep="") ) )])
@@ -98,10 +152,11 @@ prob_discr_pairwise<-function(dataRaw,
   
   chosen_stim=unique(data[[signal]])
   nstim=length(chosen_stim)
-  
+  pinput=c(0.5,0.5)
+
   func_input_checks(data,signal,response,side_variables)
   
-  cat("Fitting logistic regression models...")
+  cat("\n Fitting logistic regression models...")
   model_output=list()
   # 11 Estimate classificator
   for (is in 1:(nstim-1) ){
@@ -127,18 +182,25 @@ prob_discr_pairwise<-function(dataRaw,
 
       #Debugging:
       lr_model=nnet::multinom(formula,data=dataChosen,na.action=na.omit,maxit=lr_maxit, MaxNWts = MaxNWts,trace=FALSE)
-      model_output[[paste(chosen_stim[is],chosen_stim[js],sep="_")]]$model=lr_model
+      model_output[[paste(chosen_stim[is],chosen_stim[js],sep="_")]]$nnet_model=lr_model
       
       prob_lr<-data.frame(fitted(lr_model))
       if (length(signal_levels)==2) {prob_lr=cbind(1-prob_lr,prob_lr)}
         
-      colnames(prob_lr)<-as.character(signal_levels)
+      prob_ratio=(p0[1]/p0)*(pinput/pinput[1])
+      temp_val <- prob_lr*t(replicate(nrow(prob_lr),prob_ratio))
+      prob_lr <- data.frame(t(apply(temp_val,1,function(x){ x/sum(x) })))
+      colnames(prob_lr) <- signal_levels
+
       obs<-dataChosen[[signal]]
       pred<-apply(prob_lr,1,function(x){
           idmax=which.max(x)
           as.character(signal_levels)[idmax]
       })
-      model_output[[paste(chosen_stim[is],chosen_stim[js],sep="_")]]$regression<-caret::confusionMatrix(factor(pred,levels=signal_levels),obs)
+
+      prob_lr=data.frame(signal=dataChosen[[signal]],prob_lr)
+      model_output[[paste(chosen_stim[is],chosen_stim[js],sep="_")]]$prob_lr<-prob_lr
+      model_output[[paste(chosen_stim[is],chosen_stim[js],sep="_")]]$confusion_matrix<-caret::confusionMatrix(factor(pred,levels=signal_levels),obs)
       
     }
   }
@@ -148,9 +210,13 @@ prob_discr_pairwise<-function(dataRaw,
   for (is in 1:(nstim-1) ){
     for (js in (is+1):nstim){
       w0_acc=c()
-      temp_output=model_output[[paste(chosen_stim[is],chosen_stim[js],sep="_")]]
-      w0_acc=sum(temp_output$regression$overall[1])
-      prob_matrix[is,js]=w0_acc
+      #temp_output=model_output[[paste(chosen_stim[is],chosen_stim[js],sep="_")]]
+      #w0_acc=sum(temp_output$regression$overall[1])
+      #prob_matrix[is,js]=w0_acc
+      temp_probs=model_output[[paste(chosen_stim[is],chosen_stim[js],sep="_")]]$prob_lr
+      prob_matrix[is,js]=mean(c(by(temp_probs,temp_probs$signal,function(x){
+        mean(apply(x[,-1],1,max))
+        })))
     }
   }
   
@@ -163,16 +229,23 @@ prob_discr_pairwise<-function(dataRaw,
   row.names(prob_matrix)<-chosen_stim
   colnames(prob_matrix)<-chosen_stim
   
-  col2 <- grDevices::colorRampPalette(c("#67001F", "#B2182B", "#D6604D", "#F4A582",
-                             "#FDDBC7","#67001F", "#B2182B", "#D6604D", "#F4A582",
-                             "#FDDBC7","#FFFFFF", "#D1E5F0", "#92C5DE",
-                             "#4393C3", "#2166AC", "#053061"))
-  
+  col2 <- grDevices::colorRampPalette(c(rep("#FFFFFF",16), "#D1E5F0", "#92C5DE", "#4393C3", "#2166AC", "#053061"))
+
+  #prob_matrix[2,3]=0
+  #prob_matrix=prob_matrix*0.5
+  #prob_matrix[prob_matrix<0.5]=0.5
+  #print(prob_matrix)
+
+min_val=floor(min(prob_matrix)*10)/10
+if (min_val<0.5){min_val=-1}
+
+
 if (!is.null(output_path)){                       
   pdf(paste0(output_path,"/plot_probs_discr.pdf"),height=0.75*length(chosen_stim),width=0.75*length(chosen_stim))
-    corrplot::corrplot(prob_matrix,type = "upper", method = "pie",cl.lim = c(0.5, 1),col=col2(40), diag=FALSE)
+    corrplot::corrplot(prob_matrix,type = "upper", method = "pie",
+      cl.lim = c( min(c(min_val,0.5)) , 1),col=col2(100), diag=FALSE)
   dev.off()
-   cat("graph created") 
+   cat("graph created\n") 
   }
                      
                        
@@ -185,7 +258,7 @@ if (!is.null(output_path)){
   output$prob_matr=prob_matrix
   
   if (model_out){
-  output$model=model_output
+  output$diagnostics=model_output
   }
   
   output
