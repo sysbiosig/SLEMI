@@ -1,15 +1,17 @@
 ### ### ### ### ### ### ### ### ### ### ### ### 
 ###                                         ###
-### title: Script for testing procedures    ###
-###         of SLEMI R package              ###
-### author: T. Jetka, K. Nienaltowski,      ###
-###         T. Winarski, M. Komorowski      ###
-### date: 22.07.2018                        ###
+### title: Script replicating results and   ### 
+###        figures of MP of manuscript      ###
+###                                         ###
+### author: T. Jetka, T. Winarski,          ###
+###         K. Nienaltowski, S.Blonski,     ###
+###          M. Komorowski                  ###
+### date: 06.05.2019                        ###
 ### Submission of manuscript:               ###
 ###                                         ###
 ### Information-theoretic analysis of       ###
-### multivariate signaling responses        ###
-### using SLEMI                             ###
+### multivariate single-cell signaling      ###
+### responses using SLEMI                   ###
 ###                                         ###
 ### ### ### ### ### ### ### ### ### ### ### ### 
 
@@ -59,8 +61,7 @@ require("corrplot") # install.packages("corrplot")
 
 #### Preliminaries ####
 #1 Setting up working directory 
-setwd("~/Downloads/") #FOR USER: Please change to a preffered directory for storing output of the analysis
-setwd("D:/IPPT/Testing/Test1/")
+setwd("~/Downloads/") #FOR USER: Please change to a directory with downloaded scripts
 
 #2. Loading neccessary libraries
 source("aux_functions.R")
@@ -110,8 +111,8 @@ for (i_time in seq(from=0,to=120,by=3)) {
   Data_Analysis_final=Data_Analysis[ !apply(as.matrix(Data_Analysis[,c(output_variables) ]),1,function(x) any(is.na(x)|is.infinite(x) )), ]
   temp_capacity_output<-capacity_logreg_main(dataRaw=Data_Analysis_final,
                                              signal="SignalNum", response=output_variables, 
-                                             output_path=path_capacity_output,dataout=FALSE,model_out=FALSE,
-                                             testing=TRUE,graphs=FALSE,scale=FALSE, 
+                                             output_path=path_capacity_output,data_out=FALSE,model_out=FALSE,
+                                             testing=TRUE,scale=FALSE, 
                                              TestingSeed=random_seed,testing_cores=cores_num,
                                              boot_num=bootstrap_num,boot_prob=bootstrap_prob,
                                              traintest_num=traintest_num,partition_trainfrac=partition_trainfrac)
@@ -153,8 +154,8 @@ for (i_time in seq(from=0,to=120,by=3)) {
   Data_Analysis_final=Data_Analysis[ !apply(as.matrix(Data_Analysis[,c(output_variables) ]),1,function(x) any(is.na(x)|is.infinite(x) )), ]
   temp_capacity_output<-capacity_logreg_main(dataRaw=Data_Analysis_final,
                                              signal="SignalNum", response=output_variables, 
-                                             output_path=path_capacity_output,dataout=FALSE,model_out=FALSE,
-                                             testing=TRUE,graphs=FALSE,scale=FALSE, 
+                                             output_path=path_capacity_output,data_out=FALSE,model_out=FALSE,
+                                             testing=TRUE,scale=FALSE, 
                                              TestingSeed=random_seed,testing_cores=cores_num,
                                              boot_num=bootstrap_num,boot_prob=bootstrap_prob,
                                              traintest_num=traintest_num,partition_trainfrac=partition_trainfrac)
@@ -218,8 +219,8 @@ for (is in 1:(nstim-1) ){
     
     capacity_output[[paste(chosen_stim[is],chosen_stim[js],sep="_")]][["tp"]]<-capacity_logreg_main(dataRaw=Data_Analysis_final,
                                                                                                      signal="SignalNum", response=output_variable,
-                                                                                                     output_path=path_capacity_output,dataout=FALSE,
-                                                                                                    testing=FALSE,graphs=FALSE,scale=FALSE)
+                                                                                                     output_path=path_capacity_output,data_out=FALSE,
+                                                                                                    testing=FALSE,scale=FALSE)
     
     #time series
     capacity_chosen_times=seq(from=0,to=120,by=3)
@@ -234,8 +235,8 @@ for (is in 1:(nstim-1) ){
     
     capacity_output[[paste(chosen_stim[is],chosen_stim[js],sep="_")]][["ts"]]<-capacity_logreg_main(dataRaw=Data_Analysis_final,
                                                                                                     signal="SignalNum", response=output_variable,
-                                                                                                    output_path=path_capacity_output,dataout=FALSE,
-                                                                                                    testing=FALSE,graphs=FALSE,scale=FALSE)
+                                                                                                    output_path=path_capacity_output,data_out=FALSE,
+                                                                                                    testing=FALSE,scale=FALSE)
   
     }
 }

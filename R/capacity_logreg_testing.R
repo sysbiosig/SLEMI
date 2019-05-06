@@ -96,7 +96,7 @@ capacity_logreg_testing<-function(data,signal="signal",response="response",side_
     bt_samp_output
   }
   parallel::stopCluster(cl)
-  print("... completed 1 ...")
+  cat("... completed 1 ...")
   
   # Bootstrap&Resampling
   cl=parallel::makeCluster(testing_cores)
@@ -114,7 +114,7 @@ capacity_logreg_testing<-function(data,signal="signal",response="response",side_
                                   bt_samp_output
                                 }
   parallel::stopCluster(cl)
-  print("completed 2")
+  cat("completed 2")
   }
   
 
@@ -133,7 +133,7 @@ capacity_logreg_testing<-function(data,signal="signal",response="response",side_
     bt_samp_output
   }
   parallel::stopCluster(cl)
-  print("... completed")
+  cat("... completed")
   
   output$bootstrap        <- output_test1
   if (!is.null(side_variables)){ output$reshuffling_sideVar  <- output_test2}

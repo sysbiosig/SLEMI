@@ -1,15 +1,17 @@
 ### ### ### ### ### ### ### ### ### ### ### ### 
 ###                                         ###
-### title: Script for testing procedures    ###
-###         of SLEMI R package              ###
-### author: T. Jetka, K. Nienaltowski,      ###
-###         T. Winarski, M. Komorowski      ###
-### date: 22.07.2018                        ###
+### title: Script replicating results and   ### 
+###        figures of SI of manuscript      ###
+###                                         ###
+### author: T. Jetka, T. Winarski,          ###
+###         K. Nienaltowski, S.Blonski,     ###
+###          M. Komorowski                  ###
+### date: 06.05.2019                        ###
 ### Submission of manuscript:               ###
 ###                                         ###
 ### Information-theoretic analysis of       ###
-### multivariate signaling responses        ###
-### using SLEMI                             ###
+### multivariate single-cell signaling      ###
+### responses using SLEMI                   ###
 ###                                         ###
 ### ### ### ### ### ### ### ### ### ### ### ### 
 
@@ -19,7 +21,7 @@
 ### It should be run in the following order
 ### 1) Preliminary - setting up packages and working environment
 ### 2) Comparison - replicates Fig. S1 - shows the comaprison of our method to the KNN approach.
-### 3) Validation - replicates Fig. S3 - shows the performance of our method in four examples of simple channels
+### 3) Validation - replicates Fig. S2 - shows the performance of our method in four examples of simple channels
 ## In default mode (10 repetition of data sampling), running Validation section takes 1 hour, 
 ## similarly computations in Comparison section also take approximately 1 hour.
 ## with a single core. Set number of cores for parallel processing in line 76.
@@ -60,8 +62,7 @@ require("TDA")      # install.packages("TDA")
 
 #### 1. Preliminaries ####
 #1.1 Setting up working directory 
-setwd("~/Downloads/") #FOR USER: Please change to a preffered directory for storing output of the analysis
-setwd("D:/IPPT/Testing/Test2/")
+setwd("~/Downloads/") #FOR USER: Please change to a directory with downloaded scipts
 
 #1.2 Loading neccessary libraries
 source("aux_functions.R")
@@ -186,7 +187,7 @@ for (i_output in i_outputs){
                                           signal="signal", response=paste("X",1:dimension_num,sep=""),
                                           formula_string = paste("signal~", paste(paste("X",1:dimension_num,sep=""),collapse="+"),sep=""),
                                           output_path=path_output_single_boot,plot_height=8,plot_width=12,
-                                          testing=FALSE,graphs=FALSE,model_out = FALSE,dataout = FALSE)
+                                          testing=FALSE,model_out = FALSE,data_out = FALSE)
       tempout=tempoutput$cc
       rm(tempdata,tempoutput)
       tempout
@@ -385,7 +386,7 @@ for (i_output in i_outputs) {
                                           signal="signal", response=paste("X",1:dimension_num,sep=""),
                                           formula_string = paste("signal~", paste(paste("X",1:dimension_num,sep=""),collapse="+"),sep=""),
                                           output_path=path_output_single_boot,plot_height=8,plot_width=12,
-                                          testing=FALSE,graphs=FALSE,model_out = FALSE,dataout = FALSE)
+                                          testing=FALSE,model_out = FALSE,data_out = FALSE)
       tempout=tempoutput$cc
       rm(tempdata,tempoutput)
       tempout
@@ -467,7 +468,7 @@ df$L4=as.numeric(as.character(df$L4))
 df$L1=factor(df$L1,levels=paste(c(2,10,30),"d",sep=""))
 df$L2=factor(df$L2,levels=c(2000))
 plot=ggplot(data=df,aes(x=L4,y=value))+geom_line()+facet_grid(L2~L1)
-ggsave(plot,file="plotsSI/synthetic_comparison/knn_time.pdf",height=6,width=8)
+ggsave(plot,file="plotsSI/plot_S1D.pdf",height=6,width=8)
 
 
 dff_lr=melt(lapply(OutputList,function(x) lapply(x,function(y) lapply(y[c("lr")], function(z) z  ) ) ))
@@ -551,7 +552,7 @@ for (i_var in sds){
                                           signal="signal", response="output",
                                           formula_string = "signal~output",
                                           output_path=path_output_single,
-                                          testing=FALSE,graphs=FALSE,model_out=FALSE,dataout=FALSE)
+                                          testing=FALSE,model_out=FALSE,data_out=FALSE)
       tempoutput
     }
     parallel::stopCluster(cl)
@@ -606,7 +607,7 @@ for (i_var in sds){
                                           signal="signal", response="output",
                                           formula_string = "signal~output+I(output^2)+I(log(output+1e-16))",
                                           output_path=path_output_single,
-                                          testing=FALSE,graphs=FALSE,model_out=FALSE,dataout=FALSE,scale=FALSE)
+                                          testing=FALSE,model_out=FALSE,data_out=FALSE,scale=FALSE)
       tempoutput
     }
     parallel::stopCluster(cl)
@@ -661,7 +662,7 @@ for (i_var in sds){
                                           signal="signal", response="output",
                                           formula_string = "signal~output+I(log(output+1))+I((log(output+1))^2 )+I((log(output+1))^3)+I(sqrt(output))",
                                           output_path=path_output_single,
-                                          testing=FALSE,graphs=FALSE,model_out=FALSE,dataout=FALSE,scale=FALSE)
+                                          testing=FALSE,model_out=FALSE,data_out=FALSE,scale=FALSE)
       tempoutput
     }
     parallel::stopCluster(cl)
@@ -713,7 +714,7 @@ for (i_var in sds){
                                           signal="signal", response="output",
                                           formula_string = "signal~output",
                                           output_path=path_output_single,
-                                          testing=FALSE,graphs=FALSE,model_out=FALSE,dataout=FALSE,scale=FALSE)
+                                          testing=FALSE,model_out=FALSE,data_out=FALSE,scale=FALSE)
       tempoutput
     }
     parallel::stopCluster(cl)
@@ -751,6 +752,6 @@ dir.create(temppath,recursive = TRUE)
 plot42=tempFun3_plot(dataLN,5,"1d",temppath,plot_height=6,plot_width=10,ylimits=c(0,NA),sdlimit=10)
 
 plot=grid.arrange(plot12,plot22,plot32,plot42,ncol=2,nrow=2)
-ggsave(plot,file=paste("plotsSI/plot_S3.pdf",sep=""),height=12,width=20)
+ggsave(plot,file=paste("plotsSI/plot_S2.pdf",sep=""),height=12,width=20)
 
 

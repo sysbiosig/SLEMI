@@ -43,7 +43,7 @@
 #' \itemize{
 #' \item output$prob_matr - a \eqn{n\times n} matrix, where \eqn{n} is the number of inputs, with probabilities of correct 
 #' discirimination between pairs of input values. 
-#' \item output$diagnostics     - (if diagnostics=TRUE) a list correspondning to logistic regression model fitted for each 
+#' \item output$diagnostics     - (if diagnostics=TRUE) a list correspondning to logistic regression models fitted for each 
 #' pair of input values. Each element consists of three sub-elements: 1) nnet_model - nnet object summarising logistic regression model; 
 #' 2) prob_lr - probabilities of assignment obtained from logistic regression model; 
 #' 3) confusion_matrix - confusion matrix of classificator.

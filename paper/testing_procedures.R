@@ -2,14 +2,15 @@
 ###                                         ###
 ### title: Script for testing procedures    ###
 ###         of SLEMI R package              ###
-### author: T. Jetka, K. Nienaltowski,      ###
-###         T. Winarski, M. Komorowski      ###
-### date: 22.07.2018                        ###
+### author: T. Jetka, T. Winarski,          ###
+###         K. Nienaltowski, S.Blonski,     ###
+###          M. Komorowski                  ###
+### date: 06.05.2019                        ###
 ### Submission of manuscript:               ###
 ###                                         ###
 ### Information-theoretic analysis of       ###
-### multivariate signaling responses        ###
-### using SLEMI                             ###
+### multivariate single-cell signaling      ###
+### responses using SLEMI                   ###
 ###                                         ###
 ### ### ### ### ### ### ### ### ### ### ### ### 
 
@@ -150,13 +151,12 @@ print(head(tempdata))
 #      6      0  1.7573737
 
 ### 9 Preview the distribution of the data
-g_plot <- ggplot(
-  data = tempdata,
+g_plot <- ggplot(data = tempdata,
   aes(x = factor(signal),
       group = signal,
       y = output)) + 
   geom_boxplot() +
-  theme_publ(version = 2)
+  SLEMI:::aux_theme_publ(version = 2)
 
 if(display_plots){
   print(g_plot)
@@ -239,11 +239,7 @@ print(paste("Time of computations assertion:",
 # capacity estimation. 
 # - "MainPlot.pdf" - presents the most important information: mean,
 # input-output relation, distributions of output and channel capacity (see below).
-# - graphs, as gg or gtable objects, are saved in `logGraphs` element of function output.
 
-if(display_plots){
-  grid.arrange(tempoutput$logGraphs[[9]])
-}
 
 ### 15 Generate graphs of different size 
 # specify paramters `plot_width` and `plot_height`
@@ -263,7 +259,7 @@ tempoutput  <- capacity_logreg_main(
 )
 
 ### 16 Run analysis without generating graphs
-# set argument `graphs` to FALSE
+# set argument `output_path` to FALSE
 graphs_generate <- FALSE
 i_type <- "testing_basic_nographs"
 path_output_main <- paste('output/',i_type,'/',sep="")
@@ -272,16 +268,13 @@ dir.create(path_output_main,
 tempoutput  <- capacity_logreg_main(
   dataRaw = tempdata,
   signal = signal_name, 
-  response = response_name, 
-  output_path = path_output_main,
-  graphs = graphs_generate
+  response = response_name
 )
 
 ### 17 Run analysis with the minimal output 
-# set `graphs`, `scale`, `dataout` and `model_out` to FALSE; 
+# set `graphs`, `scale`, `data_out` and `model_out` to FALSE; 
 # respectively, this prevents creating graphs, scaling of the
 # data, including data and regression model in returned list.
-graphs_generate <- FALSE
 data_rescale <- FALSE
 data_save <- FALSE
 model_save <- FALSE
@@ -293,9 +286,8 @@ tempoutput  <- capacity_logreg_main(
   signal = signal_name, 
   response = response_name, 
   output_path = path_output_main,
-  graphs = graphs_generate,
   scale = data_rescale,
-  dataout = data_save,
+  data_out = data_save,
   model_out = model_save
 )
 
@@ -361,9 +353,6 @@ print(paste("Time of computations (sec.):",
 # calculated capacities. 
 # This graph is also obtainable from the functions results.
 
-if(display_plots){
-  grid.arrange(tempoutput$logGraphs[[9]])
-}
 
 ### 22 p-values of diagnostic tests 
 # For each diagnostic test, we provide left- and right-tailed empirical 
