@@ -58,4 +58,3 @@ output=mi_logreg_algorithm(data=data_example1,
                    response = "response")
 
 }
-\keyword{internal}

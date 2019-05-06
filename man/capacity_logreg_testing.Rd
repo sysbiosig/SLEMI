@@ -74,3 +74,4 @@ Information-theoretic analysis of multivariate single-cell signaling responses u
 \examples{
 
 }
+\keyword{internal}
