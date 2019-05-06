@@ -14,6 +14,7 @@
 #' shuffled values of columns given in side_variables argument. Function sampling_partition returns a list of two data.frame objects - 
 #' train and test that has the same structure as initial data argument with partition_trainfrac and 1-partition_trainfrac observations, resepctively.
 
+#' @keywords internal
 #' @examples 
 #' data=data_example1
 #' dataBootstrap = sampling_bootstrap(data=data,prob=0.8,"signal")
@@ -49,6 +50,7 @@ sampling_bootstrap<-function(data,prob=1,dataDiv){
 
 
 #' @rdname sampling_bootstrap
+#' @keywords internal
 sampling_shuffle<-function(data,side_variables){
   
   if (!is.null(side_variables)){
@@ -88,6 +90,7 @@ sampling_shuffle<-function(data,side_variables){
 
 
 #' @rdname sampling_bootstrap
+#' @keywords internal
 sampling_partition<-function(data,dataDiv,partition_trainfrac){
   dataNew=list()
   

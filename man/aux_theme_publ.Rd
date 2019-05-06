@@ -24,3 +24,4 @@ ggplot(data=data.frame(x=1:10,y=rnorm(10)),aes(x=x,y=y))+geom_point()+theme_publ
 ggplot(data=data.frame(x=1:10,y=rnorm(10)),aes(x=x,y=y))+geom_point()+theme_publ(version=2)
 ggplot(data=data.frame(x=1:10,y=rnorm(10)),aes(x=x,y=y))+geom_point()+theme_publ(version=3)
 }
+\keyword{internal}

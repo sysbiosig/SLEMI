@@ -41,3 +41,4 @@ dataBootstrap = sampling_bootstrap(data=data,prob=0.8,"signal")
 dataShuffle = sampling_shuffle(data=data,"sideVar")
 dataTrainTest = sampling_partition(data=data,dataDiv="signal",partition_trainfrac=0.6)
 }
+\keyword{internal}

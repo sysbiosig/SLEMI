@@ -59,6 +59,7 @@ capacity_output_graph_io<-function(data,signal,response,path,height,width){
 
 
 #' @rdname capacity_output_graph_io
+#' @keywords internal
 capacity_output_graph_boxplots<-function(data,signal,response,path,height=4,width=6){
   
   data_colnames=colnames(data)
@@ -90,6 +91,7 @@ capacity_output_graph_boxplots<-function(data,signal,response,path,height=4,widt
 
 
 #' @rdname capacity_output_graph_io
+#' @keywords internal
 capacity_output_graph_violinMean<-function(data,signal,response,path,height=4,width=6){
   
   data_colnames=colnames(data)
@@ -128,6 +130,7 @@ capacity_output_graph_violinMean<-function(data,signal,response,path,height=4,wi
 
 
 #' @rdname capacity_output_graph_io
+#' @keywords internal
 capacity_output_graph_histograms<-function(data,signal,response,path,height=4,width=6){
   
   response_length=length(response)
@@ -174,6 +177,7 @@ capacity_output_graph_histograms<-function(data,signal,response,path,height=4,wi
 
 
 #' @rdname capacity_output_graph_io
+#' @keywords internal
 capacity_output_graph_boxplotsSideVar<-function(data,signal,side_variables,path,height=4,width=6){
   
   if (is.null(side_variables)) {
@@ -198,8 +202,15 @@ capacity_output_graph_boxplotsSideVar<-function(data,signal,side_variables,path,
 
 
 #' @rdname capacity_output_graph_io
+#' @keywords internal
 capacity_output_graph_capacity<-function(cc_output,path,height=4,width=6){
   
+  temp_name="Capacity"
+  if (any(names(cc_output)=="mi")){
+    temp_name="Mutual Information"
+    cc_output$cc=cc_output$mi
+  }
+
   if (is.null(cc_output$testing)){
     
     plot<-ggplot2::ggplot(data=data.frame(x=cc_output$cc,y=0),ggplot2::aes(x=x,y=y) ) + 
@@ -219,6 +230,17 @@ capacity_output_graph_capacity<-function(cc_output,path,height=4,width=6){
     
   } else if (length(cc_output$testing)==2) {
     
+    if (any(names(cc_output)=="mi")){
+        cc_output$testing$bootstrap=lapply(cc_output$testing$bootstrap,function(x) {
+            x$cc=x$mi
+            x
+        })
+        cc_output$testing$traintest=lapply(cc_output$testing$traintest,function(x) {
+            x$cc=x$mi
+            x
+        })
+    }
+
     boot_results=sapply(cc_output$testing$bootstrap,function(x) x$cc)
     boot_sd=sd(boot_results)
     boot_mean=mean(boot_results)
@@ -266,6 +288,26 @@ capacity_output_graph_capacity<-function(cc_output,path,height=4,width=6){
     ggplot2::ggsave(plot,file=paste(path,'capacity.pdf',sep=""),height=1.5*height,width=width)
     
   } else {
+
+    if (any(names(cc_output)=="mi")){
+        cc_output$testing$bootstrap=lapply(cc_output$testing$bootstrap,function(x) {
+            x$cc=x$mi
+            x
+        })
+        cc_output$testing$traintest=lapply(cc_output$testing$traintest,function(x) {
+            x$cc=x$mi
+            x
+        })
+       cc_output$testing$resamplingMorph=lapply(cc_output$testing$resamplingMorph,function(x) {
+            x$cc=x$mi
+            x
+        })
+        cc_output$testing$bootResampMorph=lapply(cc_output$testing$bootResampMorph,function(x) {
+            x$cc=x$mi
+            x
+        })
+    }
+
     boot_results=sapply(cc_output$testing$bootstrap,function(x) x$cc)
     boot_sd=sd(boot_results)
     boot_mean=mean(boot_results)
@@ -333,6 +375,7 @@ capacity_output_graph_capacity<-function(cc_output,path,height=4,width=6){
 
 
 #' @rdname capacity_output_graph_io
+#' @keywords internal
 capacity_output_graph_densities<-function(data,signal,response,path,height=4,width=6){
   
   dataPlot=reshape2::melt(data[,c(signal,response)],id.vars=c(signal))

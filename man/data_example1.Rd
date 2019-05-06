@@ -22,4 +22,4 @@ with 500 observations per input. In addition, each observation is assigned to on
 that occurs with propensities (0.6,0.3,0.1), resepctively. 
 Conditional output distributions are Gaussian.
 }
-\keyword{datasets}
+\keyword{internal}

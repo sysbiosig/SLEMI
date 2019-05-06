@@ -20,7 +20,7 @@
 #' \item boxplots.pdf - boxplots of data
 #' \item violin.pdf - violin plots of data
 #' }
-#' @keywords data.frame
+#' @keywords internal
 #' @examples 
 #' 
 #' 

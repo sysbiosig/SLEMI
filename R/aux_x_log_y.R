@@ -1,5 +1,7 @@
 #' Calculation of expression \eqn{x\cdot \log y}
 #' 
+#' Internal, auxillary functions
+#'
 #' @param x is a numeric vector
 #' @param y is a numeric vector (the same length of x)
 #' @return Function calculates the value of expression \eqn{x\cdot \log y} element-wise in a numerically stable way. 

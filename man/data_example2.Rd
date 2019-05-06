@@ -22,4 +22,4 @@ A dataset describing a channel with 3 possible inputs and 3-dimensional output
 with 500 observations per input.
 Conditional output distributions are multivariate Gaussians.
 }
-\keyword{datasets}
+\keyword{internal}

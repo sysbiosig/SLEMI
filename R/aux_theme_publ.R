@@ -6,6 +6,7 @@
 #' @param base_size integer that sets the default size of font used in the plot
 #' @param base_family character that indicates what type of font should be used
 #' @param version integer that changes the characteristic of the plot, values 1,2 and 3 accepted.
+#' @keywords internal
 #' @examples
 #' ggplot(data=data.frame(x=1:10,y=rnorm(10)),aes(x=x,y=y))+geom_point()+theme_publ(version=1)
 #' ggplot(data=data.frame(x=1:10,y=rnorm(10)),aes(x=x,y=y))+geom_point()+theme_publ(version=2)

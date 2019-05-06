@@ -151,7 +151,7 @@ capacity_logreg_main<-function(dataRaw, signal="input", response=NULL,side_varia
   rm(temp_idnumeric)
 
   #Debugging:
-  cat("... Preprocessing completed. Algorithm initialization")
+  cat("... Preprocessing completed.")
   
   output<-capacity_logreg_algorithm(data=data,signal=signal,response=response,side_variables=side_variables,
                                               formula_string=formula_string, model_out = model_out,
@@ -191,7 +191,7 @@ capacity_logreg_main<-function(dataRaw, signal="input", response=NULL,side_varia
     dir.create(output_path,recursive=TRUE)
     options(warn=0)
 
-    cat("Creating graphs ...")
+    cat("\n Creating graphs ...")
     temp_logGraphs=try(output_graphs_main(data=dataRaw,signal=signal,response=response,side_variables=side_variables,cc_output=output,
                                 output_path=output_path,height=plot_height,width=plot_width),
         silent=FALSE)

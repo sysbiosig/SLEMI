@@ -6,6 +6,7 @@
 #' @param response is a character vector that indicates columns of data to be treated as channel's output
 #' @param side_variables is a character vector that indicates side variables' columns of data
 #' @return A character object that includes a standard formula syntax to use in algorithm for capacity calculation
+#' @keywords internal
 #' @examples 
 #' formula_generator(signal="signal",response="response", side_variables=NULL)
 #' formula_generator(signal="inputX",response="responseY", side_variables="SV1")

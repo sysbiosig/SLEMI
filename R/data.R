@@ -12,6 +12,7 @@
 #' \item{sideVar}{Label of the type of given observation}
 #' }
 #' @source synthetic
+#' @keywords internal
 "data_example1"
 
 #' Examplary data set II
@@ -28,6 +29,7 @@
 #' \item{X3}{The value of third dimension of output}
 #' }
 #' @source synthetic
+#' @keywords internal
 "data_example2"
 
 

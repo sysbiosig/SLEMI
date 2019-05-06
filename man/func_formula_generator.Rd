@@ -25,3 +25,4 @@ formula_generator(signal="signal",response="response", side_variables=NULL)
 formula_generator(signal="inputX",response="responseY", side_variables="SV1")
 formula_generator(signal="signalX",response=c("r_1","r_2","r_5"), side_variables="SV")
 }
+\keyword{internal}
