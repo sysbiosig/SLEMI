@@ -31,7 +31,7 @@
 #' @param sidevar_num is the number of re-shuffling tests of side variables to be performed. Default is 10, but it is recommended to use at least 50 for reliable estimates.
 #' @param traintest_num is the number of overfitting tests to be performed. Default is 10, but it is recommended to use at least 50 for reliable estimates.
 #' @param partition_trainfrac is the fraction of data to be used as a training dataset. Default is 0.6.
-#'
+#' @keywords internal
 #' @return a list with four elements:
 #' \itemize{
 #' \item output$bootstrap - confusion matrix of logistic regression predictions

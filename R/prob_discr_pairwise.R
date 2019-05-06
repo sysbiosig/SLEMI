@@ -257,7 +257,7 @@ if (!is.null(output_path)){
   
   output$prob_matr=prob_matrix
   
-  if (model_out){
+  if (diagnostics){
   output$diagnostics=model_output
   }
   

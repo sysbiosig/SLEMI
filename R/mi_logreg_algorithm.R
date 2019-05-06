@@ -20,7 +20,6 @@
 #' @param lr_maxit is a maximum number of iteration of fitting algorithm of logistic regression. Default is 1000.
 #' @param maxNWts is a maximum acceptable number of weights in logistic regression algorithm. Default is 5000.
 #' @param model_out is the logical indicating if the calculated logisitc regression model should be included in output list
-#' @keywords internal
 #' @export
 #' @return a list with three elements:
 #' \itemize{

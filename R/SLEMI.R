@@ -4,6 +4,8 @@
 #' state input and multidimensional continuouse output from experimental data. For efficient computations, 
 #' it uses an iterative algorithm based on logistic regression. In addition, functions to estimate mutual information and
 #' calculate probabilities of correct discrimination between a pair of input values are implemented.
+#'
+#' Package is deposited at GitHub: https://www.github.com/sysbiosig/SLEMI/ 
 #' 
 #' @section References:
 #' Jetka T, Nienaltowski K, Winarski T, Blonski S, Komorowski M,  
