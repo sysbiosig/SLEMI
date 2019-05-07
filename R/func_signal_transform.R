@@ -38,6 +38,21 @@ func_signal_transform<-function(data,signal){
       data[[signal]]=factor(as.numeric(data[[signal]]),levels=sort(unique(as.numeric(data[[signal]]) ))) 
     } 
   } else if (signal_class=="factor"){
+
+    tmp_signal_values=as.character(unique(data[[signal]]))
+    tmp_signal_values_num=as.numeric(tmp_signal_values)
+    if (any(is.na(tmp_signal_values_num))){
+      tmp_signal_values_num=stringr::str_match(tmp_signal_values,"[0-9.]+")
+      if (!any(is.na(tmp_signal_values_num))) {
+        data[[signal]]=as.numeric(stringr::str_match(data[[signal]],"[0-9.]+"))
+        data[[paste(signal,"_RAW",sep="")]]=data[[signal]]
+        data[[signal]]=factor(data[[signal]],levels=sort(unique(data[[signal]])))
+      }
+    } else {
+      data[[paste(signal,"_RAW",sep="")]]=as.numeric(data[[signal]])
+      data[[signal]]=factor(as.numeric(data[[signal]]),levels=sort(unique(as.numeric(data[[signal]]) ))) 
+    } 
+
     cat("")
   } else {
     stop('signal is of unknown type')
