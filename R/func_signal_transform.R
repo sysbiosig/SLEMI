@@ -49,8 +49,8 @@ func_signal_transform<-function(data,signal){
         data[[signal]]=factor(data[[signal]],levels=sort(unique(data[[signal]])))
       }
     } else {
-      data[[paste(signal,"_RAW",sep="")]]=as.numeric(data[[signal]])
-      data[[signal]]=factor(as.numeric(data[[signal]]),levels=sort(unique(as.numeric(data[[signal]]) ))) 
+      data[[paste(signal,"_RAW",sep="")]]=as.numeric(as.character(data[[signal]]))
+      data[[signal]]=factor(as.numeric(as.character(data[[signal]])),levels=sort(unique(as.numeric(as.character(data[[signal]])) ))) 
     } 
 
     cat("")
