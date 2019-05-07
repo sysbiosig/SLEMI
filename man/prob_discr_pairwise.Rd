@@ -32,7 +32,7 @@ If NULL, a standard additive model of response variables is assumed. Only for ad
 \item{maxNWts}{is a maximum acceptable number of weights in logistic regression algorithm. Default is 5000.}
 }
 \value{
-a list with three elements:
+a list with two elements:
 \itemize{
 \item output$prob_matr - a \eqn{n\times n} matrix, where \eqn{n} is the number of inputs, with probabilities of correct 
 discirimination between pairs of input values. 
@@ -56,7 +56,7 @@ to the correct input value is estimated as
 \deqn{\max \{ \hat{P}_{lr}(x_i|Y=y;P(X)), \hat{P}_{lr}(x_j|Y=y;P(X))\}.}
 Note that \eqn{P(x_j|Y=y)=1-P(x_i|Y=y)} as well as \eqn{\hat{P}_{lr}(x_j|Y=y;P(X))=1-\hat{P}_{lr}(x_i|Y=y;P(X))}
 The average of the above probabilities over all observations \eqn{y^i_l} yields PCDs
-\deqn{\text{PCD}_{x_i,x_j}=\frac{1}{2}\frac{1}{n_i}\sum_{l=1}^{n_i}\max\{ \hat{P}_{lr}(x_i|Y=y_i^l;P(X)),\hat{P}_{lr}(x_i^l|Y=y;P(X))\} + }
+\deqn{PCD_{x_i,x_j}=\frac{1}{2}\frac{1}{n_i}\sum_{l=1}^{n_i}\max\{ \hat{P}_{lr}(x_i|Y=y_i^l;P(X)),\hat{P}_{lr}(x_i^l|Y=y;P(X))\} + }
 \deqn{ \frac{1}{2}  \frac{1}{n_j} \sum_{l=1}^{n_j} \max \{ \hat{P}_{lr}(x_i|Y=y_j^l;P(X)), \hat{P}_{lr}(x_j|Y=y_j^l;P(X))\}.}
 
 Additional parameters: lr_maxit and maxNWts are the same as in definition of multinom function from nnet package. An alternative

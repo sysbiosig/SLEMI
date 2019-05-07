@@ -5,6 +5,33 @@
 #' and (if testing=TRUE) diagnostic tests are computed. If output directory path is given (output_path is not NULL), graphs visualising the data and the analysis
 #' are saved there, together with a compressed output object (as .rds file) with full estimation results.
 #'
+#' In a typical experiment aimed to quantify information flow a given signaling system, input values \eqn{x_1\leq x_2 \ldots... \leq x_m}, ranging from 0 to saturation are considered.
+#' Then, for each input level, \eqn{x_i}, \eqn{n_i} observations are collected, which are represetned as vectors 
+#' \deqn{y^i_j \sim P(Y|X = x_i)}
+#' Within information theory the degree of information transmission is measured as the mutual information
+#' MI(X,Y) = \sum_{i=1}^{m} P(x_i)\int_{R^k} P(y|X = x_i)log_2\frac{P(y|X = x_i)}{P(y)}dy,
+#' where \eqn{P(y)} is the marginal distribution of the output. MI is expressed in bits and \eqn{2^{MI}} can be interpreted as the number of 
+#' inputs that the system can resolve on average.
+#'
+#' The maximization of mutual information with respect to the input distribution, \eqn{P(X)},
+#' defines the information capacity, C. Formally,
+#' \deqn{C^* = max_{P(X)} MI(X,Y)}
+#' Information capacity is expressed in bits and \eqn{2^{C^*}} can be interpreted as the maximal number of inputs that the system can
+#' effectively resolve.
+#'
+#' In contrast to existing approaches, instead of estimating, possibly highly dimensional, conditional output distributions P(Y|X =x_i), we propose to estimate the discrete, conditional input distribution, 
+#' \eqn{P(x_i |Y = y)}, which is known to be a simpler problem. Estimation of the MI using estimates of \eqn{P(x_i |Y = y)}, denoted here as \eqn{\hat{P}(x_i|Y = y)}, is possible as the MI, can be
+#' alternatively written as
+#' \deqn{MI(X,Y) = \sum_{i=1}^{m} P(x_i)\int_{R^k} P(y|X = x_i)log_2\frac{P(x_i|Y = y)}{P(x_i)}dy}
+#' The expected value (as in above expression) with respect to distribution \eqn{P(Y|X = x_i)} can be approximated by the average with respect to data
+#' \deqn{MI(X,Y) \approx \sum_{i=1}^{m} P(x_i)\frac{1}{n_i} \sum_{j=1}^{n_i} P(y|X = x_i)log_2\frac{\hat{P}(x_i|Y = y^i_j)}{P(x_i)}dy}
+#' Here, we propose to use logistic regression as \eqn{\hat{P}(x_i|Y = y^i_j)}. Specifically,
+#' \deqn{log\frac{P(x_i |Y = y)}{P(x_m|Y = y)} \approx \alpha_i +\beta_iy}
+#'
+#' Following this approach, channel capacity can be calculated by optimising MI with respect to the input distribution, \eqn{P(X)}.
+#' However, this, potentially difficult problem, can be divided into two simpler maximization problems, for which explicit solutions exist. 
+#' Therefore, channel capacity can be obtained from the two explicit solutions in an iterative procedure known as alternate maximization (similarly as in Blahut-Arimoto algorithm) [1].
+#'
 #' Additional parameters: lr_maxit and maxNWts are the same as in definition of multinom function from nnet package. An alternative
 #' model formula (using formula_string arguments) should be provided if  data are not suitable for description by logistic regression
 #' (recommended only for advanced users). Preliminary scaling of  data (argument scale) should be used similarly as in other 
@@ -12,9 +39,12 @@
 #' different phenomenon (varying by units and/or magnitude) scaling is recommended.
 #'
 #' @section References:
-#' Jetka T, Nienaltowski K, Winarski T, Blonski S, Komorowski M,  
+#' [1] Csiszar I, Tusnady G, Information geometry and alternating minimization procedures, Statistics & Decisions 1 Supplement 1 (1984), 205–237
+#' [2] Jetka T, Nienaltowski K, Winarski T, Blonski S, Komorowski M,  
 #' Information-theoretic analysis of multivariate single-cell signaling responses using SLEMI,
 #' \emph{PLOS Comp Bio}, 2019.
+#'
+#'
 #'
 #' @param dataRaw must be a data.frame object
 #' @param signal is a character object with names of columns of dataRaw to be treated as channel's input.

@@ -51,8 +51,11 @@ capacity_output_graph_violinMean<-function(data,signal,response,path,height=4,wi
   
   if (any(data_colnames %in% (signalNUM))){
     
+    signal_classes=unique(data[[signalNUM]])
     maxSignal=max(data[[signalNUM]])
     minSignal=min(0,min(data[[signalNUM]]))
+    rangeSignal=range(data[[signalNUM]])
+    temp_coeff=(rangeSignal[2]-rangeSignal[1])/length(signal_classes)
 
     dataPlot=reshape2::melt(data[,c(signalNUM,response)],id.vars=c(signalNUM))
     plot<-ggplot2::ggplot(data=dataPlot,ggplot2::aes_string(x=signalNUM,y="value"))+ggplot2::geom_violin(ggplot2::aes_string(group=signalNUM),scale="width")+
