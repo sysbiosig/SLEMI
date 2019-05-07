@@ -28,7 +28,7 @@ capacity_output_graph_boxplots<-function(data,signal,response,path,height=4,widt
   
   dataPlot=reshape2::melt(data[,c(signal,response)],id.vars=c(signal))
   plot<-ggplot2::ggplot(data=dataPlot,ggplot2::aes_string(x=signal,y="value") ) + 
-    ggplot2::geom_boxplot()
+    ggplot2::geom_boxplot()+
     ggplot2::facet_grid(.~variable)+
     ggplot2::scale_y_continuous(name=paste("Output",sep="") )+
     ggplot2::scale_x_discrete(name=paste("Input",sep="") )+
