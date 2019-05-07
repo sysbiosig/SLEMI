@@ -29,54 +29,18 @@ output_graphs_main<-function(data,signal,response,side_variables,cc_output,
   
   data=func_signal_transform(data,signal)
   
-  plot_io=try(capacity_output_graph_io(data,signal,response,output_path,height=height,width=width),silent=TRUE)
+  response_factor=factor(response)
+  response_class=levels(response_factor)
+  if (length(response_class)>3){
+    response_class=response_class[seq(from=1,to=length(response_class),length.out = 3)]
+    response=response[response%in%response_class]
+  }
+
   plot_box=try(capacity_output_graph_boxplots(data,signal,response,output_path,height=height,width=width),silent=FALSE)
   plot_violin=try(capacity_output_graph_violinMean(data,signal,response,output_path,height=height,width=width),silent=FALSE)
-  plot_hist=try(capacity_output_graph_histograms(data,signal,response,output_path,height=height,width=width),silent=FALSE)
   plot_boxSideVar=try(capacity_output_graph_boxplotsSideVar(data,signal,side_variables,output_path,height=height,width=width) ,silent=FALSE)
   plot_capacity=try(capacity_output_graph_capacity(cc_output,output_path,height=height,width=width),silent=FALSE)
-  plot_density=try(capacity_output_graph_densities(data,signal,response,output_path,height=height,width=width),silent=FALSE)
-  
-  if (!is.null(side_variables)){
-    if (is.null(cc_output$testing)){
-      plot_main=try(gridExtra::grid.arrange(plot_io[["grid"]],plot_violin,plot_hist,plot_boxSideVar,plot_density,plot_capacity,
-                           layout_matrix=rbind(c(1,2),
-                                               c(3,3),
-                                               c(4,5),
-                                               c(6,6)
-                           )),silent=FALSE)
-    } else {
-      plot_main=try(gridExtra::grid.arrange(plot_io[["grid"]],plot_violin,plot_hist,plot_boxSideVar,plot_density,plot_capacity,
-                                        layout_matrix=rbind(c(1,2),
-                                                            c(3,3),
-                                                            c(4,5),
-                                                            c(6,6),
-                                                            c(6,6)
-                                        )),silent=FALSE)
-    }
-  } else {
-    if (is.null(cc_output$testing)){
-      plot_main=try(gridExtra::grid.arrange(plot_io[["grid"]],plot_violin,plot_hist,plot_box,plot_density,plot_capacity,
-                           layout_matrix=rbind(c(1,2),
-                                               c(3,3),
-                                               c(4,5),
-                                               c(6,6)
-                           )),silent=FALSE)
-    } else {
-      plot_main=try(gridExtra::grid.arrange(plot_io[["grid"]],plot_violin,plot_hist,plot_box,plot_density,plot_capacity,
-                                        layout_matrix=rbind(c(1,2),
-                                                            c(3,3),
-                                                            c(4,5),
-                                                            c(6,6),
-                                                            c(6,6)
-                                        )),silent=FALSE)
-    }
-  }
-  
-  if(!is.null(output_path)){
-    try(ggplot2::ggsave(plot_main,file=paste(output_path,'MainPlot_full.pdf',sep=""),
-      height=5*height,width=2*width,limitsize = FALSE),silent=FALSE)
-  }
+
 
   if (is.null(cc_output$testing)){
     plot_main_simp=try(gridExtra::grid.arrange(plot_violin,plot_box,plot_capacity,
@@ -106,5 +70,5 @@ output_graphs_main<-function(data,signal,response,side_variables,cc_output,
   
   
   
-  graphOutput=list(plot_main,plot_io,plot_box,plot_violin,plot_hist,plot_boxSideVar,plot_capacity,plot_density,plot_main_simp)
+  graphOutput=list(plot_box,plot_boxSideVar,plot_capacity,plot_main_simp)
 }

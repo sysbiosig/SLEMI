@@ -12,54 +12,6 @@
 #' @keywords internal
 #' @examples 
 #' 
-capacity_output_graph_io<-function(data,signal,response,path,height,width){
-  
-  data_colnames=colnames(data)
-  response_length=length(response)
-  signalNUM=paste(signal,"_RAW",sep="")
-  
-  if (any(data_colnames %in% (signalNUM))){
-
-    maxSignal=max(data[[signalNUM]])
-    
-    dataPlot=reshape2::melt(data[,c(signalNUM,response)],id.vars=c(signalNUM))
-    plot<-ggplot2::ggplot(data=dataPlot,ggplot2::aes_string(x=signalNUM,y="value"))+ggplot2::stat_summary(fun.y=mean,geom="line",size=1.35)+
-      ggplot2::facet_grid(.~variable)+
-      ggplot2::scale_y_continuous(paste("Response ",sep="") )+ggplot2::scale_x_continuous(paste("Signal - ",signal,sep=""),limits=c(0,maxSignal*1.05) )+
-      ggplot2::ggtitle("Input-Output Relation")+
-      aux_theme_publ(version=2)
-    
-    plot_col<-ggplot2::ggplot(data=dataPlot,ggplot2::aes_string(x=signalNUM,y="value"),ggplot2::aes(colour=factor(variable)))+ggplot2::stat_summary(fun.y=mean,geom="line",size=1.35)+
-      ggplot2::scale_y_continuous(paste("Response ",sep="") )+ggplot2::scale_x_continuous(paste("Signal - ",signal,sep=""),limits=c(0,maxSignal*1.05) )+
-      ggplot2::ggtitle("Input-Output Relation")+
-      aux_theme_publ(version=2)
-  } else {
-    dataPlot=reshape2::melt(data[,c(signal,response)],id.vars=c(signal))
-    plot<-ggplot2::ggplot(data=dataPlot,ggplot2::aes_string(x=signal,y="value"))+
-      ggplot2::stat_summary(fun.y=mean,geom="point",size=2.35)+
-      ggplot2::facet_grid(.~variable)+
-      ggplot2::scale_y_continuous(paste("Response ",sep="") )+
-      ggplot2::scale_x_discrete(paste("Signal - ",signal,sep="") )+
-      ggplot2::ggtitle("Input-Output Relation")+
-      aux_theme_publ(version=2)
-    
-    plot_col<-ggplot2::ggplot(data=dataPlot,ggplot2::aes_string(x=signal,y="value"),ggplot2::aes(colour=factor(variable)))+
-      ggplot2::stat_summary(fun.y=mean,geom="point",size=2.35)+
-      ggplot2::scale_y_continuous(paste("Response ",sep="") )+
-      ggplot2::scale_x_discrete(paste("Signal - ",signal,sep="") )+
-      ggplot2::ggtitle("Input-Output Relation")+
-      aux_theme_publ(version=2)
-  }
-  
-  ggplot2::ggsave(plot,file=paste(path,'io_relation.pdf',sep=""),height=height,width=min(49.5,response_length*width))
-  #ggplot2::ggsave(plot_col,file=paste(path,'io2_relation.pdf',sep=""),height=height,width=width)
-  
-  list(grid=plot,colour=plot_col)
-}
-
-
-#' @rdname capacity_output_graph_io
-#' @keywords internal
 capacity_output_graph_boxplots<-function(data,signal,response,path,height=4,width=6){
   
   data_colnames=colnames(data)
@@ -76,21 +28,20 @@ capacity_output_graph_boxplots<-function(data,signal,response,path,height=4,widt
   
   dataPlot=reshape2::melt(data[,c(signal,response)],id.vars=c(signal))
   plot<-ggplot2::ggplot(data=dataPlot,ggplot2::aes_string(x=signal,y="value") ) + 
-    ggplot2::geom_boxplot()+# geom_point() +
+    ggplot2::geom_boxplot()
     ggplot2::facet_grid(.~variable)+
     ggplot2::scale_y_continuous(name=paste("Output",sep="") )+
-    #ggplot2::scale_x_discrete(name=paste("Input",signal,sep="") )+
     ggplot2::scale_x_discrete(name=paste("Input",sep="") )+
     ggplot2::ggtitle("Boxplots")+
     aux_theme_publ(version=2)
   
-  ggplot2::ggsave(plot,file=paste(path,'boxplots.pdf',sep=""),height=height,width=width)
+  ggplot2::ggsave(plot,file=paste(path,'data_boxplots.pdf',sep=""),height=height,width=width)
   
   plot
 }
 
 
-#' @rdname capacity_output_graph_io
+#' @rdname capacity_output_graph_boxplots
 #' @keywords internal
 capacity_output_graph_violinMean<-function(data,signal,response,path,height=4,width=6){
   
@@ -107,9 +58,8 @@ capacity_output_graph_violinMean<-function(data,signal,response,path,height=4,wi
       ggplot2::stat_summary(fun.y=mean,geom="line",size=1.15)+ggplot2::stat_summary(fun.y=mean,geom="point",size=1.5)+
       ggplot2::facet_grid(variable~.)+
       ggplot2::scale_y_continuous(paste("Output",sep="") )+
-      #ggplot2::scale_x_continuous(paste("Input",signal,sep=""),limits=c(0,maxSignal*1.05) )+
       ggplot2::scale_x_continuous(paste("Input",sep=""),limits=c(0,maxSignal*1.05) )+
-      ggplot2::ggtitle("ViolinPlot")+
+      ggplot2::ggtitle("Violin plots with menas")+
       aux_theme_publ(version=2)
   } else {
     dataPlot=reshape2::melt(data[,c(signal,response)],id.vars=c(signal))
@@ -117,66 +67,19 @@ capacity_output_graph_violinMean<-function(data,signal,response,path,height=4,wi
       ggplot2::stat_summary(fun.y=mean,geom="point",size=1.5)+
       ggplot2::facet_grid(variable~.)+
       ggplot2::scale_y_continuous(paste("Output",sep="") )+
-      #ggplot2::scale_x_discrete(paste("Input",signal,sep="") )+
       ggplot2::scale_x_discrete(paste("Input",sep="") )+
-      ggplot2::ggtitle("ViolinPlot")+
+      ggplot2::ggtitle("Violin plots with menas")+
       aux_theme_publ(version=2)
   }
   
-  ggplot2:: ggsave(plot,file=paste(path,'violin.pdf',sep=""),height=height,width=min(49.5,response_length*width))
+  ggplot2:: ggsave(plot,file=paste(path,'data_MeanViolin.pdf',sep=""),height=height,width=min(49.5,response_length*width))
   
   plot
 }
 
 
-#' @rdname capacity_output_graph_io
-#' @keywords internal
-capacity_output_graph_histograms<-function(data,signal,response,path,height=4,width=6){
-  
-  response_length=length(response)
-  
-  obsv_num=unlist(by(data.frame(data[,response]),data[[signal]],function(x) nrow(x)))
-  minrange = min(unlist(sapply(by(data.frame(data[,response]),data[[signal]],function(x) sapply(x,range) ),function(x) x[2,]-x[1,])))
-  
-  tempformula=as.formula(paste("variable ~ ",signal,sep=""))
-  
-  dataPlot=reshape2::melt(data[,c(signal,response)],id.vars=c(signal))
-  plotTemp<-ggplot2::ggplot(data=dataPlot,ggplot2::aes_string(x="value"),ggplot2::aes(y=..density..) ) + 
-    ggplot2::geom_histogram(binwidth=minrange/10,ggplot2::aes(y=..density..)) + 
-    ggplot2::facet_grid(tempformula)+
-    ggplot2::coord_flip()
-  
-  plotText0=grid::textGrob("Number of observations:")
-  plotText=grid::textGrob(paste(c(paste(names(obsv_num),":",obsv_num,sep="")),collapse="   "))
-  plot=gridExtra::grid.arrange(plotText0,plotText,plotTemp,layout_matrix=matrix(c(1,2,3,3,3,3),nrow=6,ncol=1))
-  ggplot2::ggsave(plot,file=paste(path,'histograms.pdf',sep=""),height=min(49.5,response_length*height),width=min(49.5,3*width) )
-  
-  plot  
-}
-# capacity_output_graph_histograms<-function(data,signal,response,path,height=4,width=6){
-#   response_length=length(response)
-#   obsv_num=unlist(by(data.frame(data[,response]),data[[signal]],function(x) nrow(x)))
-#   minrange = min(unlist(sapply(by(data.frame(data[,response]),data[[signal]],function(x) sapply(x,range) ),function(x) x[2,]-x[1,])))
-#   tempformula=as.formula(paste("variable ~ ",signal,sep=""))
-#   dataPlot=reshape2::melt(data[,c(signal,response)],id.vars=c(signal))
-#   plotTemp<-ggplot2::ggplot(data=dataPlot,ggplot2::aes_string(x="value"),ggplot2::aes(y=..density..) ) + 
-#     ggplot2::geom_histogram(binwidth=minrange/10,ggplot2::aes(y=..density..)) + 
-#     ggplot2::facet_grid(tempformula)+
-#     ggplot2::coord_flip()
-#   r<-print(plotTemp)
-#   dc <- plyr::dlply(r$data[[1]], plyr::.(PANEL), function(x) max(x$density))
-#   tmp_data=data.frame(y=max(unlist(dc))/2,x=Inf,lab= paste("No. obs:", obsv_num,sep=" "), signal=names(obsv_num) )
-#   colnames(tmp_data)[4]<-signal
-#   plot<-plotTemp + ggplot2::geom_text(data=tmp_data,ggplot2::aes(x=x,y=y,label=lab),vjust=1)+    
-#     ggplot2::scale_y_continuous(paste("Output",sep="") )+
-#     ggplot2::ggtitle("Histograms")+
-#     aux_theme_publ(version=2)
-#   ggplot2::ggsave(plot,file=paste(path,'histograms.pdf',sep=""),height=min(49.5,response_length*height),width=min(49.5,3*width) )
-#   plot  
-# }
 
-
-#' @rdname capacity_output_graph_io
+#' @rdname capacity_output_graph_boxplots
 #' @keywords internal
 capacity_output_graph_boxplotsSideVar<-function(data,signal,side_variables,path,height=4,width=6){
   
@@ -188,20 +91,21 @@ capacity_output_graph_boxplotsSideVar<-function(data,signal,side_variables,path,
     dataTemp=data[,colnames(data)%in% c(signal,side_variables)]
     dataMelt=reshape2::melt(dataTemp, id.vars=c(signal))
     
-    plot<-ggplot2::ggplot(data=dataMelt,ggplot2::aes_string(x=signal,y="value") ) + ggplot2::geom_boxplot()+ ggplot2::facet_grid(variable~.) +
-      ggplot2::scale_y_continuous("side variable")+
+    plot<-ggplot2::ggplot(data=dataMelt,ggplot2::aes_string(x=signal,y="value") ) + 
+      ggplot2::geom_boxplot()+ ggplot2::facet_grid(variable~.) +
+      ggplot2::scale_y_continuous("Side variables value")+
       ggplot2::scale_x_discrete(paste("Input",signal,sep="") )+
-      ggplot2::ggtitle("Boxplots")+
+      ggplot2::ggtitle("Boxplots of side variables")+
       aux_theme_publ(version=2)
     
-    ggplot2::ggsave(plot,file=paste(path,'boxplots_sideVar.pdf',sep=""),height=height,width=width)
+    ggplot2::ggsave(plot,file=paste(path,'side_variables_boxplots.pdf',sep=""),height=height,width=width)
   }
   
   plot
 }
 
 
-#' @rdname capacity_output_graph_io
+#' @rdname capacity_output_graph_boxplots
 #' @keywords internal
 capacity_output_graph_capacity<-function(cc_output,path,height=4,width=6){
   
@@ -368,24 +272,6 @@ capacity_output_graph_capacity<-function(cc_output,path,height=4,width=6){
     
     ggplot2::ggsave(plot,file=paste(path,'capacity.pdf',sep=""),height=2*height,width=width)
   }
-  
-  plot
-}
-
-
-
-#' @rdname capacity_output_graph_io
-#' @keywords internal
-capacity_output_graph_densities<-function(data,signal,response,path,height=4,width=6){
-  
-  dataPlot=reshape2::melt(data[,c(signal,response)],id.vars=c(signal))
-  plot<-ggplot2::ggplot(data=dataPlot,ggplot2::aes_string(x="value",fill=signal,colour=signal)) + ggplot2::geom_density(alpha = 0.3)+
-    ggplot2::facet_grid(variable~.)+
-    ggplot2::scale_x_continuous(paste("Output",sep="") )+ ggplot2::scale_y_continuous("Density")+
-    ggplot2::ggtitle("Density")+
-    aux_theme_publ(version=2)+ggplot2::theme(legend.position = "right")
-  
-  ggplot2::ggsave(plot,file=paste(path,'kdensities.pdf',sep=""),height=height,width=width)
   
   plot
 }
