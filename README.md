@@ -90,6 +90,6 @@ where:
  Please mail t.jetka at sysbiosig.org in case of any bugs, problems and questions regarding package or inquiries regarding information theory.
  ## Reference
  Please cite
-> Jetka et al., Information-theoretic analysis of multivariate signaling responses using SLEMI, 2018 (to be published)
+> Jetka T, Nienałtowski K, Winarski T, Błoński S, Komorowski M (2019) Information-theoretic analysis of multivariate single-cell signaling responses. PLOS Computational Biology 15(7): e1007132. https://doi.org/10.1371/journal.pcbi.1007132
  ## Licence
  SLEMI is released under the GNU licence and is freely available. A comprehensive documentation is available in directory [`paper/Manual.pdf`](https://github.com/sysbiosig/SLEMI/blob/master/paper/Manual.pdf).
