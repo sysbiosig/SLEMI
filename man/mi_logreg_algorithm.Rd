@@ -44,9 +44,9 @@ model formula (using formula_string arguments) should be provided if  data are n
 }
 \section{References}{
 
-Jetka T, Nienaltowski K, Winarski T, Blonski S, Komorowski M,  
+[1] Jetka T, Nienaltowski K, Winarski T, Blonski S, Komorowski M,  
 Information-theoretic analysis of multivariate single-cell signaling responses using SLEMI,
-\emph{PLOS Comp Bio}, 2019.
+\emph{PLoS Comput Biol}, 15(7): e1007132, 2019, https://doi.org/10.1371/journal.pcbi.1007132.
 }
 
 \examples{

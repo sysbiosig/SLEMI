@@ -1,12 +1,12 @@
 # Statistical Learning based Estimation of Mutual Information (SLEMI)
- The R package SLEMI is designed to estimate channel capacity between finite state input and multidimensional output from experimental data. For efficient computations, it uses iterative algorithm based on logistic regression.  The core function `capacity_logreg_main()` is the basic interface to all functionalities provided in the package. A comprehensive documentation is available in directory [`paper/Manual.pdf`](https://github.com/sysbiosig/SLEMI/blob/master/paper/Manual.pdf).
+ The R package SLEMI is designed to estimate channel capacity between finite state input and multidimensional output from experimental data. For efficient computations, it uses iterative algorithm based on logistic regression.  The core function `capacity_logreg_main()` is the basic interface to all functionalities provided in the package. A comprehensive documentation is available in directory [`vignette/SLEMI_vignette.pdf`](https://github.com/sysbiosig/SLEMI/blob/master/vignette/SLEMI_vignette.pdf).
  ## Setup
  ### Requirements - Hardware
   + A 32 or 64 bit processor (recommended: 64bit)
   + 1GHz processor (recommended: multicore for a comprehensive analysis)
   + 2GB MB RAM (recommended: 4GB+, depends on the size of experimental data)
  ### Requirements - Software
-The main software requirement is the installation of the R environment (version: >= 3.2), which can be downloaded from [R project website](https://www.r-project.org) and is distributed for all common operating systems.  We tested the package in R environment installed on Windows 7, 10; Mac OS X 10.11 - 10.13 and Ubuntu 18.04 with no significant differences in the performance. The use of a dedicated Integrated development environment (IDE), e.g. [RStudio](https://www.rstudio.com) is recommended. 
+The main software requirement is the installation of the R environment (version: >= 3.6), which can be downloaded from [R project website](https://www.r-project.org) and is distributed for all common operating systems.  We tested the package in R environment installed on Windows 7, 10; Mac OS X 10.11 - 10.13 and Ubuntu 18.04 with no significant differences in the performance. The use of a dedicated Integrated development environment (IDE), e.g. [RStudio](https://www.rstudio.com) is recommended. 
  Apart from base installation of R, SLEMI requires following packages:
  1. for installation 
    + devtools
@@ -87,9 +87,9 @@ where:
 * traintest_num (default= 40) - a number of repetitions of the overfitting test,
 * partition_trainfrac (default= 0.6) - a fraction of initial observations to use as a training dataset in the overfitting test
  ## Support
- Please mail t.jetka at sysbiosig.org in case of any bugs, problems and questions regarding package or inquiries regarding information theory.
+ Please mail t.jetka at gmail.com in case of any bugs, problems and questions regarding package or inquiries regarding information theory.
  ## Reference
  Please cite
 > Jetka T, Nienałtowski K, Winarski T, Błoński S, Komorowski M (2019) Information-theoretic analysis of multivariate single-cell signaling responses. PLOS Computational Biology 15(7): e1007132. https://doi.org/10.1371/journal.pcbi.1007132
  ## Licence
- SLEMI is released under the GNU licence and is freely available. A comprehensive documentation is available in directory [`paper/Manual.pdf`](https://github.com/sysbiosig/SLEMI/blob/master/paper/Manual.pdf).
+ SLEMI is released under the GNU licence and is freely available. A comprehensive documentation is available in directory [`vignette/SLEMI_vignette.pdf`](https://github.com/sysbiosig/SLEMI/blob/master/vignette/SLEMI_vignette.pdf).

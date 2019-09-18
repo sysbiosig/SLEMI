@@ -39,23 +39,24 @@
 #' different phenomenon (varying by units and/or magnitude) scaling is recommended.
 #'
 #' @section References:
-#' [1] Csiszar I, Tusnady G, Information geometry and alternating minimization procedures, Statistics & Decisions 1 Supplement 1 (1984), 205–237
+#' [1] Csiszar I, Tusnady G, Information geometry and alternating minimization procedures, Statistics & Decisions 1 Supplement 1 (1984), 205–237.
+#'
 #' [2] Jetka T, Nienaltowski K, Winarski T, Blonski S, Komorowski M,  
 #' Information-theoretic analysis of multivariate single-cell signaling responses using SLEMI,
-#' \emph{PLoS Comput Biol}, 15(7): e1007132, 2019, https://doi.org/10.1371/journal.pcbi.1007132,.
+#' \emph{PLoS Comput Biol}, 15(7): e1007132, 2019, https://doi.org/10.1371/journal.pcbi.1007132.
 #'
 #'
 #'
 #' @param dataRaw must be a data.frame object
 #' @param signal is a character object with names of columns of dataRaw to be treated as channel's input.
 #' @param response is a character vector with names of columns of dataRaw  to be treated as channel's output
+#' @param output_path is the directory in which output will be saved
 #' @param side_variables (optional) is a character vector that indicates side variables' columns of data, if NULL no side variables are included
 #' @param formula_string (optional) is a character object that includes a formula syntax to use in logistic regression model. 
 #' If NULL, a standard additive model of response variables is assumed. Only for advanced users.
 #' @param cc_maxit is the number of iteration of iterative optimisation of the algorithm to esimate channel capacity. Default is 100.
 #' @param lr_maxit is a maximum number of iteration of fitting algorithm of logistic regression. Default is 1000.
 #' @param maxNWts is a maximum acceptable number of weights in logistic regression algorithm. Default is 5000.
-#' @param output_path is the directory in which output will be saved
 #' @param plot_height, plot_width - the basic dimnesions of plots
 #' @param model_out is the logical indicating if the calculated logisitc regression model should be included in output list
 #' @param data_out  is the logical indicating if the data should be included in output list

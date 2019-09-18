@@ -5,13 +5,12 @@
 \title{Estimate channel capacity between discrete input and continuouse output}
 \usage{
 capacity_logreg_main(dataRaw, signal = "input", response = NULL,
-  side_variables = NULL, formula_string = NULL, cc_maxit = 100,
-  lr_maxit = 1000, MaxNWts = 5000, output_path = NULL,
-  testing = FALSE, model_out = TRUE, scale = TRUE,
-  TestingSeed = 1234, testing_cores = 1, boot_num = 10,
-  boot_prob = 0.8, sidevar_num = 10, traintest_num = 10,
-  partition_trainfrac = 0.6, plot_width = 6, plot_height = 4,
-  data_out = FALSE)
+  output_path = NULL, side_variables = NULL, formula_string = NULL,
+  cc_maxit = 100, lr_maxit = 1000, MaxNWts = 5000, testing = FALSE,
+  model_out = TRUE, scale = TRUE, TestingSeed = 1234,
+  testing_cores = 1, boot_num = 10, boot_prob = 0.8,
+  sidevar_num = 10, traintest_num = 10, partition_trainfrac = 0.6,
+  plot_width = 6, plot_height = 4, data_out = FALSE)
 }
 \arguments{
 \item{dataRaw}{must be a data.frame object}
@@ -19,6 +18,8 @@ capacity_logreg_main(dataRaw, signal = "input", response = NULL,
 \item{signal}{is a character object with names of columns of dataRaw to be treated as channel's input.}
 
 \item{response}{is a character vector with names of columns of dataRaw  to be treated as channel's output}
+
+\item{output_path}{is the directory in which output will be saved}
 
 \item{side_variables}{(optional) is a character vector that indicates side variables' columns of data, if NULL no side variables are included}
 
@@ -28,8 +29,6 @@ If NULL, a standard additive model of response variables is assumed. Only for ad
 \item{cc_maxit}{is the number of iteration of iterative optimisation of the algorithm to esimate channel capacity. Default is 100.}
 
 \item{lr_maxit}{is a maximum number of iteration of fitting algorithm of logistic regression. Default is 1000.}
-
-\item{output_path}{is the directory in which output will be saved}
 
 \item{testing}{is the logical indicating if the testing procedures should be executed}
 
@@ -113,10 +112,11 @@ different phenomenon (varying by units and/or magnitude) scaling is recommended.
 }
 \section{References}{
 
-[1] Csiszar I, Tusnady G, Information geometry and alternating minimization procedures, Statistics & Decisions 1 Supplement 1 (1984), 205–237
+[1] Csiszar I, Tusnady G, Information geometry and alternating minimization procedures, Statistics & Decisions 1 Supplement 1 (1984), 205–237.
+
 [2] Jetka T, Nienaltowski K, Winarski T, Blonski S, Komorowski M,  
 Information-theoretic analysis of multivariate single-cell signaling responses using SLEMI,
-\emph{PLOS Comp Bio}, 2019.
+\emph{PLoS Comput Biol}, 15(7): e1007132, 2019, https://doi.org/10.1371/journal.pcbi.1007132.
 }
 
 \examples{

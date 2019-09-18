@@ -5,8 +5,8 @@
 \title{Estimate mutual information between discrete input and continuouse output}
 \usage{
 mi_logreg_main(dataRaw, signal = "input", response = NULL,
-  side_variables = NULL, pinput = NULL, formula_string = NULL,
-  lr_maxit = 1000, MaxNWts = 5000, output_path = NULL,
+  output_path = NULL, side_variables = NULL, pinput = NULL,
+  formula_string = NULL, lr_maxit = 1000, MaxNWts = 5000,
   testing = FALSE, model_out = TRUE, scale = TRUE, graphs = TRUE,
   TestingSeed = 1234, testing_cores = 1, boot_num = 10,
   boot_prob = 0.8, sidevar_num = 10, traintest_num = 10,
@@ -20,6 +20,8 @@ mi_logreg_main(dataRaw, signal = "input", response = NULL,
 
 \item{response}{is a character vector with names of columns of dataRaw  to be treated as channel's output}
 
+\item{output_path}{is the directory in which output will be saved}
+
 \item{side_variables}{(optional) is a character vector that indicates side variables' columns of data, if NULL no side variables are included}
 
 \item{pinput}{is a numeric vector with piror probabilities of the input values. Uniform distribution is assumed as default (pinput=NULL).}
@@ -28,8 +30,6 @@ mi_logreg_main(dataRaw, signal = "input", response = NULL,
 If NULL, a standard additive model of response variables is assumed. Only for advanced users.}
 
 \item{lr_maxit}{is a maximum number of iteration of fitting algorithm of logistic regression. Default is 1000.}
-
-\item{output_path}{is the directory in which output will be saved}
 
 \item{testing}{is the logical indicating if the testing procedures should be executed}
 
@@ -102,9 +102,9 @@ different phenomenon (varying by units and/or magnitude) scaling is recommended.
 }
 \section{References}{
 
-Jetka T, Nienaltowski K, Winarski T, Blonski S, Komorowski M,  
+[1] Jetka T, Nienaltowski K, Winarski T, Blonski S, Komorowski M,  
 Information-theoretic analysis of multivariate single-cell signaling responses using SLEMI,
-\emph{PLOS Comp Bio}, 2019.
+\emph{PLoS Comput Biol}, 15(7): e1007132, 2019, https://doi.org/10.1371/journal.pcbi.1007132.
 }
 
 \examples{
