@@ -42,7 +42,7 @@
 #' [1] Csiszar I, Tusnady G, Information geometry and alternating minimization procedures, Statistics & Decisions 1 Supplement 1 (1984), 205–237
 #' [2] Jetka T, Nienaltowski K, Winarski T, Blonski S, Komorowski M,  
 #' Information-theoretic analysis of multivariate single-cell signaling responses using SLEMI,
-#' \emph{PLOS Comp Bio}, 2019.
+#' \emph{PLoS Comput Biol}, 15(7): e1007132, 2019, https://doi.org/10.1371/journal.pcbi.1007132,.
 #'
 #'
 #'
@@ -108,17 +108,21 @@
 #' cc_maxit=75,lr_maxit=1500, output_path="example2/",plot_height=8,plot_width=12) 
 #' 
 #' For further details see vignette
-capacity_logreg_main<-function(dataRaw, signal="input", response=NULL,side_variables=NULL,
-                                          formula_string=NULL,
-                                          cc_maxit=100,lr_maxit=1000, MaxNWts = 5000, 
-                                          output_path=NULL,
-                                          testing=FALSE, model_out=TRUE,scale=TRUE,
+capacity_logreg_main<-function(dataRaw, signal="input", response=NULL,output_path=NULL,
+  side_variables=NULL,formula_string=NULL,cc_maxit=100,lr_maxit=1000, MaxNWts = 5000, 
+  testing=FALSE, model_out=TRUE,scale=TRUE,
                                           TestingSeed=1234,testing_cores=1,
                                           boot_num=10,boot_prob=0.8,
                                           sidevar_num=10,
                                           traintest_num=10,partition_trainfrac=0.6,
                                           plot_width=6,plot_height=4,
                                           data_out=FALSE){
+  
+ if(!is.null(output_path)){
+    options(warn=-1)
+    dir.create(output_path,recursive=TRUE)
+    options(warn=0)
+ }
   
   #Debugging:
   cat("\n Estimating channel capacity ...")
@@ -154,8 +158,8 @@ capacity_logreg_main<-function(dataRaw, signal="input", response=NULL,side_varia
    if ( any(apply(data0,1,function(x) any(is.na(x)) )) ) {
      cat("\nThere are NA in observations - removing...")
      data0=data0[!apply(data0,1,function(x) any(is.na(x)) ),]
-     cat("Numer of observations after cleaning:")
-     cat(table(data0[[signal]]))
+     cat("Number of observations after cleaning:\n")
+     print(table(data0[[signal]]))
    }
   
    data0=func_signal_transform(data0,signal)
@@ -221,7 +225,7 @@ capacity_logreg_main<-function(dataRaw, signal="input", response=NULL,side_varia
     dir.create(output_path,recursive=TRUE)
     options(warn=0)
 
-    cat("\n Creating graphs ...")
+    cat("\n Drawing graphs ...")
     temp_logGraphs=try(output_graphs_main(data=dataRaw,signal=signal,response=response,side_variables=side_variables,cc_output=output,
                                 output_path=output_path,height=plot_height,width=plot_width),
         silent=FALSE)
@@ -230,9 +234,9 @@ capacity_logreg_main<-function(dataRaw, signal="input", response=NULL,side_varia
     cat("finished")
 
     saveRDS(output,file=paste(output_path,'output.rds',sep=""))
-    cat(paste0("\n Full Procedure finished. Results are in ",output_path))  
+    cat(paste0("\n Full Procedure finished. Results saved in ",output_path,"\n"))  
   } else {
-    cat(paste0("\n Full Procedure finished."))
+    cat(paste0("\n Full Procedure finished.\n"))
   }
   
   output

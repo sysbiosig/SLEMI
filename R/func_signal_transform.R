@@ -19,6 +19,16 @@ func_signal_transform<-function(data,signal){
   signal_class=class(data[[signal]])
   
   options(warn=-1)
+    if (signal_class=="integer") {
+      data[[signal]]=as.numeric(data[[signal]])
+      signal_class=class(data[[signal]])
+    }
+
+    if (signal_class=="logical") {
+      data[[signal]]=as.numeric(data[[signal]])
+      signal_class=class(data[[signal]])
+    }
+
     if (signal_class=="numeric") {
       data[[paste(signal,"_RAW",sep="")]]=data[[signal]]
       data[[signal]]=factor(data[[signal]],levels=sort(unique(data[[signal]])))
@@ -55,7 +65,7 @@ func_signal_transform<-function(data,signal){
 
     cat("")
   } else {
-    stop('signal is of unknown type')
+    stop(paste0('Input/signal is of type ',signal_class,'. It must be numeric, character or factor.'))
   }
   options(warn=0)
 

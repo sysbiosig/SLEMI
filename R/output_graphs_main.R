@@ -34,6 +34,7 @@ output_graphs_main<-function(data,signal,response,side_variables,cc_output,
   if (length(response_class)>3){
     response_class=response_class[seq(from=1,to=length(response_class),length.out = 3)]
     response=response[response%in%response_class]
+    warning("There are more than 3 dimensions in output. Restricting plots to 3 (minimal, middle and maximal).")
   }
 
   plot_box=try(capacity_output_graph_boxplots(data,signal,response,output_path,height=height,width=width),silent=FALSE)

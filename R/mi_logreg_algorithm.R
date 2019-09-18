@@ -8,7 +8,7 @@
 #' @section References:
 #' Jetka T, Nienaltowski K, Winarski T, Blonski S, Komorowski M,  
 #' Information-theoretic analysis of multivariate single-cell signaling responses using SLEMI,
-#' \emph{PLOS Comp Bio}, 2019.
+#' \emph{PLoS Comput Biol}, 15(7): e1007132, 2019, https://doi.org/10.1371/journal.pcbi.1007132,.
 #'
 #' @param data must be a data.frame object. Cannot contain NA values.
 #' @param signal is a character object with names of columns of dataRaw to be treated as channel's input.
@@ -177,7 +177,13 @@ mi_logreg_algorithm<-function(data,signal="signal",response="response",side_vari
     output$regression<-list()
     output$regression$test<-caret::confusionMatrix(factor(pred_test,levels=signal_levels),obs_test)
     output$regression$train<-caret::confusionMatrix(factor(pred_train,levels=signal_levels),obs_train)
-  
+    rm(obs_train,obs_test,pred_train,pred_test)
+    
+    
+    prob_ratio=(p0[1]/p0)*(pinput/pinput[1])
+    temp_val <- prob_lr_test*t(replicate(nrow(prob_lr_test),prob_ratio))
+    prob_lr_test <- data.frame(t(apply(temp_val,1,function(x){ x/sum(x) })))
+    colnames(prob_lr_test) <- signal_levels
     
     C_mc<-sapply(signal_levels,function(x) {
       mc_values=log(prob_lr_test[[x]][cell_id_test[[x]] ])

@@ -31,7 +31,7 @@
 #' @section References:
 #' Jetka T, Nienaltowski K, Winarski T, Blonski S, Komorowski M,  
 #' Information-theoretic analysis of multivariate single-cell signaling responses using SLEMI,
-#' \emph{PLOS Comp Bio}, 2019.
+#' \emph{PLoS Comput Biol}, 15(7): e1007132, 2019, https://doi.org/10.1371/journal.pcbi.1007132,.
 #'
 #'
 #' @param dataRaw must be a data.frame object
@@ -93,10 +93,9 @@
 #' lr_maxit=1500, output_path="example2/",plot_height=8,plot_width=12) 
 #' 
 #' For further details see vignette
-mi_logreg_main<-function(dataRaw, signal="input", response=NULL,side_variables=NULL,
-                         pinput=NULL, formula_string=NULL,
+mi_logreg_main<-function(dataRaw, signal="input", response=NULL,output_path=NULL,
+  side_variables=NULL,pinput=NULL, formula_string=NULL,
                                           lr_maxit=1000, MaxNWts = 5000, 
-                                          output_path=NULL,
                                           testing=FALSE, model_out=TRUE,scale=TRUE,graphs=TRUE,
                                           TestingSeed=1234,testing_cores=1,
                                           boot_num=10,boot_prob=0.8,
@@ -105,6 +104,12 @@ mi_logreg_main<-function(dataRaw, signal="input", response=NULL,side_variables=N
                                           plot_width=6,plot_height=4,
                                           data_out=FALSE){
   
+ if(!is.null(output_path)){
+    options(warn=-1)
+    dir.create(output_path,recursive=TRUE)
+    options(warn=0)
+ }
+
   #Debugging:
   cat("\n Estimating mutual information ...")
   
@@ -140,9 +145,9 @@ mi_logreg_main<-function(dataRaw, signal="input", response=NULL,side_variables=N
   
    data0=dataRaw[,c(signal,response,side_variables)]
    if ( any(apply(data0,1,function(x) any(is.na(x)) )) ) {
-     print("There are NA in observations - removing")
+     cat("\n There are NA in observations - removing ")
      data0=data0[!apply(data0,1,function(x) any(is.na(x)) ),]
-     print("Numer of observations after cleaning:")
+     cat("Number of observations after cleaning: \n")
      print(table(data0[[signal]]))
    }
   
@@ -205,7 +210,7 @@ mi_logreg_main<-function(dataRaw, signal="input", response=NULL,side_variables=N
     dir.create(output_path,recursive=TRUE)
     options(warn=0)
 
-    cat("\n Creating graphs")
+    cat("\n Drawing graphs")
     temp_logGraphs=try(output_graphs_main(data=dataRaw,signal=signal,response=response,side_variables=side_variables,cc_output=output,
                                 output_path=output_path,height=plot_height,width=plot_width),silent=FALSE)
     rm(temp_logGraphs)
@@ -213,10 +218,10 @@ mi_logreg_main<-function(dataRaw, signal="input", response=NULL,side_variables=N
     cat("... finished")
 
     saveRDS(output,file=paste(output_path,'output.rds',sep=""))
-    cat(paste0("Procedure finished. Results saved in ",output_path))
+    cat(paste0("Procedure finished. Results saved in ",output_path,"\n"))
 
     } else {
-      cat(paste0("Procedure finished."))
+      cat(paste0("Procedure finished.\n"))
     }
   
   output
