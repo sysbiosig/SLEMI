@@ -10,13 +10,15 @@
 #' @keywords internal
 #' @examples 
 #' data=data_example1
-#' aux_input_checks(data=data,signal="signal",response="response",side_variables="sideVar")
+#' SLEMI:::func_input_checks(data=data,signal="signal",response="response",side_variables="sideVar")
 #' 
+#' \dontrun{
 #' data=as.matrix(data_example1)
-#' aux_input_checks(data=data,signal="signal",response="response",side_variables="sideVar")
-#' 
+#' SLEMI:::func_input_checks(data=data,signal="signal",response="response",side_variables="sideVar")
+#'  
 #' data=data_example1
-#' aux_input_checks(data=data,signal="input",response="response",side_variables="sideVar")
+#' SLEMI:::func_input_checks(data=data,signal="input",response="response",side_variables="sideVar")
+#' }
 func_input_checks<-function(data,signal,response,side_variables){
   if (!is.data.frame(data)) {
     stop('data is not in data.frame format')

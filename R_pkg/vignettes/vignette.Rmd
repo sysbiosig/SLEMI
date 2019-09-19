@@ -1,0 +1,533 @@
+---
+title: "**Statistical Learning based Estimation of the Mutual Information (SLEMI) - R package**"
+subtitle: "**User Manual**"
+author: 
+- T. Jetka^[author and maintainer, please contact via t.jetka a t gmail.com], K. Nienałtowski, M. Komorowski
+date: "`r format(Sys.time(), '%d %B %Y')`"
+abstract:
+  The package SLEMI is designed to estimate channel capacity between finite state input and multidimensional continuous output from experimental data. For efficient computations, it uses an iterative algorithm based on logistic regression. In addition, functions to estimate mutual information and calculate probabilities of correct discrimination between a pair of input values are implemented. The method is published in PLOS Computational Biology [@jetka2019].
+output: 
+  html_vignette:
+    fig_caption: yes
+    number_sections: true
+    toc: true
+vignette: >
+  %\VignetteIndexEntry{SLEMI User Manual}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(fig.pos="h")
+```
+
+\newpage
+
+# Preliminaries
+
+## Requirements - Hardware
+  + A 32 or 64 bit processor (recommended: 64bit)
+  + 1GHz processor (recommended: multicore for a comprehensive analysis)
+  + 2GB MB RAM (recommended: 4GB+, depends on the size of experimental data)
+
+## Requirements - Software
+The main software requirement is the installation of the R environment (version: >= 3.2), which can be downloaded from [R project website](https://www.r-project.org) and is distributed for all common operating systems.  We tested the package in  R environment installed on Windows 7, 10; Mac OS X 10.11 - 10.13 and Ubuntu 18.04 with no significant differences in the performance. The use of a dedicated Integrated development environment (IDE), e.g. [RStudio](https://www.rstudio.com) is recommended. 
+
+Apart from a base installation of R, SLEMI requires the following R packages:
+
+1. for installation 
+
+  + devtools
+  
+2. for estimation
+  
+  + e1071
+  + Hmisc
+  + nnet
+  + glmnet
+  + caret
+  + doParallel (if parallel computation are needed)
+  
+3. for visualisation
+
+  + ggplot2
+  + ggthemes
+  + gridExtra
+  + corrplot
+  
+4. for data handling
+
+  + reshape2
+  + stringr
+  + plyr
+
+Each of the above packages can be installed by executing 
+
+> `install.packages("name_of_a_package")`
+
+in the R console. 
+
+Importantly, during installation availability of the above packages will be verified and missing packages will be automatically installed.
+
+\newpage
+
+## Installation
+
+The package can be directly installed from [GitHub](https://github.com/sysbiosig/SLEMI).  For installation, open RStudio (or base R) and run following commands in the R console
+
+```c
+install.packages("devtools") # run if 'devtools' is not installed
+library(devtools)
+install_github("sysbiosig/SLEMI")
+```
+Are required packages not found, they will be installed automatically.
+
+## Citing and support
+
+The package implements methods published in PLOS Computational Biology, please cite:
+
+> Jetka T, Nienałtowski K, Winarski T, Błoński S, Komorowski M (2019) Information-theoretic analysis of multivariate single-cell signaling responses. PLoS Comput Biol 15(7): e1007132. https://doi.org/10.1371/journal.pcbi.1007132
+
+All problems, issues and bugs can be reported here:
+
+> [https://github.com/sysbiosig/SLEMI/issues](https://github.com/sysbiosig/SLEMI/issues)
+
+or directly via e-mail: t.jetka a t gmail.com.
+
+\newpage
+
+# Structure of the package
+The three functions listed below constitute the key wrapper (interface) functions of the package.
+
+1. `mi_logreg_main()` enables calculation of the mutual information
+
+2. `capacity_logreg_main()` enables calculation of the information capacity
+
+3. `prob_discr_pairwise()` serves to calculate probabilities of correct discrimination between pairs of input values
+
+**The function `capacity_logreg_main()`** triggers  
+
+i) preprocessing of the data 
+
+ii) estimation of channel capacity 
+
+iii) running diagnostic procedures 
+
+iv) visualisation. 
+
+Each of the above steps is implemented within auxiliary functions as presented in the Figure 1 below.
+
+The algorithm to compute the information capacity is implemented within the function \newline `capacity_logreg_algorithm()`, which uses logistic regression from the `nnet` package. 
+
+Diagnostic procedures (significance and uncertainties of estimates) are provided in an internal function `capacity_logreg_testing()`. These are based on data bootstrapping and overfitting test. 
+
+For visualization, a set of graphs is created by an internal function `capacity_output_graphs()` and saved in a specified directory. In addition, `capacity_logreg_main()` returns a list with capacity estimates, optimal input probability distribution, diagnostic measures and other summary information about the analysis.
+
+
+**The function `mi_logreg_main()`** serves to calculate the mutual information. It initiates similar steps as the function `capacity_logreg_main()` but without performing the optimization of the distribution of the input. Instead, it requires the input distribution to be specified by the user as a function's argument. 
+
+Logistic regression and Monte Carlo methods, following an analogous algorithm as within the `capacity_logreg_algorithm()` function, are combined to estimate mutual information within a function `mi_logreg_algorithm()`. Visualisation and diagnostics are carried out by the same set of auxillary functions as for channel capacity (internal functions `capacity_output_graphs()` and `capacity_logreg_testing()`). 
+
+
+**The `prob_discr_pairwise()`** allows to estimate probabilities of correct discrimination between two different values of the input. It implements estimation of probabilities of correct classification by logistic regression (from `nnet` package) for each pair of input values. The probabilities of correct discrimination are visualized with a graph composed of pie charts.
+
+\clearpage
+
+```{r structure_pdf,fig.cap="Main function to estimate channel capacity", ,echo=FALSE, fig.pos="!h"}
+# All defaults
+knitr::include_graphics("plot_scheme.pdf")
+```
+
+
+
+\newpage
+
+## Formulation of the problem
+
+ SLEMI package is designed to estimate information-theoretic measures between a discrete-valued input, $X$, and multivariate, continuous output, $Y$.  In a typical experiment aimed to quantify information flow a given signaling system, input values $x_1\leq x_2 \ldots... \leq x_m$, ranging from 0 to saturation are considered.
+ 
+ Then, for each input level, $x_i$,$n_i$ observations are collected, which are represetned as vectors 
+ $$y^i_j \sim P(Y|X = x_i)$$
+ Within information theory the degree of information transmission is measured as the mutual information
+ $$MI(X,Y) = \sum_{i=1}^{m} P(x_i)\int_{R^k} P(y|X = x_i)log_2\frac{P(y|X = x_i)}{P(y)}dy$$
+ where $P(y)$ is the marginal distribution of the output. MI is expressed in bits and $2^{MI}$ can be interpreted as the number of inputs that the system can resolve on average.
+
+ The maximization of mutual information with respect to the input distribution, $P(X)$,  defines the information capacity, $C^*$. Formally,
+ $$C^* = max_{P(X)} MI(X,Y)$$
+ Information capacity is expressed in bits and $2^{C^*}$ can be interpreted as the maximal number of inputs that the system can effectively resolve. For details regarding information theory or its application in systems biology please see Methods section and Supplementary Information of the corresponding paper [@jetka2019].
+
+## Input data
+
+Functions  `mi_logreg_main()`, `capacity_logreg_main()`,  `prob_discr_pairwise()` require data in the form of the object `data.frame` with a specifc structure of rows and columns. Responses $y^i_j$ are assumed to be measured for a finite set of stimuli levels $x_1,x_2,\ldots,x_m$. The responses $y^i_j$ can be multidimensional. Usually, experimental dataset is represented as a table with rows and columns organized as shown in Figure 2.
+
+Therefore, the input data frame is expected to have the form represented by the above table, which can be formally described by the following conditions
+
++ each row represent a response of a single cell 
++ first column contains values of the input (X). 
++ second and subsequent columns contain values of the measured output(s); these columns should be of type `numeric`; order and number of outputs should be the same for all cells.
++ the number of unique values of the input should be finite
++ a large number of observations, possibly >100,  per input value is required. 
+
+
+```{r data_pdf, fig.cap="Conceptual representation of a generic experimental dataset needed for quantifying information transmission of a channel", ,echo=FALSE, fig.pos="!h"}
+# All defaults
+knitr::include_graphics("table_data.pdf")
+```
+
+
+An example of the input `data.frame`, which contains the measurements of the NfkB system presented in the **MP** is available within the package under the variable `data_nfkb`.  It has the following format
+
+```{r init, include=FALSE}
+library(grid)
+library(ggplot2)
+library(gridExtra)
+library(stringr)
+library(reshape2)
+display_plots=TRUE
+```
+
+```{r nfkb1, include=FALSE}
+library(SLEMI)
+tempdata=data_nfkb[,1:4]
+tempdata=tempdata[!apply(tempdata,1,function(x) any(is.na(x))),]
+row.names(tempdata)<-NULL
+```
+
+```{r nfkb2, results="asis",echo=FALSE}
+knitr::kable(rbind(tempdata[1:3,],tempdata[10001:10003,],tail(tempdata,3)))
+```
+
+where each row represents measurements of a single-cell, the column named `signal` specifies the level of stimulation, while response_T is the response of the NfkB system in an individual cell at time point T. The above table can be shown in R by calling
+
+
+```c
+library(SLEMI)
+rbind(data_nfkb[1:3,1:4],data_nfkb[10001:10003,1:4],tail(data_nfkb[,1:4],3))
+```
+
+\clearpage
+
+## Calculation of the information capacity 
+Calculation of the information capacity with default settings is perfomed by the command
+
+```c
+capacity_logreg_main(dataRaw, signal, response, output_path)
+```
+
+where the required arguments are 
+
+* `dataRaw` - data frame  with  column of type `factor` containing values of input (X) and columns of type `numeric` containing values of output (Y), where each row represents a single observation
+* `signal` - a character which indicates the name of the column in `dataRaw` with values of input (X)
+* `response` - a character vector which indicates names of columns in `dataRaw` with values of output (Y)
+* `output_path` - a character with the directory, to which output should be saved
+
+ The function returns a list with the following elements
+
+* cc - a numeric scalar with channel capacity estimate (in bits)
+* p_opt - a numeric vector with the optimal input distribution
+* model - a `nnet` object describing fitted logistic regression model
+* data - a data.frame with the raw experimental data  (if `data_out=TRUE`)
+* time - processing time of the algorithm
+* params - a vector of parameters used in the algorithm
+* regression - a confusion matrix of logistic regression predictions
+
+By default, all returned elements are saved in `output_path` directory in a file `output.rds`. Along with the output data, results of the computations are visualised as the graphs listed below
+
+* MainPlot.pdf - a simple summary plot with basic distribution visualization and capacity estimate
+* capacity.pdf - a diagram presenting the capacity estimates
+* data_boxplots.pdf - boxplots of data
+* data_MeanViolin.pdf - violin plots of data with input-output relation curve (of means)
+
+## Calculation of the mutual information 
+
+The function `mi_logreg_main()` takes a similar list of arguments and generates analogous plots to the function `capacity_logreg_main()`. The differences are listed below.
+
+Firstly, user must specify the distribution of input that should be used for calculation of the mutual information. It is done  by passing a numeric vector via the argument `pinput` of `mi_logreg_main()` function. Secondly, the returned list stores the value of the computed mutual information (in bits) under the element `mi`.
+
+## Calculation of the probabilities of correct discrimination
+
+Calculation of the probabilities of correct discrimination between pairs of input values is performed by running the following command
+
+```c
+prob_discr_pairwise(dataRaw, signal, response, output_path)
+```
+
+where the required arguments are analogous to the arguments of the functions `capacity_logreg_main()` and `mi_logreg_main()`. 
+The probabilities of correct discrimination are computed for each pair of unique input values and returned as a list with the following elements
+
+* prob_matr - a symmetric numeric matrix with a probability of discriminating between $i$-th and $j$-th input values in cell (i,j) 
+* diagnostics - a list of summaries describing fitted logistic regression models of classification  between each pair of input values.
+
+In addition, a plot of corresponding pie charts is created in `output_path` in the pdf format.
+
+
+
+\newpage
+
+# Diagnostic procedures
+
+In addition to the sole calculation of the information capacity, the function `capacity_logreg_main()` can also be used to asses accuracy of the channel capacity estimates
+resulting from potentially insuffecient sample size and potential over-fitting of the regression model. Two test are implemented. Precisely, the function can perfom
+
+1. Bootstrap test - capacity is re-calculated using $\alpha$% of data, sampled from the original dataset without replacement. After repeating the procedure $n$ times, standard deviation of the obtained sample can serve as an error of the capacity estimate.
+2. Over-fitting test - the original data is divided into Training and Testing datasets. Then, logistic regression is estimated using $\alpha$% of data (training dataset), and integrals of channel capacity are calculated via Monte Carlo using remaining $(1-\alpha)$% of data (testing dataset). It is repeated $n$ times.
+
+In order to perform diagostic tests, that by default are turned off,  user must set the value of the input argument   
+
+* testing = TRUE (default=FALSE) 
+
+In addition, settings of the diagnostic test can be altered by changing the following paramaters
+
+* TestingSeed (default= 1234) - the seed for the random number generator used to sample original dataset,
+* testing_cores (default= 4) - a number of cores to use (via `doParallel` package) in parallel computing, 
+* boot_num (default= 40) - a number of repetitions of the bootstrap , 
+* boot_prob (default= 0.8) - a fraction of initial observations to  use in the bootstrap, 
+* traintest_num (default= 40) - a number of repetitions of the overfitting test,
+* partition_trainfrac (default= 0.6) - a fraction of initial observations to use as a training dataset in the overfitting test
+
+
+# Additional functionalities of the function `capacity_logreg_main()`
+In addition, to the basic functionalities described above, the function `capacity_logreg_main()` allows to control several other paramters of the alorithm that computes the information capacity. These parameters and their effects are listed below. 
+
+
+* `model_out` (`default=TRUE`) - logical, specify if `nnet` model object should be saved into output file
+* `plot_width` (`default = 6`) - numeric, the basic width of created plots 
+* `plot_height` (`default = 4`) - numeric, the basic height of created plots
+* `scale` (`default = TRUE`) - logical, value indicating if the columns of `dataRaw` are to be centered and scaled, what is usually recommended for the purpose of stability of numerical computations. From a purely theoretical perspective, such transformation does not influence the value of channel capacity.
+* `lr_maxit` (`default = 1000`) - a maximum number of iterations of fitting step of logistic regression algorithm in `nnet` function. If a warning regarding lack of convergence of logistic model occurs, should be set to a larger value (possible if data is more complex or of a very high dimension).
+* `MaxNWts` (`default = 5000`) - a maximum number of parameters in logistic regression model. A limit is set to prevent accidental over-loading the memory. It should be set to a larger value in case of exceptionally high dimension of the output data or very high number of input values. In principle, logistic model requires fitting $(m-1)\cdot(d+1)$ parameters, where $m$ is the number of unique input values and $d$ is the dimension of the output.
+
+The latter two parameters, i.e `lr_maxit` and `MaxNWts`, allow to change the parameters of the logistic regression model fitting within the dependent `nnet` package. 
+
+
+\clearpage
+
+# Examples
+
+## Minimal example
+Below, we present a minimal model that may serve as a quick introduction to computations within the package. Precisely, we consider a system 
+
+i)  with four different input values $X$: 0, 0.1, 1 and 10
+ii) with the conditional output, $Y|X=x$, give by a one-dimensional log-normal distribution $\exp\{\mathcal{N}(10\cdot\frac{x}{1+x},1)\}$
+iii) and the sample consisting of 1000 observations for each input value.
+
+The example is analogous to the Test scenario 2 of the **Supplementary Information** of [@jetka2019] (Section 3.2).
+
+**Input data**
+
+Firstly, we generate a a synthetic dataset. The data corresponding to the model can be generated, and represented as the data frame `tempdata` with columns `input` and `output`, by running
+
+```{r mwe1,include=FALSE}
+xs=c(0,0.1,1,10) # concentration of input.
+tempdata = data.frame(input = factor(c(t(replicate(1000,xs))),
+                      levels=xs),
+                      output =  c(matrix(rnorm(4000, mean=10*(xs/(1+xs)),sd=c(1,1,1,1)),
+                                            ncol=4,byrow=TRUE) ))
+tempoutput  <- capacity_logreg_main(dataRaw=tempdata, 
+                                    signal="input", response="output")
+```
+
+
+```c
+xs=c(0,0.1,1,10) # concentration of input.
+tempdata = data.frame(input = factor(c(t(replicate(1000,xs))),
+                      levels=xs),
+                      output =  c(matrix(rnorm(4000, mean=10*(xs/(1+xs)),sd=c(1,1,1,1)),
+                                            ncol=4,byrow=TRUE) ))
+```
+
+The generated data.frame has the following structure
+
+```{r MWE15, results="asis",echo=FALSE}
+knitr::kable(rbind(tempdata[1:2,],tempdata[2001:2002,],tail(tempdata,2)))
+```
+
+**Calculation of the information capacity**
+
+The Information capacit can be calculated using the  `capacity_logreg_main()` function that takes the data frame "tempdata"  as `dataRaw` argument. Column names "input" and "output" are used as arguments `signal` and `response`, respectively. The `output_path` is set as "minimal_example/". Therefore, the function is run as follows
+        
+```c                   
+tempoutput  <- capacity_logreg_main(dataRaw=tempdata, 
+                                    signal="input", response="output", 
+                                    output_path="minimal_example/")
+```
+
+Results of the computations are returned as a data structure described before. In addition, results are  presented in the form of the following graph (by default saved as MainPlot.pdf in `minimal_example/` directory). It represents the input-output data and gives the corresponding channel capacity. 
+
+```{r data_pdf2, fig.cap="Standard output graph of the minimal working example", echo=FALSE, fig.pos="h"}
+# All defaults
+knitr::include_graphics("plot_1.pdf")
+```
+
+\newpage
+
+**Calculation of the mutual information**
+
+To compare mutual information of experimental data with its channel capacity, we can run
+(uniform distribution of input values is assumed, as default)
+```{r mwe4,include=FALSE}
+tempoutput_mi  <- mi_logreg_main(dataRaw=tempdata, 
+                                    signal="input", response="output",
+                                    pinput=rep(1/4,4))
+
+```
+
+```c
+tempoutput_mi  <- mi_logreg_main(dataRaw=tempdata, 
+                                    signal="input", response="output", 
+                                    output_path="minimal_exampleMI/",
+                                    pinput=rep(1/4,4)) 
+```
+and display results
+
+```{r mwe4b,include=TRUE}
+print(paste("Mutual Information:", tempoutput_mi$mi,"; ",
+            "Channel Capacity:", tempoutput$cc, sep=" "))
+```
+
+Alternatively, the distribution of the input can be defined with probabilities $(0.4,0.1,0.4,0.1)$
+```{r mwe4_2,include=FALSE}
+tempoutput_mi  <- mi_logreg_main(dataRaw=tempdata, 
+                                    signal="input", response="output",
+                                    pinput=c(0.4,0.1,0.4,0.1))
+
+```
+
+```c
+tempoutput_mi  <- mi_logreg_main(dataRaw=tempdata, 
+                                    signal="input", response="output", 
+                                    output_path="minimal_exampleMI/",
+                                    pinput=rc(0.4,0.1,0.4,0.1)) 
+```
+and display results
+
+```{r mwe4b_2,include=TRUE}
+print(paste("Mutual Information:", tempoutput_mi$mi,"; ",
+            "Channel Capacity:", tempoutput$cc, sep=" "))
+```
+
+**Calculation of the probabilities of correct discrimination**
+
+Probabilities of correct discrimination between input values are calculated as follows
+
+```{r mwe5,include=FALSE}
+tempoutput_probs  <- prob_discr_pairwise(dataRaw=tempdata, 
+                                    signal="input", response="output")
+```
+
+```c
+tempoutput_probs  <- prob_discr_pairwise(dataRaw=tempdata, 
+                                    signal="input", response="output", 
+                                    output_path="minimal_exampleProbs/") 
+```
+
+```{r mwe5b,include=FALSE}
+for (i in 1:4){
+  tempoutput_probs$prob_matr[i,i]=1
+}
+```
+
+The above command generates graph shown in Figure 4 in the output directory
+
+```{r data_pdf3, fig.cap="Standard output graph presenting probabilities of correct discrimination between each pair of input values.", ,echo=FALSE, fig.pos="h",out.height="9cm"}
+# All defaults
+knitr::include_graphics("plot_2.pdf")
+```
+
+
+\clearpage
+
+**Diagnostics**
+
+The diagnostic test can be performed as follows
+
+```c
+dir.create("example1_testing/")
+outputCLR=capacity_logreg_main(dataRaw=data_example1,
+                            signal="signal",response="response",
+                            output_path="example1_testing/",
+                            testing=TRUE, TestingSeed = 1234, testing_cores = 4, 
+                            boot_num = 40, boot_prob = 0.8, 
+                            traintest_num = 40,partition_trainfrac = 0.6)
+```
+
+It will run diagnostics with 40 re-sampling of the data, where bootstrap is calculated using 80% of the data, while the over-fitting test uses 60% of the original dataset. 
+
+---
+#```{r diag1,include=FALSE}
+#library(SLEMI)
+#dir.create("example1_testing/")
+#outputCLR_test=capacity_logreg_main(dataRaw=data_example1,
+#                            signal="signal",response="response", #side_variables = NULL, testing=TRUE, TestingSeed = 1234, testing_cores = 6, 
+#                            boot_num = 30, boot_prob = 0.8, 
+#                            sidevar_num = 6,
+#                            traintest_num = 30,partition_trainfrac = 0.6)
+#```
+---
+
+Its results are provided in graph presented in Figure 5.
+
+```{r diag2, include=FALSE}
+library(SLEMI)
+library(ggplot2)
+library(gridExtra)
+```
+
+```{r data_pdf4, fig.cap="Standard output graph of the diagnostic procedures. P-values (PV) are based on empirical test either left- or right- sided. In the top axis, black dot represents the estimate of the channel capacity that involves the  compete dataset, red dot is the mean of bootstrap procedures, while the bars are mean +/- sd. The remaining panels are histograms of all repetitions of a specific diagnostic procedure.", ,echo=FALSE, fig.pos="h"}
+# All defaults
+knitr::include_graphics("plot_3.pdf")
+```
+
+The top diagram shows the value of the capacity estimate (in black) obtained from the complete dataset and the mean value of bootstrap repetitions with indicated +/- standard deviation (in red). Plots that follow show histograms of calculated capacities for different diagnostic regimes. The black dot represents the estimate of the channel capacity based on the complete dataset. In addition, corresponding empirical p-values of both tests (left- and right-sided) are calculated to assess the randomness of obtained results (PV in the plots).
+
+A reliable estimation of the information capacity should yield the following results of the bootstrap and overfitting tests.
+
+1.  The bootstrap test should yield distribution of the capacity estimates with small variance. In addition, the capacity estimated based on the complete dataset should not be an outlier (p-value>0.05). Otherwise, it would indicate that the sample size is too low for an accurate estimation of the channel capacity.
+
+2. The over-fitting test should provide similar results. The capacity estimate obtained based on the complete dataset should lie within the distribution of capacities generated in the test. In the opposite case, it could mean that the logistic regression model does not fully grasp the essential aspects of input-output dependencies in the data. 
+
+\clearpage
+
+## Further step-by-step introductory examples 
+Two step-by-step examples that further illustrate the applicability of the SLEMI package are provided in the Section 6 of the 'Testing procedures' pdf file that is added to the publication [@jetka2019] and can be found [here](https://github.com/sysbiosig/SLEMI/blob/master/paper/TestingProcedures.pdf).
+
+## Examples in paper
+To reproduce results of the NFkB analysis presented in the publication, see Section 7 of the 'Testing procedures' pdf file that is added to the publication [@jetka2019] and can be found [here](https://github.com/sysbiosig/SLEMI/blob/master/paper/TestingProcedures.pdf).
+
+\clearpage
+
+# Session Info 
+
+```{r session}
+sessionInfo()
+``` 
+
+# References
+
+---
+references:
+- id: jetka2019
+  title:  Information-theoretic analysis of multivariate single-cell signaling responses
+  author:
+  - family: Jetka
+    given: Tomasz
+  - family: Nienałtowski
+    given: Karol
+  - family: Winarski
+    given: Tomasz
+  - family: Błoński
+    given: Sławomir
+  - family: Komorowski
+    given: Michał
+  container-title: PLOS Computational Biology
+  volume: 15
+  URL: 'https://doi.org/10.1371/journal.pcbi.1007132'
+  DOI: 10.1371/journal.pcbi.1007132
+  issue: 7
+  publisher: PLOS
+  page: e1007132
+  type: article-journal
+  issued:
+    year: 2019
+    month: 7
+---

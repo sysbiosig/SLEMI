@@ -27,9 +27,9 @@ If NULL, a standard additive model of response variables is assumed. Only for ad
 
 \item{lr_maxit}{is a maximum number of iteration of fitting algorithm of logistic regression. Default is 1000.}
 
-\item{diagnostics}{is a logical indicating if details of logistic regression fitting should be included in output list}
+\item{MaxNWts}{is a maximum acceptable number of weights in logistic regression algorithm. Default is 5000.}
 
-\item{maxNWts}{is a maximum acceptable number of weights in logistic regression algorithm. Default is 5000.}
+\item{diagnostics}{is a logical indicating if details of logistic regression fitting should be included in output list}
 }
 \value{
 a list with two elements:

@@ -21,8 +21,6 @@
 #' \item violin.pdf - violin plots of data
 #' }
 #' @keywords internal
-#' @examples 
-#' 
 #' 
 output_graphs_main<-function(data,signal,response,side_variables,cc_output,
                         output_path,height=4,width=6){

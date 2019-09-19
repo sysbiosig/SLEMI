@@ -36,7 +36,7 @@
 #' @param output_path is a directory where a pie chart with calculated probabilities will be saved. If NULL, the graph will not be created.
 #' @param scale is a logical indicating if the response variables should be scaled and centered before fitting logistic regression
 #' @param lr_maxit is a maximum number of iteration of fitting algorithm of logistic regression. Default is 1000.
-#' @param maxNWts is a maximum acceptable number of weights in logistic regression algorithm. Default is 5000.
+#' @param MaxNWts is a maximum acceptable number of weights in logistic regression algorithm. Default is 5000.
 #' @param diagnostics is a logical indicating if details of logistic regression fitting should be included in output list
 #' @export
 #' @return a list with two elements:
@@ -50,20 +50,21 @@
 #' }
 #' @examples 
 #' ## Calculate probabilities of discrimination for toy dataset
-#' ## Not run:
+#' \dontrun{
 #' temp_data=data_example1
 #' output=prob_discr_pairwise(dataRaw=data_example1,
 #'                    signal = "signal",
 #'                    response = "response",
 #'                    output_path = "discrimination_probabilities/toy_dataset/")
-#'
+#' }
 #' ## Calculate probabilities of discrimination for nfkb dataset
-#' ## Not run:
+#' \dontrun{
 #' for (it in seq(from=12,to=30,by=3)){
 #'  output=prob_discr_pairwise(dataRaw=data_nfkb,
 #'                             signal = "signal",
 #'                            response = paste0("response_",it),
 #'                             output_path = paste0("discrimination_probabilities/nfkb/",it,"/"))
+#' }
 #' }
 #'
 prob_discr_pairwise<-function(dataRaw,
@@ -131,11 +132,11 @@ prob_discr_pairwise<-function(dataRaw,
   #PreProcessing
   temp_idnumeric=sapply(data0,is.numeric)
   if (scale&sum(temp_idnumeric)==1) {
-    data0[,temp_idnumeric]<-(data0[,temp_idnumeric]-mean(data0[,temp_idnumeric]))/sd(data0[,temp_idnumeric])
+    data0[,temp_idnumeric]<-(data0[,temp_idnumeric]-mean(data0[,temp_idnumeric]))/stats::sd(data0[,temp_idnumeric])
     data <- cbind(data0,tempsignal)
   } else if (scale) {
     preProcValues <- caret::preProcess(data0, method = c("center", "scale"))
-    data <- cbind(predict(preProcValues, data0),tempsignal)
+    data <- cbind(stats::predict(preProcValues, data0),tempsignal)
   } else {
     data <- cbind(data0,tempsignal)
   }
@@ -145,9 +146,9 @@ prob_discr_pairwise<-function(dataRaw,
   cat(" completed")
   
   if (!is.null(formula_string)){
-    formula=as.formula(formula_string)
+    formula=stats::as.formula(formula_string)
   } else {
-    formula=as.formula(func_formula_generator(signal,response, side_variables))
+    formula=stats::as.formula(func_formula_generator(signal,response, side_variables))
   }
   
   chosen_stim=unique(data[[signal]])
@@ -181,10 +182,10 @@ prob_discr_pairwise<-function(dataRaw,
       }
 
       #Debugging:
-      lr_model=nnet::multinom(formula,data=dataChosen,na.action=na.omit,maxit=lr_maxit, MaxNWts = MaxNWts,trace=FALSE)
+      lr_model=nnet::multinom(formula,data=dataChosen,na.action=stats::na.omit,maxit=lr_maxit, MaxNWts = MaxNWts,trace=FALSE)
       model_output[[paste(chosen_stim[is],chosen_stim[js],sep="_")]]$nnet_model=lr_model
       
-      prob_lr<-data.frame(fitted(lr_model))
+      prob_lr<-data.frame(stats::fitted(lr_model))
       if (length(signal_levels)==2) {prob_lr=cbind(1-prob_lr,prob_lr)}
         
       prob_ratio=(p0[1]/p0)*(pinput/pinput[1])
@@ -241,10 +242,10 @@ if (min_val<0.5){min_val=-1}
 
 
 if (!is.null(output_path)){                       
-  pdf(paste0(output_path,"/plot_probs_discr.pdf"),height=0.75*length(chosen_stim),width=0.75*length(chosen_stim))
+  grDevices::pdf(paste0(output_path,"/plot_probs_discr.pdf"),height=0.75*length(chosen_stim),width=0.75*length(chosen_stim))
     corrplot::corrplot(prob_matrix,type = "upper", method = "pie",
       cl.lim = c( min(c(min_val,0.5)) , 1),col=col2(100), diag=FALSE)
-  dev.off()
+  grDevices::dev.off()
    cat("graph created\n") 
   }
                      

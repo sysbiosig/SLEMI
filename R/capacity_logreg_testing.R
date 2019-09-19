@@ -41,9 +41,6 @@
 #' }
 #' Each of above is a list, where an element is an output of a single repetition of the channel capacity algorithm
 #' @export
-#'
-#' @examples 
-#' 
 capacity_logreg_testing<-function(data,signal="signal",response="response",side_variables=NULL,
                                           cc_maxit=100,lr_maxit=1000,MaxNWts = 5000,
                                           formula_string=NULL,

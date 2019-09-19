@@ -30,6 +30,8 @@ If NULL, a standard additive model of response variables is assumed. Only for ad
 
 \item{lr_maxit}{is a maximum number of iteration of fitting algorithm of logistic regression. Default is 1000.}
 
+\item{MaxNWts}{is a maximum acceptable number of weights in logistic regression algorithm. Default is 5000.}
+
 \item{testing}{is the logical indicating if the testing procedures should be executed}
 
 \item{model_out}{is the logical indicating if the calculated logisitc regression model should be included in output list}
@@ -50,11 +52,11 @@ If NULL, a standard additive model of response variables is assumed. Only for ad
 
 \item{partition_trainfrac}{is the fraction of data to be used as a training dataset}
 
-\item{plot_height, }{plot_width - the basic dimnesions of plots}
+\item{plot_width}{- the basic dimnesions (width) of plots, in inches}
+
+\item{plot_height}{- the basic dimnesions (height) of plots, in inches}
 
 \item{data_out}{is the logical indicating if the data should be included in output list}
-
-\item{maxNWts}{is a maximum acceptable number of weights in logistic regression algorithm. Default is 5000.}
 }
 \value{
 a list with several elements:
@@ -124,7 +126,7 @@ tempdata=data_example1
 dir.create("example1/",recursive=TRUE)
 outputCLR1=capacity_logreg_main(dataRaw=tempdata,
 signal="signal", response="response",
-formula_string = "signal~output",
+formula_string = "signal~response",
 cc_maxit=75,lr_maxit=1500, output_path="example1/",plot_height=8,plot_width=12)
 
 
@@ -133,7 +135,7 @@ dir.create("example1_testing/",recursive=TRUE)
 outputCLR1_testing=capacity_logreg_main(dataRaw=tempdata,
 signal="signal", response="response",
 cc_maxit=75,lr_maxit=1500, output_path="example1_testing/",plot_height=8,plot_width=12,
-testing=TRUE,graphs=TRUE,TestingSeed=11111, boot_num=50,boot_prob=0.8,testing_cores=2,
+testing=TRUE,TestingSeed=11111, boot_num=50,boot_prob=0.8,testing_cores=2,
 sidevar_num=2,traintest_num=50,partition_trainfrac=0.6)
 
 
@@ -144,5 +146,5 @@ signal="signal", response=c("X1","X2","X3"),
 formula_string = "signal~X1+X2+X3",
 cc_maxit=75,lr_maxit=1500, output_path="example2/",plot_height=8,plot_width=12) 
 
-For further details see vignette
+#For further details see vignette
 }

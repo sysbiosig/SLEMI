@@ -17,9 +17,9 @@
 #' @keywords internal
 #' @examples 
 #' data=data_example1
-#' dataBootstrap = sampling_bootstrap(data=data,prob=0.8,"signal")
-#' dataShuffle = sampling_shuffle(data=data,"sideVar")
-#' dataTrainTest = sampling_partition(data=data,dataDiv="signal",partition_trainfrac=0.6)
+#' dataBootstrap = SLEMI:::sampling_bootstrap(data=data,prob=0.8,data$signal)
+#' dataShuffle = SLEMI:::sampling_shuffle(data=data,"sideVar")
+#' dataTrainTest = SLEMI:::sampling_partition(data=data,dataDiv=data$signal,partition_trainfrac=0.6)
 
 sampling_bootstrap<-function(data,prob=1,dataDiv){
   # Bootstrapping samples within a given variable level

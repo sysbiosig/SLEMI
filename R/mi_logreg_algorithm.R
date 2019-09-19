@@ -18,7 +18,7 @@
 #' @param formula_string (optional) is a character object that includes a formula syntax to use in logistic regression model. 
 #' If NULL, a standard additive model of response variables is assumed. Only for advanced users.
 #' @param lr_maxit is a maximum number of iteration of fitting algorithm of logistic regression. Default is 1000.
-#' @param maxNWts is a maximum acceptable number of weights in logistic regression algorithm. Default is 5000.
+#' @param MaxNWts is a maximum acceptable number of weights in logistic regression algorithm. Default is 5000.
 #' @param model_out is the logical indicating if the calculated logisitc regression model should be included in output list
 #' @export
 #' @return a list with three elements:
@@ -30,7 +30,6 @@
 #' }
 #' @examples 
 #' ## Estimate mutual information directly
-#' ## Not run:
 #' temp_data=data_example1
 #' output=mi_logreg_algorithm(data=data_example1,
 #'                    signal = "signal",
@@ -44,9 +43,9 @@ mi_logreg_algorithm<-function(data,signal="signal",response="response",side_vari
   output<-list()
   
   if (!is.null(formula_string)){
-    formula=as.formula(formula_string)
+    formula=stats::as.formula(formula_string)
   } else {
-    formula=as.formula(func_formula_generator(signal,response, side_variables))
+    formula=stats::as.formula(func_formula_generator(signal,response, side_variables))
   }
   
   if (is.null(data$train)|is.null(data$test)) {
@@ -76,9 +75,9 @@ mi_logreg_algorithm<-function(data,signal="signal",response="response",side_vari
       pinput=rep(1/length(p0),length(p0))
     }
     
-    lr_model=nnet::multinom(formula,data=data,na.action=na.omit,maxit=lr_maxit, MaxNWts = MaxNWts,trace=FALSE)
+    lr_model=nnet::multinom(formula,data=data,na.action=stats::na.omit,maxit=lr_maxit, MaxNWts = MaxNWts,trace=FALSE)
     
-    prob_lr<-data.frame(fitted(lr_model))
+    prob_lr<-data.frame(stats::fitted(lr_model))
     if (length(signal_levels)==2) {prob_lr=cbind(1-prob_lr,prob_lr)}
     
     colnames(prob_lr)<-as.character(signal_levels)
@@ -152,11 +151,11 @@ mi_logreg_algorithm<-function(data,signal="signal",response="response",side_vari
     }
     
 
-    lr_model=nnet::multinom(formula,data=data_train,na.action=na.omit,maxit=lr_maxit, MaxNWts = MaxNWts,trace=FALSE)
+    lr_model=nnet::multinom(formula,data=data_train,na.action=stats::na.omit,maxit=lr_maxit, MaxNWts = MaxNWts,trace=FALSE)
     
-    prob_lr_train<-data.frame(fitted(lr_model))
+    prob_lr_train<-data.frame(stats::fitted(lr_model))
     if (length(signal_levels)==2) {prob_lr_train=cbind(1-prob_lr_train,prob_lr_train)}
-    prob_lr_test<-data.frame(predict(lr_model,newdata=data_test,type="prob"))
+    prob_lr_test<-data.frame(stats::predict(lr_model,newdata=data_test,type="prob"))
     if (length(signal_levels)==2) {prob_lr_test=cbind(1-prob_lr_test,prob_lr_test)}
     
     colnames(prob_lr_train)<-as.character(signal_levels)

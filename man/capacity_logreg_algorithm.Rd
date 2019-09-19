@@ -27,7 +27,7 @@ If NULL, a standard additive model of response variables is assumed. Only for ad
 
 \item{lr_maxit}{is a maximum number of iteration of fitting algorithm of logistic regression. Default is 1000.}
 
-\item{maxNWts}{is a maximum acceptable number of weights in logistic regression algorithm. Default is 5000.}
+\item{MaxNWts}{is a maximum acceptable number of weights in logistic regression algorithm. Default is 5000.}
 }
 \value{
 a list with three elements:
@@ -54,8 +54,8 @@ Information-theoretic analysis of multivariate single-cell signaling responses u
 tempdata=data_example1
 dir.create("example1/",recursive=TRUE)
 outputCLR1=capacity_logreg_main(dataRaw=tempdata,
-signal="signal", response="output",
-formula_string = "signal~output",
+signal="signal", response="response",
+formula_string = "signal~response",
 cc_maxit=75,lr_maxit=1500, output_path="example1/",plot_height=8,plot_width=12)
 
 }

@@ -43,13 +43,13 @@
 #' @export
 #' @examples 
 #' ## Compute uncertainity of mutual information estimator using 4 cores
-#' ## Not run:
+#' \dontrun{
 #' temp_data=data_example1
 #' output=mi_logreg_testing(data=data_example1,
 #'                    signal = "signal",
 #'                    response = "response",
 #'                    testing_cores = 4)
-#'
+#' }
 mi_logreg_testing<-function(data,signal="signal",response="response",side_variables=NULL,
                             pinput=NULL,lr_maxit=1000,MaxNWts = 5000,
                                   formula_string=NULL,

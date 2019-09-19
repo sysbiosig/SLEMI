@@ -19,7 +19,7 @@
 #' If NULL, a standard additive model of response variables is assumed. Only for advanced users.
 #' @param cc_maxit is the number of iteration of iterative optimisation of the algorithm to esimate channel capacity. Default is 100.
 #' @param lr_maxit is a maximum number of iteration of fitting algorithm of logistic regression. Default is 1000.
-#' @param maxNWts is a maximum acceptable number of weights in logistic regression algorithm. Default is 5000.
+#' @param MaxNWts is a maximum acceptable number of weights in logistic regression algorithm. Default is 5000.
 #' @param model_out is the logical indicating if the calculated logisitc regression model should be included in output list
 #' @export
 #' @return a list with three elements:
@@ -31,11 +31,10 @@
 #' }
 #' @examples 
 #' tempdata=data_example1
-#' dir.create("example1/",recursive=TRUE)
 #' outputCLR1=capacity_logreg_main(dataRaw=tempdata,
-#' signal="signal", response="output",
-#' formula_string = "signal~output",
-#' cc_maxit=75,lr_maxit=1500, output_path="example1/",plot_height=8,plot_width=12)
+#' signal="signal", response="response",
+#' formula_string = "signal~response",
+#' cc_maxit=75,lr_maxit=1500, plot_height=8,plot_width=12)
 #'
 capacity_logreg_algorithm<-function(data,
                                     signal="signal",response="response",side_variables=NULL,
@@ -46,9 +45,9 @@ capacity_logreg_algorithm<-function(data,
   output<-list()
   
   if (!is.null(formula_string)){
-    formula=as.formula(formula_string)
+    formula=stats::as.formula(formula_string)
   } else {
-    formula=as.formula(func_formula_generator(signal,response, side_variables))
+    formula=stats::as.formula(func_formula_generator(signal,response, side_variables))
   }
   
   if (is.null(data$train)|is.null(data$test)) {
@@ -74,9 +73,9 @@ capacity_logreg_algorithm<-function(data,
     }
     
     
-    lr_model=nnet::multinom(formula,data=data,na.action=na.omit,maxit=lr_maxit, MaxNWts = MaxNWts,trace=FALSE)
+    lr_model=nnet::multinom(formula,data=data,na.action=stats::na.omit,maxit=lr_maxit, MaxNWts = MaxNWts,trace=FALSE)
     
-    prob_lr<-data.frame(fitted(lr_model))
+    prob_lr<-data.frame(stats::fitted(lr_model))
     if (length(signal_levels)==2) {prob_lr=cbind(1-prob_lr,prob_lr)}
     
     colnames(prob_lr)<-as.character(signal_levels)
@@ -136,11 +135,11 @@ capacity_logreg_algorithm<-function(data,
       stop('There is no observations of some signals')
     }
     
-    lr_model=nnet::multinom(formula,data=data_train,na.action=na.omit,maxit=lr_maxit, MaxNWts = MaxNWts,trace=FALSE)
+    lr_model=nnet::multinom(formula,data=data_train,na.action=stats::na.omit,maxit=lr_maxit, MaxNWts = MaxNWts,trace=FALSE)
     
-    prob_lr_train<-data.frame(fitted(lr_model))
+    prob_lr_train<-data.frame(stats::fitted(lr_model))
     if (length(signal_levels)==2) {prob_lr_train=cbind(1-prob_lr_train,prob_lr_train)}
-    prob_lr_test<-data.frame(predict(lr_model,newdata=data_test,type="prob"))
+    prob_lr_test<-data.frame(stats::predict(lr_model,newdata=data_test,type="prob"))
     if (length(signal_levels)==2) {prob_lr_test=cbind(1-prob_lr_test,prob_lr_test)}
     
     colnames(prob_lr_train)<-as.character(signal_levels)

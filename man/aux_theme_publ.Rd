@@ -20,8 +20,7 @@ Internal, auxillary functions
 This function changes the theme of plots created with the use of ggplot package
 }
 \examples{
-ggplot(data=data.frame(x=1:10,y=rnorm(10)),aes(x=x,y=y))+geom_point()+theme_publ(version=1)
-ggplot(data=data.frame(x=1:10,y=rnorm(10)),aes(x=x,y=y))+geom_point()+theme_publ(version=2)
-ggplot(data=data.frame(x=1:10,y=rnorm(10)),aes(x=x,y=y))+geom_point()+theme_publ(version=3)
+library(ggplot2)
+ggplot(data=data.frame(x=1:10,y=rnorm(10)),aes(x=x,y=y))+geom_point()+SLEMI:::aux_theme_publ(version=2)
 }
 \keyword{internal}

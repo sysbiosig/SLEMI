@@ -9,7 +9,7 @@
 #' Then, for each input level, \eqn{x_i}, \eqn{n_i} observations are collected, which are represetned as vectors 
 #' \deqn{y^i_j \sim P(Y|X = x_i)}
 #' Within information theory the degree of information transmission is measured as the mutual information
-#' MI(X,Y) = \sum_{i=1}^{m} P(x_i)\int_{R^k} P(y|X = x_i)log_2\frac{P(y|X = x_i)}{P(y)}dy,
+#' \deqn{MI(X,Y) = \sum_{i=1}^{m} P(x_i)\int_{R^k} P(y|X = x_i)log_2\frac{P(y|X = x_i)}{P(y)}dy,}
 #' where \eqn{P(y)} is the marginal distribution of the output. MI is expressed in bits and \eqn{2^{MI}} can be interpreted as the number of 
 #' inputs that the system can resolve on average.
 #'
@@ -43,8 +43,9 @@
 #' @param formula_string (optional) is a character object that includes a formula syntax to use in logistic regression model. 
 #' If NULL, a standard additive model of response variables is assumed. Only for advanced users.
 #' @param lr_maxit is a maximum number of iteration of fitting algorithm of logistic regression. Default is 1000.
-#' @param maxNWts is a maximum acceptable number of weights in logistic regression algorithm. Default is 5000.
-#' @param plot_height, plot_width - the basic dimnesions of plots
+#' @param MaxNWts is a maximum acceptable number of weights in logistic regression algorithm. Default is 5000.
+#' @param plot_height - the basic dimnesions (height) of plots, in inches
+#' @param plot_width - the basic dimnesions (width) of plots, in inches
 #' @param model_out is the logical indicating if the calculated logisitc regression model should be included in output list
 #' @param data_out  is the logical indicating if the data should be included in output list
 #' @param scale is a logical indicating if the response variables should be scaled and centered before fitting logistic regression
@@ -71,32 +72,30 @@
 #' @export
 #' @examples 
 #' tempdata=data_example1
-#' dir.create("example1/",recursive=TRUE)
 #' outputCLR1=mi_logreg_main(dataRaw=tempdata,
 #' signal="signal", response="response",
-#' lr_maxit=1500, output_path="example1/",plot_height=8,plot_width=12)
+#' lr_maxit=1500,plot_height=8,plot_width=12)
 #' 
 #' 
 #' tempdata=data_example1
-#' dir.create("example1_testing/",recursive=TRUE)
+#' \dontrun{
 #' outputCLR1_testing=mi_logreg_main(dataRaw=tempdata,
 #' signal="signal", response="response",
 #' lr_maxit=1500, output_path="example1_testing/",plot_height=8,plot_width=12,
-#' testing=TRUE,graphs=TRUE,TestingSeed=11111, boot_num=50,boot_prob=0.8,testing_cores=2,
+#' testing=TRUE,TestingSeed=11111, boot_num=50,boot_prob=0.8,testing_cores=2,
 #' sidevar_num=2,traintest_num=50,partition_trainfrac=0.6)
-#' 
+#' }
 #' 
 #' tempdata=data_example2
-#' dir.create("example2/",recursive=TRUE)
 #' outputCLR2=mi_logreg_main(dataRaw=tempdata,
 #' signal="signal", response=c("X1","X2","X3"),
-#' lr_maxit=1500, output_path="example2/",plot_height=8,plot_width=12) 
+#' lr_maxit=1500, plot_height=8,plot_width=12) 
 #' 
-#' For further details see vignette
+#' #For further details see vignette
 mi_logreg_main<-function(dataRaw, signal="input", response=NULL,output_path=NULL,
   side_variables=NULL,pinput=NULL, formula_string=NULL,
                                           lr_maxit=1000, MaxNWts = 5000, 
-                                          testing=FALSE, model_out=TRUE,scale=TRUE,graphs=TRUE,
+                                          testing=FALSE, model_out=TRUE,scale=TRUE,
                                           TestingSeed=1234,testing_cores=1,
                                           boot_num=10,boot_prob=0.8,
                                           sidevar_num=10,
@@ -163,11 +162,11 @@ mi_logreg_main<-function(dataRaw, signal="input", response=NULL,output_path=NULL
   #PreProcessing
   temp_idnumeric=sapply(data0,is.numeric)
   if (scale&sum(temp_idnumeric)==1) {
-    data0[,temp_idnumeric]<-(data0[,temp_idnumeric]-mean(data0[,temp_idnumeric]))/sd(data0[,temp_idnumeric])
+    data0[,temp_idnumeric]<-(data0[,temp_idnumeric]-mean(data0[,temp_idnumeric]))/stats::sd(data0[,temp_idnumeric])
     data <- cbind(data0,tempsignal)
   } else if (scale) {
     preProcValues <- caret::preProcess(data0, method = c("center", "scale"))
-    data <- cbind(predict(preProcValues, data0),tempsignal)
+    data <- cbind(stats::predict(preProcValues, data0),tempsignal)
   } else {
     data <- cbind(data0,tempsignal)
   }

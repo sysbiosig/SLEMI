@@ -9,11 +9,11 @@
 #' copy of original column
 #' @examples 
 #' data=data_example1
-#' data1=aux_signal_transform(data,"signal")
+#' data1=SLEMI:::func_signal_transform(data,"signal")
 #' data$signal=as.character(data$signal)
-#' data2=aux_signal_transform(data,"signal")
+#' data2=SLEMI:::func_signal_transform(data,"signal")
 #' data$signal=as.numeric(data$signal)
-#' data3=aux_signal_transform(data,"signal")
+#' data3=SLEMI:::func_signal_transform(data,"signal")
 #' @keywords internal
 func_signal_transform<-function(data,signal){
   signal_class=class(data[[signal]])

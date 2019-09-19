@@ -10,10 +10,11 @@
 #' @param height integer indicating the height of a single plot
 #' @param width integer indicating the width of a single plot
 #' @keywords internal
-#' @examples 
 #' 
 capacity_output_graph_boxplots<-function(data,signal,response,path,height=4,width=6){
   
+  x=y=density=NULL
+
   data_colnames=colnames(data)
   response_length=length(response)
   signalNUM=paste(signal,"_RAW",sep="")
@@ -45,6 +46,8 @@ capacity_output_graph_boxplots<-function(data,signal,response,path,height=4,widt
 #' @keywords internal
 capacity_output_graph_violinMean<-function(data,signal,response,path,height=4,width=6){
   
+  x=y=density=NULL
+
   data_colnames=colnames(data)
   response_length=length(response)
   signalNUM=paste(signal,"_RAW",sep="")
@@ -86,7 +89,9 @@ capacity_output_graph_violinMean<-function(data,signal,response,path,height=4,wi
 #' @rdname capacity_output_graph_boxplots
 #' @keywords internal
 capacity_output_graph_boxplotsSideVar<-function(data,signal,side_variables,path,height=4,width=6){
-  
+    
+  x=y=density=NULL
+
   if (is.null(side_variables)) {
     plot=grid::textGrob(" ")  
   } else if (!all(sapply(data[,side_variables],function(x) is.numeric(x) ))) {
@@ -112,7 +117,9 @@ capacity_output_graph_boxplotsSideVar<-function(data,signal,side_variables,path,
 #' @rdname capacity_output_graph_boxplots
 #' @keywords internal
 capacity_output_graph_capacity<-function(cc_output,path,height=4,width=6){
-  
+    
+  x=y=density=..density..=NULL
+
   temp_name="Capacity"
   if (any(names(cc_output)=="mi")){
     temp_name="Mutual Information"
@@ -134,7 +141,7 @@ capacity_output_graph_capacity<-function(cc_output,path,height=4,width=6){
             panel.grid.major.y=ggplot2::element_blank(),
             axis.line.y=ggplot2::element_blank())
     
-    ggplot2::ggsave(plot,file=paste(path,str_replace_all(str_to_lower(temp_name)," ","_"),'pdf',sep=""),height=2,width=6)
+    ggplot2::ggsave(plot,file=paste(path,stringr::str_replace_all(stringr::str_to_lower(temp_name)," ","_"),'pdf',sep=""),height=2,width=6)
     
   } else if (length(cc_output$testing)==2) {
     
@@ -150,7 +157,7 @@ capacity_output_graph_capacity<-function(cc_output,path,height=4,width=6){
     }
 
     boot_results=sapply(cc_output$testing$bootstrap,function(x) x$cc)
-    boot_sd=sd(boot_results)
+    boot_sd=stats::sd(boot_results)
     boot_mean=mean(boot_results)
     
     plot1<-ggplot2::ggplot(data=data.frame(x=cc_output$cc,y=0),ggplot2::aes(x=x,y=y) ) + 
@@ -193,7 +200,7 @@ capacity_output_graph_capacity<-function(cc_output,path,height=4,width=6){
                       layout_matrix=rbind(c(1,1),c(1,1),c(2,4),c(2,5),c(3,6),c(3,7)))
     
     
-    ggplot2::ggsave(plot,file=paste(path,str_replace_all(str_to_lower(temp_name)," ","_"),'.pdf',sep=""),height=1.5*height,width=width)
+    ggplot2::ggsave(plot,file=paste(path,stringr::str_replace_all(stringr::str_to_lower(temp_name)," ","_"),'.pdf',sep=""),height=1.5*height,width=width)
     
   } else {
 
@@ -217,7 +224,7 @@ capacity_output_graph_capacity<-function(cc_output,path,height=4,width=6){
     }
 
     boot_results=sapply(cc_output$testing$bootstrap,function(x) x$cc)
-    boot_sd=sd(boot_results)
+    boot_sd=stats::sd(boot_results)
     boot_mean=mean(boot_results)
     
     plot1<-ggplot2::ggplot(data=data.frame(x=cc_output$cc,y=0),ggplot2::aes(x=x,y=y) ) + 
@@ -274,7 +281,7 @@ capacity_output_graph_capacity<-function(cc_output,path,height=4,width=6){
                                  layout_matrix=rbind(c(1,1),c(1,1),c(2,6),c(2,7),c(3,8),c(3,9),c(4,10),c(4,11),c(5,12),c(5,13)))
     
     
-    ggplot2::ggsave(plot,file=paste(path,str_replace_all(str_to_lower(temp_name)," ","_"),'.pdf',sep=""),height=2*height,width=width)
+    ggplot2::ggsave(plot,file=paste(path,stringr::str_replace_all(stringr::str_to_lower(temp_name)," ","_"),'.pdf',sep=""),height=2*height,width=width)
   }
   
   plot
