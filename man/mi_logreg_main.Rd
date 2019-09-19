@@ -83,7 +83,7 @@ In a typical experiment aimed to quantify information flow a given signaling sys
 Then, for each input level, \eqn{x_i}, \eqn{n_i} observations are collected, which are represetned as vectors 
 \deqn{y^i_j \sim P(Y|X = x_i)}
 Within information theory the degree of information transmission is measured as the mutual information
-MI(X,Y) = \sum_{i=1}^{m} P(x_i)\int_{R^k} P(y|X = x_i)log_2\frac{P(y|X = x_i)}{P(y)}dy,
+\deqn{MI(X,Y) = \sum_{i=1}^{m} P(x_i)\int_{R^k} P(y|X = x_i)log_2\frac{P(y|X = x_i)}{P(y)}dy,}
 where \eqn{P(y)} is the marginal distribution of the output. MI is expressed in bits and \eqn{2^{MI}} can be interpreted as the number of 
 inputs that the system can resolve on average.
 
@@ -111,26 +111,24 @@ Information-theoretic analysis of multivariate single-cell signaling responses u
 
 \examples{
 tempdata=data_example1
-dir.create("example1/",recursive=TRUE)
 outputCLR1=mi_logreg_main(dataRaw=tempdata,
 signal="signal", response="response",
-lr_maxit=1500, output_path="example1/",plot_height=8,plot_width=12)
+lr_maxit=1500,plot_height=8,plot_width=12)
 
 
 tempdata=data_example1
-dir.create("example1_testing/",recursive=TRUE)
+\dontrun{
 outputCLR1_testing=mi_logreg_main(dataRaw=tempdata,
 signal="signal", response="response",
 lr_maxit=1500, output_path="example1_testing/",plot_height=8,plot_width=12,
 testing=TRUE,TestingSeed=11111, boot_num=50,boot_prob=0.8,testing_cores=2,
 sidevar_num=2,traintest_num=50,partition_trainfrac=0.6)
-
+}
 
 tempdata=data_example2
-dir.create("example2/",recursive=TRUE)
 outputCLR2=mi_logreg_main(dataRaw=tempdata,
 signal="signal", response=c("X1","X2","X3"),
-lr_maxit=1500, output_path="example2/",plot_height=8,plot_width=12) 
+lr_maxit=1500, plot_height=8,plot_width=12) 
 
 #For further details see vignette
 }

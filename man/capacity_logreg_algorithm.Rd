@@ -52,10 +52,9 @@ Information-theoretic analysis of multivariate single-cell signaling responses u
 
 \examples{
 tempdata=data_example1
-dir.create("example1/",recursive=TRUE)
 outputCLR1=capacity_logreg_main(dataRaw=tempdata,
 signal="signal", response="response",
 formula_string = "signal~response",
-cc_maxit=75,lr_maxit=1500, output_path="example1/",plot_height=8,plot_width=12)
+cc_maxit=75,lr_maxit=1500, plot_height=8,plot_width=12)
 
 }

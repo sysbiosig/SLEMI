@@ -73,12 +73,12 @@ Information-theoretic analysis of multivariate single-cell signaling responses u
 
 \examples{
 ## Compute uncertainity of mutual information estimator using 4 cores
-## Not run:
+\dontrun{
 temp_data=data_example1
 output=mi_logreg_testing(data=data_example1,
                    signal = "signal",
                    response = "response",
                    testing_cores = 4)
-
+}
 }
 \keyword{internal}

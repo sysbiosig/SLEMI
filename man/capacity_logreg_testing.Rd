@@ -71,7 +71,4 @@ Information-theoretic analysis of multivariate single-cell signaling responses u
 \emph{PLoS Comput Biol}, 15(7): e1007132, 2019, https://doi.org/10.1371/journal.pcbi.1007132.
 }
 
-\examples{
-
-}
 \keyword{internal}

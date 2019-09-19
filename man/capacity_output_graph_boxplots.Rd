@@ -38,7 +38,4 @@ capacity_output_graph_capacity(cc_output, path, height = 4, width = 6)
 \description{
 INPUT:
 }
-\examples{
-
-}
 \keyword{internal}

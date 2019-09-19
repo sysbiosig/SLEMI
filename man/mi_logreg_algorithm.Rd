@@ -51,7 +51,6 @@ Information-theoretic analysis of multivariate single-cell signaling responses u
 
 \examples{
 ## Estimate mutual information directly
-## Not run:
 temp_data=data_example1
 output=mi_logreg_algorithm(data=data_example1,
                    signal = "signal",

@@ -17,9 +17,9 @@ data_nfkb
 }
 \description{
 In the paper describing methodological aspects of our algorithm we present the analysis of information transmission 
-in NfkB pathway upn the stimulation of TNF-$\alpha$. Experimental data from this experiment in the form of single-cell 
+in NfkB pathway upn the stimulation of TNF-\eqn{\alpha}. Experimental data from this experiment in the form of single-cell 
 time series are attached to the package as a data.frame object and can be accessed using `data_nfkb` variable.
-Each row of `data_nfkb` represents a single observation of a cell. Column 'signal' indicates the level of TNF-$\alpha$ 
+Each row of `data_nfkb` represents a single observation of a cell. Column 'signal' indicates the level of TNF-\eqn{\alpha}
 stimulation for a given cell, while columns 'response_T', gives the normalised ratio of nuclear and cytoplasmic transcription 
 factor as described in Supplementary Methods of the corresponding publication.
 }

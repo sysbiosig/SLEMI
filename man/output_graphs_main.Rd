@@ -40,8 +40,4 @@ A list with ggplot or gtable object. Each plot is also saved in `output_path` di
 \description{
 INPUT:
 }
-\examples{
-
-
-}
 \keyword{internal}
