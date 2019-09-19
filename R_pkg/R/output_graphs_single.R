@@ -118,7 +118,7 @@ capacity_output_graph_boxplotsSideVar<-function(data,signal,side_variables,path,
 #' @keywords internal
 capacity_output_graph_capacity<-function(cc_output,path,height=4,width=6){
     
-  x=y=density=..density..=NULL
+  x=y=density=NULL
 
   temp_name="Capacity"
   if (any(names(cc_output)=="mi")){
@@ -141,7 +141,7 @@ capacity_output_graph_capacity<-function(cc_output,path,height=4,width=6){
             panel.grid.major.y=ggplot2::element_blank(),
             axis.line.y=ggplot2::element_blank())
     
-    ggplot2::ggsave(plot,file=paste(path,stringr::str_replace_all(stringr::str_to_lower(temp_name)," ","_"),'pdf',sep=""),height=2,width=6)
+    ggplot2::ggsave(plot,file=paste(path,stringr::str_replace_all(stringr::str_to_lower(temp_name)," ","_"),'.pdf',sep=""),height=2,width=6)
     
   } else if (length(cc_output$testing)==2) {
     
@@ -177,13 +177,13 @@ capacity_output_graph_capacity<-function(cc_output,path,height=4,width=6){
             panel.grid.major.y=ggplot2::element_blank(),
             axis.line.y=ggplot2::element_blank())
     
-    plot2<-ggplot2::ggplot( data=data.frame(x=sapply(cc_output$testing$bootstrap,function(x) x$cc)),ggplot2::aes(x=x,y=..density..) ) + 
+    plot2<-ggplot2::ggplot( data=data.frame(x=sapply(cc_output$testing$bootstrap,function(x) x$cc)),ggplot2::aes_string(x="x",y="..density..") ) + 
       ggplot2::geom_histogram(bins=100 )+
       ggplot2::geom_point(data=data.frame(x=cc_output$cc,y=0),ggplot2::aes(x=x,y=y),size=4,shape=15) +
       ggplot2::ggtitle("Bootstrap")+ggplot2::scale_x_continuous(paste0(temp_name," (bits)"))+
       aux_theme_publ(version=2)
     
-    plot4<-ggplot2::ggplot( data=data.frame(x=sapply(cc_output$testing$traintest,function(x) x$cc)),ggplot2::aes(x=x,y=..density..) ) + 
+    plot4<-ggplot2::ggplot( data=data.frame(x=sapply(cc_output$testing$traintest,function(x) x$cc)),ggplot2::aes_string(x="x",y="..density..") ) + 
       ggplot2::geom_histogram(bins=100 )+
       ggplot2::geom_point(data=data.frame(x=cc_output$cc,y=0),ggplot2::aes(x=x,y=y),size=4,shape=15) +
       ggplot2::ggtitle("TrainTest")+ggplot2::scale_x_continuous(paste0(temp_name," (bits)"))+
@@ -244,25 +244,25 @@ capacity_output_graph_capacity<-function(cc_output,path,height=4,width=6){
                      panel.grid.major.y=ggplot2::element_blank(),
                      axis.line.y=ggplot2::element_blank())
     
-    plot2<-ggplot2::ggplot( data=data.frame(x=sapply(cc_output$testing$bootstrap,function(x) x$cc)),ggplot2::aes(x=x,y=..density..) ) + 
+    plot2<-ggplot2::ggplot( data=data.frame(x=sapply(cc_output$testing$bootstrap,function(x) x$cc)),ggplot2::aes_string(x="x",y="..density..") ) + 
       ggplot2::geom_histogram(bins=100 )+
       ggplot2::geom_point(data=data.frame(x=cc_output$cc,y=0),ggplot2::aes(x=x,y=y),size=4,shape=15) +
       ggplot2::ggtitle("Bootstrap")+ggplot2::scale_x_continuous(  paste0(temp_name," (bits)") )+
       aux_theme_publ(version=2)
     
-    plot3<-ggplot2::ggplot( data=data.frame(x=sapply(cc_output$testing$resamplingMorph,function(x) x$cc)),ggplot2::aes(x=x,y=..density..) ) + 
+    plot3<-ggplot2::ggplot( data=data.frame(x=sapply(cc_output$testing$resamplingMorph,function(x) x$cc)),ggplot2::aes_string(x="x",y="..density..") ) + 
       ggplot2::geom_histogram(bins=100 )+
       ggplot2::geom_point(data=data.frame(x=cc_output$cc,y=0),ggplot2::aes(x=x,y=y),size=4,shape=15) +
       ggplot2::ggtitle("SideVar Resampling")+ggplot2::scale_x_continuous(  paste0(temp_name," (bits)") )+
       aux_theme_publ(version=2)
     
-    plot4<-ggplot2::ggplot( data=data.frame(x=sapply(cc_output$testing$traintest,function(x) x$cc)),ggplot2::aes(x=x,y=..density..) ) + 
+    plot4<-ggplot2::ggplot( data=data.frame(x=sapply(cc_output$testing$traintest,function(x) x$cc)),ggplot2::aes_string(x="x",y="..density..") ) + 
       ggplot2::geom_histogram(bins=100 )+
       ggplot2::geom_point(data=data.frame(x=cc_output$cc,y=0),ggplot2::aes(x=x,y=y),size=4,shape=15) +
       ggplot2::ggtitle("TrainTest")+ggplot2::scale_x_continuous(  paste0(temp_name," (bits)") )+
       aux_theme_publ(version=2)
     
-    plot3b<-ggplot2::ggplot( data=data.frame(x=sapply(cc_output$testing$bootResampMorph,function(x) x$cc)),ggplot2::aes(x=x,y=..density..) ) + 
+    plot3b<-ggplot2::ggplot( data=data.frame(x=sapply(cc_output$testing$bootResampMorph,function(x) x$cc)),ggplot2::aes_string(x="x",y="..density..") ) + 
       ggplot2::geom_histogram(bins=100 )+
       ggplot2::geom_point(data=data.frame(x=cc_output$cc,y=0),ggplot2::aes(x=x,y=y),size=4,shape=15) +
       ggplot2::ggtitle("Boot SideVar Resampling")+ggplot2::scale_x_continuous(  paste0(temp_name," (bits)") )+
