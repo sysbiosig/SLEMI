@@ -44,8 +44,8 @@
 #' @examples
 #' ## Please set boot_num and traintest_num with larger numbers 
 #' ## for a more reliable testing
-#' tempdata=rbind(head(data_example1,50),
-#' tail(data_example1,50))
+#' #tempdata=rbind(head(data_example1,50), tail(data_example1,50))
+#' tempdata=data_example1
 #' outputCLR1_testing=capacity_logreg_testing(data=tempdata,
 #' signal="signal", response="response",cc_maxit=10,
 #' TestingSeed=11111, boot_num=1,boot_prob=0.8,testing_cores=1,
@@ -63,87 +63,132 @@ capacity_logreg_testing<-function(data,signal="signal",response="response",side_
   data_signal=data[[signal]]
   
   set.seed(TestingSeed)
-  message(" Testing procedures starting with ",testing_cores," core(s)..")
+  message("Testing procedures starting with ",testing_cores," core(s)..")
   
-  `%dopar%`<-foreach::`%dopar%`
+    if (testing_cores==1){  
+        `%do%`<-foreach::`%do%`
+        output_test1<-foreach::foreach(j=1:boot_num,
+                                   .export=c("sampling_bootstrap","capacity_logreg_algorithm","aux_x_log_y","func_formula_generator",
+                                    "func_input_checks","func_signal_transform","func_iterative_logreg_update"),
+                                   .packages=c("nnet","caret")) %do% {
+                                        data_bt_samp   <- sampling_bootstrap(data,boot_prob,data_signal)
+                                        bt_samp_output <- capacity_logreg_algorithm(data=data_bt_samp,signal=signal,response=response,side_variables=side_variables,
+                                                                                              formula_string=formula_string,model_out=FALSE,cc_maxit=cc_maxit,
+                                                                                              lr_maxit=lr_maxit,MaxNWts =MaxNWts )
+                                        bt_samp_output
+                                    }
+      
+        if (!is.null(side_variables)){
+            output_test2=foreach::foreach(j=1:sidevar_num,
+                                            .export=c("sampling_shuffle","capacity_logreg_algorithm","aux_x_log_y","func_formula_generator",
+                                            "func_input_checks","func_signal_transform","func_iterative_logreg_update"),
+                                            .packages=c("nnet","caret")) %do% {
+                                                data_resamp_samp   <- sampling_shuffle(data,side_variables)
+                                                bt_samp_output <- capacity_logreg_algorithm(data=data_resamp_samp,signal=signal,response=response,side_variables=side_variables,
+                                                                                            formula_string=formula_string,model_out=FALSE,cc_maxit=cc_maxit,lr_maxit=lr_maxit,MaxNWts =MaxNWts )
+                                                bt_samp_output
+                                            }
+            output_test4=foreach::foreach(j=1:sidevar_num,
+                                        .export=c("sampling_bootstrap","sampling_shuffle","capacity_logreg_algorithm","aux_x_log_y","func_formula_generator",
+                                            "func_input_checks","func_signal_transform","func_iterative_logreg_update"),
+                                        .packages=c("nnet","caret")) %do% {
+                                            data_resamp_samp   <- sampling_shuffle(data,side_variables)
+                                            data_bt_samp   <- sampling_bootstrap(data_resamp_samp,boot_prob,data_signal)
+                                            bt_samp_output <- capacity_logreg_algorithm(data=data_bt_samp,signal=signal,response=response,side_variables=side_variables,
+                                                                                        formula_string=formula_string,model_out=FALSE,cc_maxit=cc_maxit,lr_maxit=lr_maxit,MaxNWts =MaxNWts )
+                                            bt_samp_output
+                                        }
+        }
   
-  #Bootstrap
-  #message(" Bootstrap starting..")
-  cl=parallel::makeCluster(testing_cores)
-  doParallel::registerDoParallel(cl)
-  output_test1<-foreach::foreach(j=1:boot_num,
-                                 .export=c("sampling_bootstrap","capacity_logreg_algorithm","aux_x_log_y","func_formula_generator",
-                                  "func_input_checks","func_signal_transform","func_iterative_logreg_update"),
-                                 .packages=c("nnet","caret")) %dopar% {
-
-      data_bt_samp   <- sampling_bootstrap(data,boot_prob,data_signal)
-      bt_samp_output <- capacity_logreg_algorithm(data=data_bt_samp,signal=signal,response=response,side_variables=side_variables,
-                                                          formula_string=formula_string,model_out=FALSE,cc_maxit=cc_maxit,
-                                                          lr_maxit=lr_maxit,MaxNWts =MaxNWts )
-    bt_samp_output
-  }
- # parallel::stopCluster(cl)
-  #message("... completed")
-  
-  if (!is.null(side_variables)){
-  # Resampling
-   #message(" Reshuffling starting..")
-  #cl=parallel::makeCluster(testing_cores)
- # doParallel::registerDoParallel(cl)
-  output_test2=foreach::foreach(j=1:sidevar_num,
-                                .export=c("sampling_shuffle","capacity_logreg_algorithm","aux_x_log_y","func_formula_generator",
-                                  "func_input_checks","func_signal_transform","func_iterative_logreg_update"),
-                                .packages=c("nnet","caret")) %dopar% {
-
-      data_resamp_samp   <- sampling_shuffle(data,side_variables)
-      bt_samp_output <- capacity_logreg_algorithm(data=data_resamp_samp,signal=signal,response=response,side_variables=side_variables,
-                                                  formula_string=formula_string,model_out=FALSE,cc_maxit=cc_maxit,lr_maxit=lr_maxit,MaxNWts =MaxNWts )
-    bt_samp_output
-  }
- # parallel::stopCluster(cl)
-  #message("... completed 1 ...")
-  
-  # Bootstrap&Resampling
-  #cl=parallel::makeCluster(testing_cores)
- # doParallel::registerDoParallel(cl)
-  output_test4=foreach::foreach(j=1:sidevar_num,
-                                .export=c("sampling_bootstrap","sampling_shuffle","capacity_logreg_algorithm","aux_x_log_y","func_formula_generator",
-                                  "func_input_checks","func_signal_transform","func_iterative_logreg_update"),
-                                .packages=c("nnet","caret")) %dopar% {
-
-                                    data_resamp_samp   <- sampling_shuffle(data,side_variables)
-                                    data_bt_samp   <- sampling_bootstrap(data_resamp_samp,boot_prob,data_signal)
-                                    bt_samp_output <- capacity_logreg_algorithm(data=data_bt_samp,signal=signal,response=response,side_variables=side_variables,
-                                                                                formula_string=formula_string,model_out=FALSE,cc_maxit=cc_maxit,lr_maxit=lr_maxit,MaxNWts =MaxNWts )
-
-                                  bt_samp_output
-                                }
- # parallel::stopCluster(cl)
-  #message("completed 2")
-  }
-  
-
-  # Train-Test
-   #message(" Over-fitting starting..")
- # cl=parallel::makeCluster(testing_cores)
- # doParallel::registerDoParallel(cl)
-  output_test3=foreach::foreach(j=1:traintest_num,
+        output_test3=foreach::foreach(j=1:traintest_num,
                                 .export=c("sampling_partition","capacity_logreg_algorithm","aux_x_log_y","func_formula_generator",
                                   "func_input_checks","func_signal_transform","func_iterative_logreg_update"),
-                                .packages=c("nnet","caret")) %dopar% {
-    
-      datatraintestsamp   <- sampling_partition(data,data_signal,partition_trainfrac)
-      bt_samp_output<- capacity_logreg_algorithm(data=datatraintestsamp,signal=signal,response=response,side_variables=side_variables,
-                                                 formula_string=formula_string,model_out=FALSE,cc_maxit=cc_maxit,lr_maxit=lr_maxit,MaxNWts =MaxNWts )
-    bt_samp_output
-  }
-  parallel::stopCluster(cl)
-  #message("... completed")
-  
-  output$bootstrap        <- output_test1
-  if (!is.null(side_variables)){ output$reshuffling_sideVar  <- output_test2}
-  if (!is.null(side_variables)){ output$bootstrap_Reshuffling_sideVar  <- output_test4}
-  output$traintest        <- output_test3
-  
-  output
+                                .packages=c("nnet","caret")) %do% {
+                                        datatraintestsamp   <- sampling_partition(data,data_signal,partition_trainfrac)
+                                        bt_samp_output<- capacity_logreg_algorithm(data=datatraintestsamp,signal=signal,response=response,side_variables=side_variables,
+                                                                                 formula_string=formula_string,model_out=FALSE,cc_maxit=cc_maxit,lr_maxit=lr_maxit,MaxNWts =MaxNWts )
+                                        bt_samp_output
+                                    }
+
+        output$bootstrap        <- output_test1
+        if (!is.null(side_variables)){ output$reshuffling_sideVar  <- output_test2}
+        if (!is.null(side_variables)){ output$bootstrap_Reshuffling_sideVar  <- output_test4}
+        output$traintest        <- output_test3
+    } else if (testing_cores>1) {
+        `%dopar%`<-foreach::`%dopar%`
+        
+        #Bootstrap
+        #message(" Bootstrap starting..")
+        cl=parallel::makeCluster(testing_cores)
+        doParallel::registerDoParallel(cl)
+        output_test1<-foreach::foreach(j=1:boot_num,
+                                       .export=c("sampling_bootstrap","capacity_logreg_algorithm","aux_x_log_y","func_formula_generator",
+                                        "func_input_checks","func_signal_transform","func_iterative_logreg_update"),
+                                       .packages=c("nnet","caret")) %dopar% {
+                                            data_bt_samp   <- sampling_bootstrap(data,boot_prob,data_signal)
+                                            bt_samp_output <- capacity_logreg_algorithm(data=data_bt_samp,signal=signal,response=response,side_variables=side_variables,
+                                                                                                formula_string=formula_string,model_out=FALSE,cc_maxit=cc_maxit,
+                                                                                                lr_maxit=lr_maxit,MaxNWts =MaxNWts )
+                                          bt_samp_output
+                                        }
+        #parallel::stopCluster(cl)
+        #message("... completed")
+        
+        if (!is.null(side_variables)){
+        #Resampling
+        #message(" Reshuffling starting..")
+        #cl=parallel::makeCluster(testing_cores)
+        #doParallel::registerDoParallel(cl)
+            output_test2=foreach::foreach(j=1:sidevar_num,
+                                        .export=c("sampling_shuffle","capacity_logreg_algorithm","aux_x_log_y","func_formula_generator",
+                                          "func_input_checks","func_signal_transform","func_iterative_logreg_update"),
+                                        .packages=c("nnet","caret")) %dopar% {
+                                            data_resamp_samp   <- sampling_shuffle(data,side_variables)
+                                            bt_samp_output <- capacity_logreg_algorithm(data=data_resamp_samp,signal=signal,response=response,side_variables=side_variables,
+                                                                                      formula_string=formula_string,model_out=FALSE,cc_maxit=cc_maxit,lr_maxit=lr_maxit,MaxNWts =MaxNWts )
+                                            bt_samp_output
+                                        }
+        #parallel::stopCluster(cl)
+        #message("... completed 1 ...")
+        
+        #Bootstrap&Resampling
+        #cl=parallel::makeCluster(testing_cores)
+        #doParallel::registerDoParallel(cl)
+            output_test4=foreach::foreach(j=1:sidevar_num,
+                                      .export=c("sampling_bootstrap","sampling_shuffle","capacity_logreg_algorithm","aux_x_log_y","func_formula_generator",
+                                        "func_input_checks","func_signal_transform","func_iterative_logreg_update"),
+                                      .packages=c("nnet","caret")) %dopar% {
+                                            data_resamp_samp   <- sampling_shuffle(data,side_variables)
+                                            data_bt_samp   <- sampling_bootstrap(data_resamp_samp,boot_prob,data_signal)
+                                            bt_samp_output <- capacity_logreg_algorithm(data=data_bt_samp,signal=signal,response=response,side_variables=side_variables,
+                                                                                        formula_string=formula_string,model_out=FALSE,cc_maxit=cc_maxit,lr_maxit=lr_maxit,MaxNWts =MaxNWts )
+                                            bt_samp_output
+                                      }
+        #parallel::stopCluster(cl)
+        #message("completed 2")
+        }
+        
+        # Train-Test
+        #message(" Over-fitting starting..")
+        # cl=parallel::makeCluster(testing_cores)
+        # doParallel::registerDoParallel(cl)
+        output_test3=foreach::foreach(j=1:traintest_num,
+                                      .export=c("sampling_partition","capacity_logreg_algorithm","aux_x_log_y","func_formula_generator",
+                                        "func_input_checks","func_signal_transform","func_iterative_logreg_update"),
+                                      .packages=c("nnet","caret")) %dopar% {
+                                            datatraintestsamp   <- sampling_partition(data,data_signal,partition_trainfrac)
+                                            bt_samp_output<- capacity_logreg_algorithm(data=datatraintestsamp,signal=signal,response=response,side_variables=side_variables,
+                                                                                       formula_string=formula_string,model_out=FALSE,cc_maxit=cc_maxit,lr_maxit=lr_maxit,MaxNWts =MaxNWts )
+                                            bt_samp_output
+                                        }
+        parallel::stopCluster(cl)
+        #message("... completed")
+        
+        output$bootstrap        <- output_test1
+        if (!is.null(side_variables)){ output$reshuffling_sideVar  <- output_test2}
+        if (!is.null(side_variables)){ output$bootstrap_Reshuffling_sideVar  <- output_test4}
+        output$traintest        <- output_test3
+    }
+      
+    output
 }

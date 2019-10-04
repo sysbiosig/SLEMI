@@ -74,7 +74,8 @@ Information-theoretic analysis of multivariate single-cell signaling responses u
 \examples{
 ## Compute uncertainity of mutual information estimator using 1 core
 ## Set boot_num and traintest_num with larger numbers for more reliable testing
-tempdata=data_example1[data_example1$signal\%in\%c("0","0.1"),]
+tempdata=rbind(head(data_example1,50),
+tail(data_example1,50))
 output=mi_logreg_testing(data=tempdata,
                    signal = "signal",
                    response = "response",

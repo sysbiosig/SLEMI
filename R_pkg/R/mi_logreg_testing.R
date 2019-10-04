@@ -44,8 +44,8 @@
 #' @examples 
 #' ## Compute uncertainity of mutual information estimator using 1 core
 #' ## Set boot_num and traintest_num with larger numbers for more reliable testing
-#' tempdata=rbind(head(data_example1,50),
-#' tail(data_example1,50))
+#' #tempdata=rbind(head(data_example1,50),tail(data_example1,50))
+#' tempdata=data_example1
 #' output=mi_logreg_testing(data=tempdata,
 #'                    signal = "signal",
 #'                    response = "response",
@@ -65,84 +65,140 @@ mi_logreg_testing<-function(data,signal="signal",response="response",side_variab
 
   set.seed(TestingSeed)
   message("Testing procedures starting with ", testing_cores, " core(s)..")
-  
-  `%dopar%`<-foreach::`%dopar%`
-  
-  #Bootstrap
-   #message("Bootstrap starting..")
-  cl=parallel::makeCluster(testing_cores)
-  doParallel::registerDoParallel(cl)
-  output_test1<-foreach::foreach(j=1:boot_num,
+
+    if (testing_cores==1){  
+        `%do%`<-foreach::`%do%`
+        output_test1<-foreach::foreach(j=1:boot_num,
                                  .export=c("sampling_bootstrap","mi_logreg_algorithm","aux_x_log_y","func_formula_generator",
                                   "func_input_checks","func_signal_transform"),
-                                 .packages=c("nnet","caret")) %dopar% {
-                                     data_bt_samp   <- sampling_bootstrap(data,boot_prob,data_signal)
-                                     bt_samp_output <- mi_logreg_algorithm(data=data_bt_samp,signal=signal,response=response,side_variables=side_variables,
-                                                                                 formula_string=formula_string,model_out=FALSE,lr_maxit=lr_maxit,MaxNWts =MaxNWts,
+                                 .packages=c("nnet","caret")) %do% {
+                                    data_bt_samp   <- sampling_bootstrap(data,boot_prob,data_signal)
+                                    bt_samp_output <- mi_logreg_algorithm(data=data_bt_samp,signal=signal,response=response,side_variables=side_variables,
+                                                                           formula_string=formula_string,model_out=FALSE,lr_maxit=lr_maxit,MaxNWts =MaxNWts,
                                                                            pinput=pinput)
-                                   bt_samp_output
+                                    bt_samp_output
                                  }
- # parallel::stopCluster(cl)
-  #message("completed..")
-  
-  if (!is.null(side_variables)){
-    # Resampling
-   # message("Reshuffling starting..")
-  #  cl=parallel::makeCluster(testing_cores)
-   # doParallel::registerDoParallel(cl)
-    output_test2=foreach::foreach(j=1:sidevar_num,
+
+        if (!is.null(side_variables)){
+            output_test2=foreach::foreach(j=1:sidevar_num,
                                   .export=c("sampling_shuffle","mi_logreg_algorithm","aux_x_log_y","func_formula_generator",
                                   "func_input_checks","func_signal_transform"),
-                                  .packages=c("nnet","caret")) %dopar% {
-                                      data_resamp_samp   <- sampling_shuffle(data,side_variables)
-                                      bt_samp_output <- mi_logreg_algorithm(data=data_resamp_samp,signal=signal,response=response,side_variables=side_variables,
-                                                                                  formula_string=formula_string,model_out=FALSE,lr_maxit=lr_maxit,MaxNWts =MaxNWts,
+                                  .packages=c("nnet","caret")) %do% {
+                                    data_resamp_samp   <- sampling_shuffle(data,side_variables)
+                                    bt_samp_output <- mi_logreg_algorithm(data=data_resamp_samp,signal=signal,response=response,side_variables=side_variables,
+                                                                            formula_string=formula_string,model_out=FALSE,lr_maxit=lr_maxit,MaxNWts =MaxNWts,
                                                                             pinput=pinput )
                                     bt_samp_output
                                   }
-    parallel::stopCluster(cl)
-   #message("completed 1..")
-    
-    
-    # Bootstrap&Resampling
-   # cl=parallel::makeCluster(testing_cores)
-   # doParallel::registerDoParallel(cl)
-    output_test4=foreach::foreach(j=1:sidevar_num,
+
+            output_test4=foreach::foreach(j=1:sidevar_num,
                                   .export=c("sampling_bootstrap","sampling_shuffle","mi_logreg_algorithm","aux_x_log_y","func_formula_generator",
                                   "func_input_checks","func_signal_transform"),
-                                  .packages=c("nnet","caret")) %dopar% {
-                                      data_resamp_samp   <- sampling_shuffle(data,side_variables)
-                                      data_bt_samp   <- sampling_bootstrap(data_resamp_samp,boot_prob,data_signal)
-                                      bt_samp_output <- mi_logreg_algorithm(data=data_bt_samp,signal=signal,response=response,side_variables=side_variables,
-                                                                                  formula_string=formula_string,model_out=FALSE,lr_maxit=lr_maxit,MaxNWts =MaxNWts,
-                                                                            pinput=pinput )
+                                  .packages=c("nnet","caret")) %do% {
+                                    data_resamp_samp   <- sampling_shuffle(data,side_variables)
+                                    data_bt_samp   <- sampling_bootstrap(data_resamp_samp,boot_prob,data_signal)
+                                    bt_samp_output <- mi_logreg_algorithm(data=data_bt_samp,signal=signal,response=response,side_variables=side_variables,
+                                                                          formula_string=formula_string,model_out=FALSE,lr_maxit=lr_maxit,MaxNWts =MaxNWts,
+                                                                          pinput=pinput)
                                     bt_samp_output
                                   }
-    parallel::stopCluster(cl)
-   # message("completed 2")
-  }
+        }
   
-  # Train-Test
-  # message("Over-fitting starting..")
-  #cl=parallel::makeCluster(testing_cores)
- # doParallel::registerDoParallel(cl)
-  output_test3=foreach::foreach(j=1:traintest_num,
+        output_test3=foreach::foreach(j=1:traintest_num,
                                 .export=c("sampling_partition","mi_logreg_algorithm","aux_x_log_y","func_formula_generator",
                                   "func_input_checks","func_signal_transform"),
-                                .packages=c("nnet","caret")) %dopar% {
+                                .packages=c("nnet","caret")) %do% {
                                     datatraintestsamp   <- sampling_partition(data,data_signal,partition_trainfrac)
                                     bt_samp_output<- mi_logreg_algorithm(data=datatraintestsamp,signal=signal,response=response,side_variables=side_variables,
-                                                                               formula_string=formula_string,model_out=FALSE,lr_maxit=lr_maxit,MaxNWts =MaxNWts,
+                                                                         formula_string=formula_string,model_out=FALSE,lr_maxit=lr_maxit,MaxNWts =MaxNWts,
                                                                          pinput=pinput )
-                                  bt_samp_output
+                                    bt_samp_output
                                 }
-  parallel::stopCluster(cl)
- # message("completed")
   
-  output$bootstrap        <- output_test1
-  if (!is.null(side_variables)){ output$reshuffling_sideVar  <- output_test2}
-  if (!is.null(side_variables)){ output$bootstrap_Reshuffling_sideVar  <- output_test4}
-  output$traintest        <- output_test3
-  
-  output
+        output$bootstrap        <- output_test1
+        if (!is.null(side_variables)){ output$reshuffling_sideVar  <- output_test2}
+        if (!is.null(side_variables)){ output$bootstrap_Reshuffling_sideVar  <- output_test4}
+        output$traintest        <- output_test3
+    } else if (testing_cores>1) {
+
+        `%dopar%`<-foreach::`%dopar%`
+          
+        #Bootstrap
+        #message("Bootstrap starting..")
+        cl=parallel::makeCluster(testing_cores)
+        doParallel::registerDoParallel(cl)
+        output_test1<-foreach::foreach(j=1:boot_num,
+                                         .export=c("sampling_bootstrap","mi_logreg_algorithm","aux_x_log_y","func_formula_generator",
+                                          "func_input_checks","func_signal_transform"),
+                                         .packages=c("nnet","caret")) %dopar% {
+                                             data_bt_samp   <- sampling_bootstrap(data,boot_prob,data_signal)
+                                             bt_samp_output <- mi_logreg_algorithm(data=data_bt_samp,signal=signal,response=response,side_variables=side_variables,
+                                                                                         formula_string=formula_string,model_out=FALSE,lr_maxit=lr_maxit,MaxNWts =MaxNWts,
+                                                                                   pinput=pinput)
+                                           bt_samp_output
+                                         }
+        # parallel::stopCluster(cl)
+        #message("completed..")
+          
+        if (!is.null(side_variables)){
+            # Resampling
+            # message("Reshuffling starting..")
+            #  cl=parallel::makeCluster(testing_cores)
+            # doParallel::registerDoParallel(cl)
+            output_test2=foreach::foreach(j=1:sidevar_num,
+                                              .export=c("sampling_shuffle","mi_logreg_algorithm","aux_x_log_y","func_formula_generator",
+                                              "func_input_checks","func_signal_transform"),
+                                              .packages=c("nnet","caret")) %dopar% {
+                                                  data_resamp_samp   <- sampling_shuffle(data,side_variables)
+                                                  bt_samp_output <- mi_logreg_algorithm(data=data_resamp_samp,signal=signal,response=response,side_variables=side_variables,
+                                                                                              formula_string=formula_string,model_out=FALSE,lr_maxit=lr_maxit,MaxNWts =MaxNWts,
+                                                                                        pinput=pinput )
+                                                bt_samp_output
+                                              }
+            #parallel::stopCluster(cl)
+            #message("completed 1..")
+                
+                
+            # Bootstrap&Resampling
+            # cl=parallel::makeCluster(testing_cores)
+            # doParallel::registerDoParallel(cl)
+            output_test4=foreach::foreach(j=1:sidevar_num,
+                                              .export=c("sampling_bootstrap","sampling_shuffle","mi_logreg_algorithm","aux_x_log_y","func_formula_generator",
+                                              "func_input_checks","func_signal_transform"),
+                                              .packages=c("nnet","caret")) %dopar% {
+                                                  data_resamp_samp   <- sampling_shuffle(data,side_variables)
+                                                  data_bt_samp   <- sampling_bootstrap(data_resamp_samp,boot_prob,data_signal)
+                                                  bt_samp_output <- mi_logreg_algorithm(data=data_bt_samp,signal=signal,response=response,side_variables=side_variables,
+                                                                                              formula_string=formula_string,model_out=FALSE,lr_maxit=lr_maxit,MaxNWts =MaxNWts,
+                                                                                        pinput=pinput )
+                                                bt_samp_output
+                                              }
+            # parallel::stopCluster(cl)
+            # message("completed 2")
+        }
+          
+        # Train-Test
+        # message("Over-fitting starting..")
+        # cl=parallel::makeCluster(testing_cores)
+        # doParallel::registerDoParallel(cl)
+        output_test3=foreach::foreach(j=1:traintest_num,
+                                        .export=c("sampling_partition","mi_logreg_algorithm","aux_x_log_y","func_formula_generator",
+                                          "func_input_checks","func_signal_transform"),
+                                        .packages=c("nnet","caret")) %dopar% {
+                                            datatraintestsamp   <- sampling_partition(data,data_signal,partition_trainfrac)
+                                            bt_samp_output<- mi_logreg_algorithm(data=datatraintestsamp,signal=signal,response=response,side_variables=side_variables,
+                                                                                       formula_string=formula_string,model_out=FALSE,lr_maxit=lr_maxit,MaxNWts =MaxNWts,
+                                                                                 pinput=pinput )
+                                          bt_samp_output
+                                        }
+        parallel::stopCluster(cl)
+        # message("completed")
+          
+        output$bootstrap        <- output_test1
+        if (!is.null(side_variables)){ output$reshuffling_sideVar  <- output_test2}
+        if (!is.null(side_variables)){ output$bootstrap_Reshuffling_sideVar  <- output_test4}
+        output$traintest        <- output_test3
+    }
+ 
+    output
 }
