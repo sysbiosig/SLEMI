@@ -41,6 +41,16 @@
 #' }
 #' Each of above is a list, where an element is an output of a single repetition of the channel capacity algorithm
 #' @export
+#' @examples
+#' ## Please set boot_num and traintest_num with larger numbers 
+#' ## for a more reliable testing
+#' tempdata=rbind(head(data_example1,50),
+#' tail(data_example1,50))
+#' outputCLR1_testing=capacity_logreg_testing(data=tempdata,
+#' signal="signal", response="response",cc_maxit=10,
+#' TestingSeed=11111, boot_num=1,boot_prob=0.8,testing_cores=1,
+#' traintest_num=1,partition_trainfrac=0.6)
+#'
 capacity_logreg_testing<-function(data,signal="signal",response="response",side_variables=NULL,
                                           cc_maxit=100,lr_maxit=1000,MaxNWts = 5000,
                                           formula_string=NULL,
@@ -53,7 +63,7 @@ capacity_logreg_testing<-function(data,signal="signal",response="response",side_
   data_signal=data[[signal]]
   
   set.seed(TestingSeed)
-  message(" Testing procedures starting with ",testing_cores," core(s)")
+  message(" Testing procedures starting with ",testing_cores," core(s)..")
   
   `%dopar%`<-foreach::`%dopar%`
   
@@ -72,14 +82,14 @@ capacity_logreg_testing<-function(data,signal="signal",response="response",side_
                                                           lr_maxit=lr_maxit,MaxNWts =MaxNWts )
     bt_samp_output
   }
-  parallel::stopCluster(cl)
+ # parallel::stopCluster(cl)
   #message("... completed")
   
   if (!is.null(side_variables)){
   # Resampling
    #message(" Reshuffling starting..")
-  cl=parallel::makeCluster(testing_cores)
-  doParallel::registerDoParallel(cl)
+  #cl=parallel::makeCluster(testing_cores)
+ # doParallel::registerDoParallel(cl)
   output_test2=foreach::foreach(j=1:sidevar_num,
                                 .export=c("sampling_shuffle","capacity_logreg_algorithm","aux_x_log_y","func_formula_generator",
                                   "func_input_checks","func_signal_transform","func_iterative_logreg_update"),
@@ -90,12 +100,12 @@ capacity_logreg_testing<-function(data,signal="signal",response="response",side_
                                                   formula_string=formula_string,model_out=FALSE,cc_maxit=cc_maxit,lr_maxit=lr_maxit,MaxNWts =MaxNWts )
     bt_samp_output
   }
-  parallel::stopCluster(cl)
+ # parallel::stopCluster(cl)
   #message("... completed 1 ...")
   
   # Bootstrap&Resampling
-  cl=parallel::makeCluster(testing_cores)
-  doParallel::registerDoParallel(cl)
+  #cl=parallel::makeCluster(testing_cores)
+ # doParallel::registerDoParallel(cl)
   output_test4=foreach::foreach(j=1:sidevar_num,
                                 .export=c("sampling_bootstrap","sampling_shuffle","capacity_logreg_algorithm","aux_x_log_y","func_formula_generator",
                                   "func_input_checks","func_signal_transform","func_iterative_logreg_update"),
@@ -108,15 +118,15 @@ capacity_logreg_testing<-function(data,signal="signal",response="response",side_
 
                                   bt_samp_output
                                 }
-  parallel::stopCluster(cl)
+ # parallel::stopCluster(cl)
   #message("completed 2")
   }
   
 
   # Train-Test
    #message(" Over-fitting starting..")
-  cl=parallel::makeCluster(testing_cores)
-  doParallel::registerDoParallel(cl)
+ # cl=parallel::makeCluster(testing_cores)
+ # doParallel::registerDoParallel(cl)
   output_test3=foreach::foreach(j=1:traintest_num,
                                 .export=c("sampling_partition","capacity_logreg_algorithm","aux_x_log_y","func_formula_generator",
                                   "func_input_checks","func_signal_transform","func_iterative_logreg_update"),

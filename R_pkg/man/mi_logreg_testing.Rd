@@ -7,7 +7,7 @@
 mi_logreg_testing(data, signal = "signal", response = "response",
   side_variables = NULL, pinput = NULL, lr_maxit = 1000,
   MaxNWts = 5000, formula_string = NULL, TestingSeed = 1234,
-  testing_cores = 4, boot_num = 10, boot_prob = 0.8,
+  testing_cores = 1, boot_num = 10, boot_prob = 0.8,
   sidevar_num = 10, traintest_num = 10, partition_trainfrac = 0.6)
 }
 \arguments{
@@ -72,13 +72,12 @@ Information-theoretic analysis of multivariate single-cell signaling responses u
 }
 
 \examples{
-## Compute uncertainity of mutual information estimator using 4 cores
-\dontrun{
-temp_data=data_example1
-output=mi_logreg_testing(data=data_example1,
+## Compute uncertainity of mutual information estimator using 1 core
+## Set boot_num and traintest_num with larger numbers for more reliable testing
+tempdata=data_example1[data_example1$signal\%in\%c("0","0.1"),]
+output=mi_logreg_testing(data=tempdata,
                    signal = "signal",
                    response = "response",
-                   testing_cores = 4)
-}
+                   testing_cores = 1,boot_num=1,traintest_num=1)
 }
 \keyword{internal}

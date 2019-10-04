@@ -74,21 +74,14 @@ Information-theoretic analysis of multivariate single-cell signaling responses u
 
 \examples{
 ## Calculate probabilities of discrimination for toy dataset
-\dontrun{
 temp_data=data_example1
 output=prob_discr_pairwise(dataRaw=data_example1,
                    signal = "signal",
-                   response = "response",
-                   output_path = "discrimination_probabilities/toy_dataset/")
-}
+                   response = "response")
 ## Calculate probabilities of discrimination for nfkb dataset
-\dontrun{
-for (it in seq(from=12,to=30,by=3)){
+ it=21 # choose from 0, 3, 6, ..., 120 for measurements at other time points
  output=prob_discr_pairwise(dataRaw=data_nfkb,
                             signal = "signal",
-                           response = paste0("response_",it),
-                            output_path = paste0("discrimination_probabilities/nfkb/",it,"/"))
-}
-}
+                           response = paste0("response_",it))
 
 }

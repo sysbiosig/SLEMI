@@ -23,14 +23,17 @@ Internal, auxillary functions
 }
 \examples{
 data=data_example1
-SLEMI:::func_input_checks(data=data,signal="signal",response="response",side_variables="sideVar")
+SLEMI:::func_input_checks(data=data,signal="signal",
+response="response",side_variables="sideVar")
 
-\dontrun{
-data=as.matrix(data_example1)
-SLEMI:::func_input_checks(data=data,signal="signal",response="response",side_variables="sideVar")
- 
-data=data_example1
-SLEMI:::func_input_checks(data=data,signal="input",response="response",side_variables="sideVar")
-}
+# The following examples will give errors, because  the data has 
+# inconsistent format for the analysis. Only to check the adequacy of
+# initial checks. 
+# data=as.matrix(data_example1)
+# SLEMI:::func_input_checks(data=data,signal="signal",
+# response="response",side_variables="sideVar")
+# data=data_example1
+# SLEMI:::func_input_checks(data=data,signal="input",
+# response="response",side_variables="sideVar")
 }
 \keyword{internal}

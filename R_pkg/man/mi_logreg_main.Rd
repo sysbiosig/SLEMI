@@ -111,24 +111,10 @@ Information-theoretic analysis of multivariate single-cell signaling responses u
 
 \examples{
 tempdata=data_example1
-outputCLR1=mi_logreg_main(dataRaw=tempdata,
-signal="signal", response="response",
-lr_maxit=1500,plot_height=8,plot_width=12)
-
-
-tempdata=data_example1
-\dontrun{
-outputCLR1_testing=mi_logreg_main(dataRaw=tempdata,
-signal="signal", response="response",
-lr_maxit=1500, output_path="example1_testing/",plot_height=8,plot_width=12,
-testing=TRUE,TestingSeed=11111, boot_num=50,boot_prob=0.8,testing_cores=2,
-sidevar_num=2,traintest_num=50,partition_trainfrac=0.6)
-}
+outputCLR1=mi_logreg_main(dataRaw=tempdata, signal="signal", response="response")
 
 tempdata=data_example2
-outputCLR2=mi_logreg_main(dataRaw=tempdata,
-signal="signal", response=c("X1","X2","X3"),
-lr_maxit=1500, plot_height=8,plot_width=12) 
+outputCLR2=mi_logreg_main(dataRaw=tempdata, signal="signal", response=c("X1","X2","X3")) 
 
 #For further details see vignette
 }

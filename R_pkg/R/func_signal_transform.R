@@ -35,6 +35,7 @@ func_signal_transform<-function(data,signal){
       tmp_signal_values=unique(data[[signal]])
       tmp_signal_values_num=as.numeric(tmp_signal_values)
     if (any(is.na(tmp_signal_values_num))){
+      message("Warning message due to check for numeric values in signal. Resulting object discarded.")
       tmp_signal_values_num=stringr::str_match(tmp_signal_values,"[0-9.]+")
       if (any(is.na(tmp_signal_values_num))) {
         data[[signal]]=factor(data[[signal]])
@@ -51,6 +52,7 @@ func_signal_transform<-function(data,signal){
     tmp_signal_values=unique(as.character(data[[signal]]))
     tmp_signal_values_num=as.numeric(tmp_signal_values)
     if (any(is.na(tmp_signal_values_num))){
+      message("Warning message due to check for numeric values in signal. Resulting object discarded.")
       tmp_signal_values_num=stringr::str_match(tmp_signal_values,"[0-9.]+")
       if (!any(is.na(tmp_signal_values_num))) {
         data[[signal]]=as.numeric(stringr::str_match(as.character(data[[signal]]),"[0-9.]+"))

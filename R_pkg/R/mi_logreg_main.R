@@ -74,11 +74,6 @@
 #' tempdata=data_example1
 #' outputCLR1=mi_logreg_main(dataRaw=tempdata, signal="signal", response="response")
 #' 
-#' tempdata=data_example1
-#' outputCLR1_testing=mi_logreg_main(dataRaw=tempdata,signal="signal", response="response",
-#' testing=TRUE,TestingSeed=11111, boot_num=3,boot_prob=0.8,testing_cores=1,
-#' sidevar_num=3,traintest_num=3,partition_trainfrac=0.6)
-#' 
 #' tempdata=data_example2
 #' outputCLR2=mi_logreg_main(dataRaw=tempdata, signal="signal", response=c("X1","X2","X3")) 
 #' 

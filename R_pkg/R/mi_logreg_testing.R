@@ -43,11 +43,13 @@
 #' @export
 #' @examples 
 #' ## Compute uncertainity of mutual information estimator using 1 core
-#' temp_data=data_example1
-#' output=mi_logreg_testing(data=data_example1,
+#' ## Set boot_num and traintest_num with larger numbers for more reliable testing
+#' tempdata=rbind(head(data_example1,50),
+#' tail(data_example1,50))
+#' output=mi_logreg_testing(data=tempdata,
 #'                    signal = "signal",
 #'                    response = "response",
-#'                    testing_cores = 1,boot_num=3,traintest_num=3)
+#'                    testing_cores = 1,boot_num=1,traintest_num=1)
 mi_logreg_testing<-function(data,signal="signal",response="response",side_variables=NULL,
                             pinput=NULL,lr_maxit=1000,MaxNWts = 5000,
                                   formula_string=NULL,
@@ -62,13 +64,13 @@ mi_logreg_testing<-function(data,signal="signal",response="response",side_variab
   func_input_checks(data,signal,response,side_variables)
 
   set.seed(TestingSeed)
-  message("Testing procedures starting with ", testing_cores, " core(s)")
+  message("Testing procedures starting with ", testing_cores, " core(s)..")
   
   `%dopar%`<-foreach::`%dopar%`
   
   #Bootstrap
    #message("Bootstrap starting..")
-   cl=parallel::makeCluster(testing_cores)
+  cl=parallel::makeCluster(testing_cores)
   doParallel::registerDoParallel(cl)
   output_test1<-foreach::foreach(j=1:boot_num,
                                  .export=c("sampling_bootstrap","mi_logreg_algorithm","aux_x_log_y","func_formula_generator",
@@ -80,14 +82,14 @@ mi_logreg_testing<-function(data,signal="signal",response="response",side_variab
                                                                            pinput=pinput)
                                    bt_samp_output
                                  }
-  parallel::stopCluster(cl)
+ # parallel::stopCluster(cl)
   #message("completed..")
   
   if (!is.null(side_variables)){
     # Resampling
    # message("Reshuffling starting..")
-    cl=parallel::makeCluster(testing_cores)
-    doParallel::registerDoParallel(cl)
+  #  cl=parallel::makeCluster(testing_cores)
+   # doParallel::registerDoParallel(cl)
     output_test2=foreach::foreach(j=1:sidevar_num,
                                   .export=c("sampling_shuffle","mi_logreg_algorithm","aux_x_log_y","func_formula_generator",
                                   "func_input_checks","func_signal_transform"),
@@ -103,8 +105,8 @@ mi_logreg_testing<-function(data,signal="signal",response="response",side_variab
     
     
     # Bootstrap&Resampling
-    cl=parallel::makeCluster(testing_cores)
-    doParallel::registerDoParallel(cl)
+   # cl=parallel::makeCluster(testing_cores)
+   # doParallel::registerDoParallel(cl)
     output_test4=foreach::foreach(j=1:sidevar_num,
                                   .export=c("sampling_bootstrap","sampling_shuffle","mi_logreg_algorithm","aux_x_log_y","func_formula_generator",
                                   "func_input_checks","func_signal_transform"),
@@ -122,8 +124,8 @@ mi_logreg_testing<-function(data,signal="signal",response="response",side_variab
   
   # Train-Test
   # message("Over-fitting starting..")
-  cl=parallel::makeCluster(testing_cores)
-  doParallel::registerDoParallel(cl)
+  #cl=parallel::makeCluster(testing_cores)
+ # doParallel::registerDoParallel(cl)
   output_test3=foreach::foreach(j=1:traintest_num,
                                 .export=c("sampling_partition","mi_logreg_algorithm","aux_x_log_y","func_formula_generator",
                                   "func_input_checks","func_signal_transform"),

@@ -7,7 +7,7 @@
 capacity_logreg_testing(data, signal = "signal", response = "response",
   side_variables = NULL, cc_maxit = 100, lr_maxit = 1000,
   MaxNWts = 5000, formula_string = NULL, TestingSeed = 1234,
-  testing_cores = 4, boot_num = 10, boot_prob = 0.8,
+  testing_cores = 1, boot_num = 10, boot_prob = 0.8,
   sidevar_num = 10, traintest_num = 10, partition_trainfrac = 0.6)
 }
 \arguments{
@@ -71,4 +71,14 @@ Information-theoretic analysis of multivariate single-cell signaling responses u
 \emph{PLoS Comput Biol}, 15(7): e1007132, 2019, https://doi.org/10.1371/journal.pcbi.1007132.
 }
 
+\examples{
+## Please set boot_num and traintest_num with larger numbers 
+## for a more reliable testing
+tempdata=data_example1[data_example1$signal\%in\%c("0","0.1"),]
+outputCLR1_testing=capacity_logreg_testing(data=tempdata,
+signal="signal", response="response",cc_maxit=25,
+TestingSeed=11111, boot_num=1,boot_prob=0.8,testing_cores=1,
+traintest_num=1,partition_trainfrac=0.6)
+
+}
 \keyword{internal}
