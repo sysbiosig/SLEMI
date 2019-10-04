@@ -62,7 +62,7 @@ mi_logreg_testing<-function(data,signal="signal",response="response",side_variab
   func_input_checks(data,signal,response,side_variables)
 
   set.seed(TestingSeed)
-  message("Testing procedures starting with ", testing_cores, " cores")
+  message("Testing procedures starting with ", testing_cores, " core(s)")
   
   `%dopar%`<-foreach::`%dopar%`
   

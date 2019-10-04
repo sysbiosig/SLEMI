@@ -53,7 +53,7 @@ capacity_logreg_testing<-function(data,signal="signal",response="response",side_
   data_signal=data[[signal]]
   
   set.seed(TestingSeed)
-  message(" Testing procedures starting with ",testing_cores," cores")
+  message(" Testing procedures starting with ",testing_cores," core(s)")
   
   `%dopar%`<-foreach::`%dopar%`
   

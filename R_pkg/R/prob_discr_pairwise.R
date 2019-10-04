@@ -144,7 +144,8 @@ prob_discr_pairwise<-function(dataRaw,
 
   func_input_checks(data,signal,response,side_variables)
   
-  message(" Fitting logistic regression models...")
+  temp_num_pairs=(nstim^2-nstim)*0.5
+  message("Fitting logistic regression models for ",temp_num_pairs," pairs")
   model_output=list()
   # 11 Estimate classificator
   for (is in 1:(nstim-1) ){

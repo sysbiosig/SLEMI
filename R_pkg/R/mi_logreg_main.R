@@ -111,7 +111,7 @@ mi_logreg_main<-function(dataRaw, signal="input", response=NULL,output_path=NULL
   
   # checking assumptions
   if (is.null(output_path)) { 
-    warning('path is not defined. Graphs and RDS file will not be saved.')
+    message('Output Path is not defined. Graphs and RDS file will not be saved.')
     }
   if (!is.data.frame(dataRaw)) {
     stop('data is not in data.frame format')
