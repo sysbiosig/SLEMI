@@ -50,7 +50,7 @@ mi_logreg_algorithm<-function(data,signal="signal",response="response",side_vari
   
   if (is.null(data$train)|is.null(data$test)) {
     
-    cat("\n Main Algorithm starting...")
+  #  cat("\n Main Algorithm starting...")
 
     # checking assumptions
     func_input_checks(data,signal,response,side_variables)
@@ -113,7 +113,7 @@ mi_logreg_algorithm<-function(data,signal="signal",response="response",side_vari
     output$pinput  <- tmp_iterative_output$pinput
     output$mi     <- log2(exp(tmp_iterative_output$MI_opt))
     
-    cat("... Main algorihtm completed.")
+  #  cat("... Main algorihtm completed.")
     
   } else {
     

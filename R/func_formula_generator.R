@@ -16,7 +16,8 @@ func_formula_generator<-function(signal="signal",response="response", side_varia
     formula_string<- (paste(signal,"~",
                             paste(
                               paste(c(response),collapse="+"),
-                              paste(apply(expand.grid(side_variables,response),1,function(x) paste(x,collapse=":")),collapse="+"),
+                              paste(apply(expand.grid(side_variables,response),1,
+                                function(x) paste(x,collapse=":")),collapse="+"),
                               sep="+"),
                             collapse=""))
   } else {

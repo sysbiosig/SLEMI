@@ -50,22 +50,15 @@
 #' }
 #' @examples 
 #' ## Calculate probabilities of discrimination for toy dataset
-#' \dontrun{
 #' temp_data=data_example1
 #' output=prob_discr_pairwise(dataRaw=data_example1,
 #'                    signal = "signal",
-#'                    response = "response",
-#'                    output_path = "discrimination_probabilities/toy_dataset/")
-#' }
+#'                    response = "response")
 #' ## Calculate probabilities of discrimination for nfkb dataset
-#' \dontrun{
-#' for (it in seq(from=12,to=30,by=3)){
+#'  it=21 # choose from 0, 3, 6, ..., 120 for measurements at other time points
 #'  output=prob_discr_pairwise(dataRaw=data_nfkb,
 #'                             signal = "signal",
-#'                            response = paste0("response_",it),
-#'                             output_path = paste0("discrimination_probabilities/nfkb/",it,"/"))
-#' }
-#' }
+#'                            response = paste0("response_",it))
 #'
 prob_discr_pairwise<-function(dataRaw,
                               signal="input",response=NULL,side_variables=NULL,
@@ -75,7 +68,7 @@ prob_discr_pairwise<-function(dataRaw,
   
   
   
-  cat("\nEstimating pairwise probabilities of discrimination...")
+  message("Estimating pairwise probabilities of discrimination...")
   
   if (is.null(response)){
     response=paste0("output_",1:(ncol(dataRaw)-1) )  
@@ -86,11 +79,9 @@ prob_discr_pairwise<-function(dataRaw,
 
   # checking assumptions
   if (is.null(output_path)) { 
-    warning('path is not defined. Graphs and RDS file will not be saved.')
+    message('Path is not defined. Graphs and RDS file will not be saved.')
   } else {
-    options(warn=-1)
     dir.create(output_path,recursive = TRUE)
-    options(warn=0)
   }
   
   if (!is.data.frame(dataRaw)) {
@@ -111,14 +102,10 @@ prob_discr_pairwise<-function(dataRaw,
   
   data0=dataRaw[,c(signal,response,side_variables)]
   if ( any(apply(data0,1,function(x) any(is.na(x)) )) ) {
-    cat("\n There are NA in observations - removing..")
+    message(" There are NA in observations - removing..")
     data0=data0[!apply(data0,1,function(x) any(is.na(x)) ),]
-    cat("\n Number of observations after cleaning:\n")
-    print(data.frame(input=names(table(data0[[signal]])), 
-      No.Of.Obsv=as.numeric(table(data0[[signal]]))))
   }
   
-
 
   data0=func_signal_transform(data0,signal)
   tempcolnames=colnames(data0)
@@ -127,7 +114,7 @@ prob_discr_pairwise<-function(dataRaw,
   data0=data.frame(data0[,!(tempcolnames%in%c(signal,paste(signal,"_RAW",sep="") ) )])
   colnames(data0)<-tempcolnames[!(tempcolnames%in%c(signal,paste(signal,"_RAW",sep="") ) )]
   
-  cat("\n  Preprocessing started...")
+ # message("  Preprocessing started...")
   
   #PreProcessing
   temp_idnumeric=sapply(data0,is.numeric)
@@ -143,7 +130,7 @@ prob_discr_pairwise<-function(dataRaw,
   rm(temp_idnumeric)
   
   #Debugging:
-  cat(" completed")
+  #cat(" completed")
   
   if (!is.null(formula_string)){
     formula=stats::as.formula(formula_string)
@@ -157,7 +144,7 @@ prob_discr_pairwise<-function(dataRaw,
 
   func_input_checks(data,signal,response,side_variables)
   
-  cat("\n Fitting logistic regression models...")
+  message(" Fitting logistic regression models...")
   model_output=list()
   # 11 Estimate classificator
   for (is in 1:(nstim-1) ){
@@ -205,7 +192,7 @@ prob_discr_pairwise<-function(dataRaw,
       
     }
   }
-  cat("completed...")
+  #cat("completed...")
 
   prob_matrix=matrix(0,nstim,nstim)
   for (is in 1:(nstim-1) ){
@@ -246,7 +233,7 @@ if (!is.null(output_path)){
     corrplot::corrplot(prob_matrix,type = "upper", method = "pie",
       cl.lim = c( min(c(min_val,0.5)) , 1),col=col2(100), diag=FALSE)
   grDevices::dev.off()
-   cat("graph created\n") 
+   message("Graph with probabilities created in",output_path) 
   }
                      
                        
@@ -259,7 +246,7 @@ if (!is.null(output_path)){
   output$prob_matr=prob_matrix
   
   if (diagnostics){
-  output$diagnostics=model_output
+    output$diagnostics=model_output
   }
   
   output

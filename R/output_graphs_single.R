@@ -79,7 +79,7 @@ capacity_output_graph_violinMean<-function(data,signal,response,path,height=4,wi
       aux_theme_publ(version=2)
   }
   
-  ggplot2:: ggsave(plot,file=paste(path,'data_MeanViolin.pdf',sep=""),height=min(49.5,height*response_length),width=width)
+  ggplot2::ggsave(plot,file=paste(path,'data_MeanViolin.pdf',sep=""),height=min(49.5,height*response_length),width=width)
   
   plot
 }

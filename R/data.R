@@ -41,14 +41,19 @@
 
 #' Each row of `data_nfkb` represents a single observation of a cell. Column 'signal' indicates the level of TNF-\eqn{\alpha}
 #' stimulation for a given cell, while columns 'response_T', gives the normalised ratio of nuclear and cytoplasmic transcription 
-#' factor as described in Supplementary Methods of the corresponding publication. 
-#' 
+#' factor as described in Supplementary Methods of the corresponding publication. In the CRAN version of the package
+#' we included only a subset of the data (5 time measurements). For the full datasets, please access GitHub pages. 
+#'
 #' For each concentration, there are at least 1000 single-cell observation (with the exception of 0.5ng stimulation, 
 #' where the number of identified cells is almost 900)
-#' @format A data frame with 15632 rows and 42 variables:
+#' @format A data frame with 15632 rows and 6 variables:
 #' \describe{
 #' \item{signal}{Level of TNFa stimulation}
-#' \item{response_T}{The concentration of normalised NfkB transcription factor, measured at time T}
+#' \item{response_0}{The concentration of normalised NfkB transcription factor, measured at time 0}
+#' \item{response_3}{The concentration of normalised NfkB transcription factor, measured at time 3}
+#' \item{response_21}{The concentration of normalised NfkB transcription factor, measured at time 21}
+#' \item{response_90}{The concentration of normalised NfkB transcription factor, measured at time 90}
+#' \item{response_120}{The concentration of normalised NfkB transcription factor, measured at time 120}
 #' #' }
 #' @source in-house experimental data
 "data_nfkb"

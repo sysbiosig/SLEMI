@@ -18,7 +18,6 @@
 func_signal_transform<-function(data,signal){
   signal_class=class(data[[signal]])
   
-  options(warn=-1)
     if (signal_class=="integer") {
       data[[signal]]=as.numeric(data[[signal]])
       signal_class=class(data[[signal]])
@@ -63,11 +62,9 @@ func_signal_transform<-function(data,signal){
       data[[signal]]=factor(as.numeric(as.character(data[[signal]])),levels=sort(unique(as.numeric(as.character(data[[signal]])) ))) 
     } 
 
-    cat("")
   } else {
     stop(paste0('Input/signal is of type ',signal_class,'. It must be numeric, character or factor.'))
   }
-  options(warn=0)
 
   data
 }

@@ -72,24 +72,15 @@
 #' @export
 #' @examples 
 #' tempdata=data_example1
-#' outputCLR1=mi_logreg_main(dataRaw=tempdata,
-#' signal="signal", response="response",
-#' lr_maxit=1500,plot_height=8,plot_width=12)
-#' 
+#' outputCLR1=mi_logreg_main(dataRaw=tempdata, signal="signal", response="response")
 #' 
 #' tempdata=data_example1
-#' \dontrun{
-#' outputCLR1_testing=mi_logreg_main(dataRaw=tempdata,
-#' signal="signal", response="response",
-#' lr_maxit=1500, output_path="example1_testing/",plot_height=8,plot_width=12,
-#' testing=TRUE,TestingSeed=11111, boot_num=50,boot_prob=0.8,testing_cores=2,
-#' sidevar_num=2,traintest_num=50,partition_trainfrac=0.6)
-#' }
+#' outputCLR1_testing=mi_logreg_main(dataRaw=tempdata,signal="signal", response="response",
+#' testing=TRUE,TestingSeed=11111, boot_num=3,boot_prob=0.8,testing_cores=1,
+#' sidevar_num=3,traintest_num=3,partition_trainfrac=0.6)
 #' 
 #' tempdata=data_example2
-#' outputCLR2=mi_logreg_main(dataRaw=tempdata,
-#' signal="signal", response=c("X1","X2","X3"),
-#' lr_maxit=1500, plot_height=8,plot_width=12) 
+#' outputCLR2=mi_logreg_main(dataRaw=tempdata, signal="signal", response=c("X1","X2","X3")) 
 #' 
 #' #For further details see vignette
 mi_logreg_main<-function(dataRaw, signal="input", response=NULL,output_path=NULL,
@@ -104,16 +95,12 @@ mi_logreg_main<-function(dataRaw, signal="input", response=NULL,output_path=NULL
                                           data_out=FALSE){
   
  if(!is.null(output_path)){
-    options(warn=-1)
     dir.create(output_path,recursive=TRUE)
-    options(warn=0)
  }
 
   #Debugging:
-  cat("\n Estimating mutual information ...")
+  message("Estimating mutual information ...")
   
-  cat("\n Preprocessing started ...")
-
   time_start=proc.time()
   dataRaw=as.data.frame(dataRaw)
   
@@ -144,10 +131,8 @@ mi_logreg_main<-function(dataRaw, signal="input", response=NULL,output_path=NULL
   
    data0=dataRaw[,c(signal,response,side_variables)]
    if ( any(apply(data0,1,function(x) any(is.na(x)) )) ) {
-     cat("\n There are NA in observations - removing ")
+     message(" There are NA in observations - removing ")
      data0=data0[!apply(data0,1,function(x) any(is.na(x)) ),]
-     cat("Number of observations after cleaning: \n")
-     print(table(data0[[signal]]))
    }
   
    data0=func_signal_transform(data0,signal)
@@ -173,7 +158,7 @@ mi_logreg_main<-function(dataRaw, signal="input", response=NULL,output_path=NULL
   rm(temp_idnumeric)
 
   #Debugging:
-  cat("... completed")
+  #cat("... completed")
   
   output<-mi_logreg_algorithm(data=data,signal=signal,response=response,side_variables=side_variables,
                               pinput=pinput,formula_string=formula_string, model_out = model_out,
@@ -205,22 +190,20 @@ mi_logreg_main<-function(dataRaw, signal="input", response=NULL,output_path=NULL
   }
   
   if(!is.null(output_path)){
-    options(warn=-1)
     dir.create(output_path,recursive=TRUE)
-    options(warn=0)
 
-    cat("\n Drawing graphs")
+    message("Drawing graphs and saving objects...")
     temp_logGraphs=try(output_graphs_main(data=dataRaw,signal=signal,response=response,side_variables=side_variables,cc_output=output,
                                 output_path=output_path,height=plot_height,width=plot_width),silent=FALSE)
     rm(temp_logGraphs)
     #Debugging:
-    cat("... finished")
+    #cat("... finished")
 
     saveRDS(output,file=paste(output_path,'output.rds',sep=""))
-    cat(paste0("Procedure finished. Results saved in ",output_path,"\n"))
+    message(paste0("Estimation finished. Results saved in ",output_path,""))
 
     } else {
-      cat(paste0("Procedure finished.\n"))
+      message(paste0("Estimation finished."))
     }
   
   output

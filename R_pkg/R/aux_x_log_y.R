@@ -17,7 +17,7 @@ aux_x_log_y<-function(x,y){
   ids=is.infinite(out)
   out[ids]=x[ids]*log(y[ids])
 
-  if (length(x)>10000){
+  if (length(x)>100000){
   	temp=e1071::moment(x)
   	temp_str=Hmisc::capitalize("large")
   }

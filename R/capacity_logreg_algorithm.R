@@ -31,10 +31,8 @@
 #' }
 #' @examples 
 #' tempdata=data_example1
-#' outputCLR1=capacity_logreg_main(dataRaw=tempdata,
-#' signal="signal", response="response",
-#' formula_string = "signal~response",
-#' cc_maxit=75,lr_maxit=1500, plot_height=8,plot_width=12)
+#' outputCLR1=capacity_logreg_algorithm(data=tempdata, signal="signal", response="response",
+#' formula_string = "signal~response")
 #'
 capacity_logreg_algorithm<-function(data,
                                     signal="signal",response="response",side_variables=NULL,
@@ -52,7 +50,7 @@ capacity_logreg_algorithm<-function(data,
   
   if (is.null(data$train)|is.null(data$test)) {
     
-    cat("\n Main Algorithm starting...")
+    #cat("\n Main Algorithm starting...")
 
     # checking assumptions
     func_input_checks(data,signal,response,side_variables)
@@ -103,7 +101,7 @@ capacity_logreg_algorithm<-function(data,
     output$p_opt  <- tmp_iterative_output$p_opt
     output$cc     <- log2(exp(tmp_iterative_output$MI_opt))
     
-      cat("... Main algorithm completed.")
+    #  cat("... Main algorithm completed.")
 
   } else {
     

@@ -44,23 +44,21 @@
 capacity_logreg_testing<-function(data,signal="signal",response="response",side_variables=NULL,
                                           cc_maxit=100,lr_maxit=1000,MaxNWts = 5000,
                                           formula_string=NULL,
-                                          TestingSeed=1234,testing_cores=4,
+                                          TestingSeed=1234,testing_cores=1,
                                           boot_num=10,boot_prob=0.8,
                                           sidevar_num=10,
                                           traintest_num=10,partition_trainfrac=0.6){
   
   output=list()
-  
   data_signal=data[[signal]]
   
-  
   set.seed(TestingSeed)
-  cat("\n Testing started..")
+  message(" Testing procedures starting with ",testing_cores," cores")
   
   `%dopar%`<-foreach::`%dopar%`
   
   #Bootstrap
-  cat("\n Bootstrap starting..")
+  #message(" Bootstrap starting..")
   cl=parallel::makeCluster(testing_cores)
   doParallel::registerDoParallel(cl)
   output_test1<-foreach::foreach(j=1:boot_num,
@@ -75,11 +73,11 @@ capacity_logreg_testing<-function(data,signal="signal",response="response",side_
     bt_samp_output
   }
   parallel::stopCluster(cl)
-  cat("... completed")
+  #message("... completed")
   
   if (!is.null(side_variables)){
   # Resampling
-   cat("\n Reshuffling starting..")
+   #message(" Reshuffling starting..")
   cl=parallel::makeCluster(testing_cores)
   doParallel::registerDoParallel(cl)
   output_test2=foreach::foreach(j=1:sidevar_num,
@@ -93,7 +91,7 @@ capacity_logreg_testing<-function(data,signal="signal",response="response",side_
     bt_samp_output
   }
   parallel::stopCluster(cl)
-  cat("... completed 1 ...")
+  #message("... completed 1 ...")
   
   # Bootstrap&Resampling
   cl=parallel::makeCluster(testing_cores)
@@ -111,12 +109,12 @@ capacity_logreg_testing<-function(data,signal="signal",response="response",side_
                                   bt_samp_output
                                 }
   parallel::stopCluster(cl)
-  cat("completed 2")
+  #message("completed 2")
   }
   
 
   # Train-Test
-   cat("\n Over-fitting starting..")
+   #message(" Over-fitting starting..")
   cl=parallel::makeCluster(testing_cores)
   doParallel::registerDoParallel(cl)
   output_test3=foreach::foreach(j=1:traintest_num,
@@ -130,7 +128,7 @@ capacity_logreg_testing<-function(data,signal="signal",response="response",side_
     bt_samp_output
   }
   parallel::stopCluster(cl)
-  cat("... completed")
+  #message("... completed")
   
   output$bootstrap        <- output_test1
   if (!is.null(side_variables)){ output$reshuffling_sideVar  <- output_test2}

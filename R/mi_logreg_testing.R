@@ -42,18 +42,16 @@
 #' Each of the above is a list, where an element is a standard output of a single mi_logreg_algorithm run.
 #' @export
 #' @examples 
-#' ## Compute uncertainity of mutual information estimator using 4 cores
-#' \dontrun{
+#' ## Compute uncertainity of mutual information estimator using 1 core
 #' temp_data=data_example1
 #' output=mi_logreg_testing(data=data_example1,
 #'                    signal = "signal",
 #'                    response = "response",
-#'                    testing_cores = 4)
-#' }
+#'                    testing_cores = 1,boot_num=3,traintest_num=3)
 mi_logreg_testing<-function(data,signal="signal",response="response",side_variables=NULL,
                             pinput=NULL,lr_maxit=1000,MaxNWts = 5000,
                                   formula_string=NULL,
-                                  TestingSeed=1234,testing_cores=4,
+                                  TestingSeed=1234,testing_cores=1,
                                   boot_num=10,boot_prob=0.8,
                                   sidevar_num=10,
                                   traintest_num=10,partition_trainfrac=0.6){
@@ -64,12 +62,12 @@ mi_logreg_testing<-function(data,signal="signal",response="response",side_variab
   func_input_checks(data,signal,response,side_variables)
 
   set.seed(TestingSeed)
-  cat("\n Testing started..")
+  message("Testing procedures starting with ", testing_cores, " cores")
   
   `%dopar%`<-foreach::`%dopar%`
   
   #Bootstrap
-   cat("\n Bootstrap starting..")
+   #message("Bootstrap starting..")
    cl=parallel::makeCluster(testing_cores)
   doParallel::registerDoParallel(cl)
   output_test1<-foreach::foreach(j=1:boot_num,
@@ -83,11 +81,11 @@ mi_logreg_testing<-function(data,signal="signal",response="response",side_variab
                                    bt_samp_output
                                  }
   parallel::stopCluster(cl)
-  cat("completed..")
+  #message("completed..")
   
   if (!is.null(side_variables)){
     # Resampling
-    cat("\n Reshuffling starting..")
+   # message("Reshuffling starting..")
     cl=parallel::makeCluster(testing_cores)
     doParallel::registerDoParallel(cl)
     output_test2=foreach::foreach(j=1:sidevar_num,
@@ -101,7 +99,7 @@ mi_logreg_testing<-function(data,signal="signal",response="response",side_variab
                                     bt_samp_output
                                   }
     parallel::stopCluster(cl)
-    cat("completed 1..")
+   #message("completed 1..")
     
     
     # Bootstrap&Resampling
@@ -119,11 +117,11 @@ mi_logreg_testing<-function(data,signal="signal",response="response",side_variab
                                     bt_samp_output
                                   }
     parallel::stopCluster(cl)
-    cat("completed 2")
+   # message("completed 2")
   }
   
   # Train-Test
-   cat("\n Over-fitting starting..")
+  # message("Over-fitting starting..")
   cl=parallel::makeCluster(testing_cores)
   doParallel::registerDoParallel(cl)
   output_test3=foreach::foreach(j=1:traintest_num,
@@ -137,7 +135,7 @@ mi_logreg_testing<-function(data,signal="signal",response="response",side_variab
                                   bt_samp_output
                                 }
   parallel::stopCluster(cl)
-  cat("completed")
+ # message("completed")
   
   output$bootstrap        <- output_test1
   if (!is.null(side_variables)){ output$reshuffling_sideVar  <- output_test2}

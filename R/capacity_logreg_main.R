@@ -88,24 +88,18 @@
 #' tempdata=data_example1
 #' outputCLR1=capacity_logreg_main(dataRaw=tempdata,
 #' signal="signal", response="response",
-#' formula_string = "signal~response",
-#' cc_maxit=75,lr_maxit=1500,plot_height=8,plot_width=12)
-#' 
+#' formula_string = "signal~response")
 #' 
 #' tempdata=data_example1
-#' \dontrun{
 #' outputCLR1_testing=capacity_logreg_main(dataRaw=tempdata,
 #' signal="signal", response="response",
-#' cc_maxit=75,lr_maxit=1500, output_path="example1_testing/",plot_height=8,plot_width=12,
-#' testing=TRUE,TestingSeed=11111, boot_num=50,boot_prob=0.8,testing_cores=2,
-#' sidevar_num=2,traintest_num=50,partition_trainfrac=0.6)
-#' }
+#' testing=TRUE,TestingSeed=11111, boot_num=3,boot_prob=0.8,testing_cores=1,
+#' sidevar_num=3,traintest_num=3,partition_trainfrac=0.6)
 #' 
 #' tempdata=data_example2
 #' outputCLR2=capacity_logreg_main(dataRaw=tempdata,
 #' signal="signal", response=c("X1","X2","X3"),
-#' formula_string = "signal~X1+X2+X3",
-#' cc_maxit=75,lr_maxit=1500,plot_height=8,plot_width=12) 
+#' formula_string = "signal~X1+X2+X3") 
 #' 
 #' #For further details see vignette
 capacity_logreg_main<-function(dataRaw, signal="input", response=NULL,output_path=NULL,
@@ -119,13 +113,11 @@ capacity_logreg_main<-function(dataRaw, signal="input", response=NULL,output_pat
                                           data_out=FALSE){
   
  if(!is.null(output_path)){
-    options(warn=-1)
     dir.create(output_path,recursive=TRUE)
-    options(warn=0)
  }
   
   #Debugging:
-  cat("\n Estimating channel capacity ...")
+  message(" Estimating channel capacity ...")
   
    if (is.null(response)){
     response=paste0("output_",1:(ncol(dataRaw)-1) )  
@@ -156,10 +148,8 @@ capacity_logreg_main<-function(dataRaw, signal="input", response=NULL,output_pat
   
    data0=dataRaw[,c(signal,response,side_variables)]
    if ( any(apply(data0,1,function(x) any(is.na(x)) )) ) {
-     cat("\nThere are NA in observations - removing...")
+     message("There are NA in observations - removing...")
      data0=data0[!apply(data0,1,function(x) any(is.na(x)) ),]
-     cat("Number of observations after cleaning:\n")
-     print(table(data0[[signal]]))
    }
   
    data0=func_signal_transform(data0,signal)
@@ -169,7 +159,7 @@ capacity_logreg_main<-function(dataRaw, signal="input", response=NULL,output_pat
    data0=data.frame(data0[,!(tempcolnames%in%c(signal,paste(signal,"_RAW",sep="") ) )])
    colnames(data0)<-tempcolnames[!(tempcolnames%in%c(signal,paste(signal,"_RAW",sep="") ) )]
    
-  cat("\n Preprocessing started")
+ # message(" Preprocessing started")
   
   #PreProcessing
   temp_idnumeric=sapply(data0,is.numeric)
@@ -185,7 +175,7 @@ capacity_logreg_main<-function(dataRaw, signal="input", response=NULL,output_pat
   rm(temp_idnumeric)
 
   #Debugging:
-  cat("... Preprocessing completed.")
+  #message("Running main algorithm...")
   
   output<-capacity_logreg_algorithm(data=data,signal=signal,response=response,side_variables=side_variables,
                                               formula_string=formula_string, model_out = model_out,
@@ -221,22 +211,19 @@ capacity_logreg_main<-function(dataRaw, signal="input", response=NULL,output_pat
   }
   
   if(!is.null(output_path)){
-    options(warn=-1)
     dir.create(output_path,recursive=TRUE)
-    options(warn=0)
 
-    cat("\n Drawing graphs ...")
+    message(" Drawing graphs and saving objects ...")
     temp_logGraphs=try(output_graphs_main(data=dataRaw,signal=signal,response=response,side_variables=side_variables,cc_output=output,
                                 output_path=output_path,height=plot_height,width=plot_width),
         silent=FALSE)
     rm(temp_logGraphs)
     #Debugging:
-    cat("finished")
 
     saveRDS(output,file=paste(output_path,'output.rds',sep=""))
-    cat(paste0("\n Full Procedure finished. Results saved in ",output_path,"\n"))  
+    message(paste0(" Estimation finished. Results saved in ",output_path,""))  
   } else {
-    cat(paste0("\n Full Procedure finished.\n"))
+    message(paste0(" Estimation finished."))
   }
   
   output
