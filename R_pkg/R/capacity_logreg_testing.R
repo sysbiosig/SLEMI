@@ -44,7 +44,6 @@
 #' @examples
 #' ## Please set boot_num and traintest_num with larger numbers 
 #' ## for a more reliable testing
-#' #tempdata=rbind(head(data_example1,50), tail(data_example1,50))
 #' tempdata=data_example1
 #' outputCLR1_testing=capacity_logreg_testing(data=tempdata,
 #' signal="signal", response="response",cc_maxit=10,

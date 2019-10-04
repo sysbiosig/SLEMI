@@ -44,7 +44,6 @@
 #' @examples 
 #' ## Compute uncertainity of mutual information estimator using 1 core
 #' ## Set boot_num and traintest_num with larger numbers for more reliable testing
-#' #tempdata=rbind(head(data_example1,50),tail(data_example1,50))
 #' tempdata=data_example1
 #' output=mi_logreg_testing(data=tempdata,
 #'                    signal = "signal",
